@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（本文1200px・完全安定版）")
+st.title("外交部風 画像ジェネレーター（完全安定版／本文1200px）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -26,7 +26,7 @@ DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 DEFAULT_YELLOW_WORDS = "火遊び"
 
-# ▼ 初期 session_state 設定
+# ▼ session_state 初期値（UI 依存ではなく本体値）
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -36,7 +36,7 @@ if "footer_right" not in st.session_state:
 if "yellow_words" not in st.session_state:
     st.session_state.yellow_words = DEFAULT_YELLOW_WORDS
 
-# ▼ 背景設定は保持（クリアしない）
+# ▼ 背景設定（背景だけは保持）
 if "bg_choice" not in st.session_state:
     st.session_state.bg_choice = "背景 01"
 
@@ -52,13 +52,13 @@ BG_PATH = BACKGROUND_CHOICES[bg_name]
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力欄（値は session_state の本体を参照）
+# ▼ 入力欄（value は session_state 本体のみ参照）
 main_text_input = st.text_area("本文", value=st.session_state.main_text)
 footer_left_input = st.text_input("下部ヘッダー（左）", value=st.session_state.footer_left)
 footer_right_input = st.text_input("下部ヘッダー（右）", value=st.session_state.footer_right)
 yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）", value=st.session_state.yellow_words)
 
-# ▼ 反映ボタン（状態を保存してリロード）
+# ▼ ★ 反映ボタン → 本体値を上書きして rerun
 if st.button("★ 反映する"):
     st.session_state.main_text = main_text_input
     st.session_state.footer_left = footer_left_input
@@ -66,12 +66,12 @@ if st.button("★ 反映する"):
     st.session_state.yellow_words = yellow_words_input
     st.rerun()
 
-# ▼ 初期テキストに戻す（背景だけ保持）
+# ▼ ★ 初期テキストに戻す（背景だけ保持）
 if st.button("★ 初期テキストに戻す"):
-    bg_keep = st.session_state.bg_choice     # 背景だけ退避
-    st.session_state.clear()                 # 全部クリア（＝F5相当）
-    st.session_state.bg_choice = bg_keep     # 背景だけ復元
-    st.rerun()                                # 完全再描画
+    keep_bg = st.session_state.bg_choice
+    st.session_state.clear()
+    st.session_state.bg_choice = keep_bg
+    st.rerun()
 
 # ▼ JS に渡す値
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
@@ -83,9 +83,9 @@ yellow_words_list = [
 ]
 yellow_words_js = "|".join(yellow_words_list)
 
-# ============================================
-# Canvas 描画（本文最大1200px）
-# ============================================
+# =========================================================
+# Canvas 描画 HTML（本文1200px・黄色語・背景維持）
+# =========================================================
 
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
@@ -109,7 +109,6 @@ canvas_html = f"""
 
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
-
   const canvas = document.getElementById("posterCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -132,7 +131,7 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    let fontSize = 1200;    // ★ 最大1200px
+    let fontSize = 1200;
     const minFont = 150;
 
     function measure(fs) {{
@@ -143,11 +142,11 @@ canvas_html = f"""
         if (w > maxW) maxW = w;
       }}
       const totalH = lines.length * fs * 1.3;
-      return {{maxW, totalH}};
+      return {{ maxW, totalH }};
     }}
 
     while (fontSize >= minFont) {{
-      const {{maxW, totalH}} = measure(fontSize);
+      const {{ maxW, totalH }} = measure(fontSize);
       if (maxW <= areaW && totalH <= areaH) break;
       fontSize -= 20;
     }}
@@ -155,31 +154,35 @@ canvas_html = f"""
     function drawColoredLine(line, cx, y) {{
       let segs = [];
       let pos = 0;
+
       while (pos < line.length) {{
         let matched = false;
+
         for (const w of yellowWords) {{
           if (line.startsWith(w, pos)) {{
-            segs.push({{text:w, yellow:true}});
+            segs.push({{ "text": w, "yellow": true }});
             pos += w.length;
             matched = true;
             break;
           }}
         }}
+
         if (!matched) {{
-          segs.push({text: line[pos], yellow:false});
+          segs.push({{ "text": line[pos], "yellow": false }});
           pos++;
         }}
       }}
 
       ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-      let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width, 0);
-      let x = cx - totalW/2;
+      let totalWidth = segs.reduce((s, seg) => s + ctx.measureText(seg.text).width, 0);
+
+      let x = cx - totalWidth / 2;
 
       for (const seg of segs) {{
         ctx.textBaseline = "middle";
         ctx.lineJoin = "round";
-        ctx.lineWidth = fontSize * 0.12;
         ctx.strokeStyle = "black";
+        ctx.lineWidth = fontSize * 0.12;
         ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
 
         ctx.strokeText(seg.text, x, y);
@@ -189,15 +192,14 @@ canvas_html = f"""
       }}
     }}
 
-    const {{totalH}} = measure(fontSize);
-    let y = top + (areaH - totalH)/2 + fontSize*0.5;
+    const {{ totalH }} = measure(fontSize);
+    let yStart = top + (areaH - totalH)/2 + fontSize*0.5;
 
     for (const line of lines) {{
-      drawColoredLine(line, W*0.5, y);
-      y += fontSize * 1.3;
+      drawColoredLine(line, W * 0.5, yStart);
+      yStart += fontSize * 1.3;
     }}
 
-    // ヘッダー（固定250px）
     const hSize = 250;
     ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.lineJoin = "round";
@@ -208,14 +210,14 @@ canvas_html = f"""
 
     if (footerLeft.trim().length > 0) {{
       ctx.textAlign = "left";
-      ctx.strokeText(footerLeft, W*0.15, H*0.90);
-      ctx.fillText(footerLeft, W*0.15, H*0.90);
+      ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
+      ctx.fillText(footerLeft, W * 0.15, H * 0.90);
     }}
 
     if (footerRight.trim().length > 0) {{
       ctx.textAlign = "right";
-      ctx.strokeText(footerRight, W*0.85, H*0.90);
-      ctx.fillText(footerRight, W*0.85, H*0.90);
+      ctx.strokeText(footerRight, W * 0.85, H * 0.90);
+      ctx.fillText(footerRight, W * 0.85, H * 0.90);
     }}
   }}
 
