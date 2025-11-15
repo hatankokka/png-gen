@@ -7,7 +7,7 @@ from streamlit.components.v1 import html as st_html
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
 st.title("外交部風 画像ジェネレーター（背景切替＋初期化対応）")
 
-# ▼ 背景画像の選択肢
+# ▼ 背景画像の選択肢（この3つは .streamlit フォルダ内にある前提）
 BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
@@ -22,9 +22,9 @@ DEFAULT_MAIN = """“きのこは再び筍国主義の過ちを
 覆そうとしているのか”"""
 
 DEFAULT_LEFT = "茸国外交部報道官"
-DEFAULT_RIGHT = "2015年11月1日"  # ← ここを変更！
+DEFAULT_RIGHT = "2015年11月1日"
 
-# ▼ セッションステートに保存
+# ▼ セッションステートに保存（初期化ボタンのため）
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 
@@ -34,36 +34,40 @@ if "footer_left" not in st.session_state:
 if "footer_right" not in st.session_state:
     st.session_state.footer_right = DEFAULT_RIGHT
 
-# ▼ 背景選択
+
+# ▼ 背景選択 UI
 bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
 BG_PATH = BACKGROUND_CHOICES[bg_name]
 
 if not os.path.exists(BG_PATH):
-    st.error(f"{BG_PATH} が見つかりません（フォルダ構造を確認してください）")
+    st.error(f"{BG_PATH} が見つかりません。フォルダ構造を確認してください。")
     st.stop()
 
-# ▼ Base64 化
+# ▼ Base64 化して JS に渡す
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ UI入力欄
+
+# ▼ 入力フォーム（セッションステートを反映）
 main_text = st.text_area("本文", st.session_state.main_text)
 footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left)
 footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right)
 
-# ▼ リセットボタン
+
+# ▼ 初期化ボタン（※エラーの原因だった experimental_rerun は使用しない）
 if st.button("★ 初期テキストに戻す"):
     st.session_state.main_text = DEFAULT_MAIN
     st.session_state.footer_left = DEFAULT_LEFT
     st.session_state.footer_right = DEFAULT_RIGHT
-    st.experimental_rerun()
+    st.rerun()   # ← これで安全に再読み込みできる
 
-# ▼ HTMLエスケープ
+
+# ▼ HTMLエスケープして JS に渡す
 main_js = html.escape(main_text).replace("\n", "\\n")
 footer_left_js = html.escape(footer_left)
 footer_right_js = html.escape(footer_right)
 
-# ▼ Canvas 描画 HTML
+# ▼ Canvas 描画 HTML（PNG生成ロジック）
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
   <button id="downloadBtn"
