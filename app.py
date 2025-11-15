@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（本文色付け対応）")
+st.title("外交部風 画像ジェネレーター（反映ボタン版）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -24,18 +24,15 @@ DEFAULT_MAIN = """“われわれは
 
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
-
-# ▼ 黄色単語の初期値（改行区切り）
 DEFAULT_YELLOW_WORDS = "火遊び"
 
-# ▼ session_state 初期設定
+# ▼ session_state 初期化
 initial_values = {
     "main_text": DEFAULT_MAIN,
     "footer_left": DEFAULT_LEFT,
     "footer_right": DEFAULT_RIGHT,
     "yellow_words": DEFAULT_YELLOW_WORDS
 }
-
 for key, value in initial_values.items():
     if key not in st.session_state:
         st.session_state[key] = value
@@ -51,16 +48,23 @@ if not os.path.exists(BG_PATH):
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力欄
-main_text = st.text_area("本文", st.session_state.main_text, key="main_text_input")
-footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left, key="footer_left_input")
-footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right, key="footer_right_input")
-
+# ▼ 入力欄（UI → 入力中の値）
+main_text_input = st.text_area("本文", st.session_state.main_text, key="main_text_input")
+footer_left_input = st.text_input("下部ヘッダー（左）", st.session_state.footer_left, key="footer_left_input")
+footer_right_input = st.text_input("下部ヘッダー（右）", st.session_state.footer_right, key="footer_right_input")
 yellow_words_input = st.text_area(
     "黄色にしたい単語（改行区切り）",
     st.session_state.yellow_words,
     key="yellow_words_input"
 )
+
+# ▼ 反映ボタン
+if st.button("★ 反映する"):
+    st.session_state.main_text = main_text_input
+    st.session_state.footer_left = footer_left_input
+    st.session_state.footer_right = footer_right_input
+    st.session_state.yellow_words = yellow_words_input
+    st.rerun()
 
 # ▼ 初期化ボタン
 if st.button("★ 初期テキストに戻す"):
@@ -70,15 +74,14 @@ if st.button("★ 初期テキストに戻す"):
     st.session_state.yellow_words = DEFAULT_YELLOW_WORDS
     st.rerun()
 
-# ▼ JSへ渡す値
+# ▼ JS に渡す値
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
-# 改行区切り → リストに変換
+# 黄色単語リスト（改行区切り → list）
 yellow_words_list = [
-    w.strip() for w in st.session_state.yellow_words_input.split("\n")
-    if w.strip()
+    w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()
 ]
 yellow_words_js = "|".join(yellow_words_list)
 
@@ -105,7 +108,6 @@ canvas_html = f"""
   const mainTextRaw = "{main_js}".replace(/\\\\n/g, "\\n");
   const footerLeft = "{footer_left_js}";
   const footerRight = "{footer_right_js}";
-
   const yellowWords = "{yellow_words_js}".split("|").filter(x => x.length > 0);
 
   const img = new Image();
@@ -136,7 +138,6 @@ canvas_html = f"""
     let fontSize = 900;
     const minFont = 150;
 
-    // ---- 本文フォント決定（900 → 自動縮小） ----
     function measure(fs) {{
       ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
       let maxW = 0;
