@@ -25,13 +25,18 @@ DEFAULT_MAIN = """“われわれは
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
+# ▼ 黄色単語の初期値（改行区切り）
+DEFAULT_YELLOW_WORDS = "火遊び"
+
 # ▼ session_state 初期設定
-for key, value in {
+initial_values = {
     "main_text": DEFAULT_MAIN,
     "footer_left": DEFAULT_LEFT,
     "footer_right": DEFAULT_RIGHT,
-    "yellow_words": ""
-}.items():
+    "yellow_words": DEFAULT_YELLOW_WORDS
+}
+
+for key, value in initial_values.items():
     if key not in st.session_state:
         st.session_state[key] = value
 
@@ -62,7 +67,7 @@ if st.button("★ 初期テキストに戻す"):
     st.session_state.main_text = DEFAULT_MAIN
     st.session_state.footer_left = DEFAULT_LEFT
     st.session_state.footer_right = DEFAULT_RIGHT
-    st.session_state.yellow_words = ""
+    st.session_state.yellow_words = DEFAULT_YELLOW_WORDS
     st.rerun()
 
 # ▼ JSへ渡す値
@@ -75,10 +80,10 @@ yellow_words_list = [
     w.strip() for w in st.session_state.yellow_words_input.split("\n")
     if w.strip()
 ]
-yellow_words_js = "|".join(yellow_words_list)  # JS側で分割する
+yellow_words_js = "|".join(yellow_words_list)
 
 # ============================================
-# Canvas描画 HTML（黄色単語対応）
+# Canvas描画 HTML（黄色語対応）
 # ============================================
 
 canvas_html = f"""
@@ -105,7 +110,6 @@ canvas_html = f"""
 
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
-
   const canvas = document.getElementById("posterCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -119,6 +123,7 @@ canvas_html = f"""
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(img, 0, 0, W, H);
 
+    // ---- 本文処理 ----
     const lines = mainTextRaw.split("\\n").filter(l => l.trim().length > 0);
 
     const top = H * 0.28;
@@ -128,10 +133,10 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    // ---- 本文フォント（最大900px） ----
     let fontSize = 900;
     const minFont = 150;
 
+    // ---- 本文フォント決定（900 → 自動縮小） ----
     function measure(fs) {{
       ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
       let maxW = 0;
@@ -149,9 +154,8 @@ canvas_html = f"""
       fontSize -= 20;
     }}
 
-    // ---- 1行内で文字色切替する関数 ----
+    // ---- 1行中で黄色語を適用 ----
     function drawColoredLine(line, xCenter, y) {{
-      // 単語の出現位置で split
       let segments = [];
       let pos = 0;
 
@@ -159,7 +163,7 @@ canvas_html = f"""
         let matched = false;
 
         for (const word of yellowWords) {{
-          if (word && line.startsWith(word, pos)) {{
+          if (line.startsWith(word, pos)) {{
             segments.push({{ text: word, yellow: true }});
             pos += word.length;
             matched = true;
@@ -173,23 +177,20 @@ canvas_html = f"""
         }}
       }}
 
-      // ---- セグメントの総幅を測定 ----
       let totalWidth = 0;
+      ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
       for (const seg of segments) {{
-        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
         totalWidth += ctx.measureText(seg.text).width;
       }}
 
-      // 左端の描画開始位置
       let cursorX = xCenter - totalWidth / 2;
 
-      // ---- 描画 ----
       for (const seg of segments) {{
         ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-        ctx.textBaseline = "middle";
         ctx.lineJoin = "round";
-        ctx.lineWidth = fontSize * 0.12;
+        ctx.textBaseline = "middle";
         ctx.strokeStyle = "black";
+        ctx.lineWidth = fontSize * 0.12;
         ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
 
         ctx.strokeText(seg.text, cursorX, y);
@@ -205,29 +206,27 @@ canvas_html = f"""
       let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
 
       for (const line of lines) {{
-        const cx = left + areaW / 2;
-        drawColoredLine(line, cx, y);
+        drawColoredLine(line, W * 0.50, y);
         y += fontSize * 1.3;
       }}
     }}
 
     // ---- ヘッダー（固定250px）----
     const headerSize = 250;
+
     ctx.font = headerSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-    ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
     ctx.lineWidth = headerSize * 0.10;
     ctx.strokeStyle = "black";
     ctx.fillStyle = "white";
+    ctx.textBaseline = "middle";
 
-    // 左下
     if (footerLeft.trim().length > 0) {{
       ctx.textAlign = "left";
       ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
       ctx.fillText(footerLeft, W * 0.15, H * 0.90);
     }}
 
-    // 右下
     if (footerRight.trim().length > 0) {{
       ctx.textAlign = "right";
       ctx.strokeText(footerRight, W * 0.85, H * 0.90);
