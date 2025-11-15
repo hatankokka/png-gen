@@ -61,14 +61,12 @@ DEFAULT_MAIN = """“われわれは
 回転焼派に告げる
 大判焼問題で
 火遊びをするな
-
-
 火遊びをすれば
 必ず身を滅ぼす”"""
 
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
-DEFAULT_YELLOW_WORDS = "火遊び"
+DEFAULT_YELLOW_WORDS = "火遊び""大判焼問題"
 
 # ▼ session_state 初期
 if "main_text" not in st.session_state:
@@ -311,3 +309,4 @@ canvas_html = f"""
 """
 
 st_html(canvas_html, height=950, scrolling=True)
+
