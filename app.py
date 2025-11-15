@@ -5,9 +5,9 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（9行までは1200px固定＆最適縮小版）")
+st.title("外交部風 画像ジェネレーター（7行までは1000px固定／8行以上は縮小）")
 
-# ▼ 背景画像の選択肢
+# ▼ 背景画像
 BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
@@ -27,7 +27,7 @@ DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 DEFAULT_YELLOW_WORDS = "火遊び"
 
-# ▼ session_state 初期設定
+# ▼ session_state 初期値
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -37,14 +37,14 @@ if "footer_right" not in st.session_state:
 if "yellow_words" not in st.session_state:
     st.session_state.yellow_words = DEFAULT_YELLOW_WORDS
 
-# ▼ 背景設定（保持する）
+# ▼ 背景（保持）
 if "bg_choice" not in st.session_state:
     st.session_state.bg_choice = "背景 01"
 
 bg_name = st.selectbox(
     "背景画像を選択",
     list(BACKGROUND_CHOICES.keys()),
-    index=list(BACKGROUND_CHOICES.keys()).index(st.session_state.bg_choice),
+    index=list(BACKGROUND_CHOICES.keys()).index(st.session_state.bg_choice)
 )
 st.session_state.bg_choice = bg_name
 
@@ -56,7 +56,8 @@ with open(BG_PATH, "rb") as f:
 main_text_input = st.text_area("本文", value=st.session_state.main_text)
 footer_left_input = st.text_input("下部ヘッダー（左）", value=st.session_state.footer_left)
 footer_right_input = st.text_input("下部ヘッダー（右）", value=st.session_state.footer_right)
-yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）", value=st.session_state.yellow_words)
+yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）",
+                                  value=st.session_state.yellow_words)
 
 # ▼ 反映
 if st.button("★ 反映する"):
@@ -66,24 +67,26 @@ if st.button("★ 反映する"):
     st.session_state.yellow_words = yellow_words_input
     st.rerun()
 
-# ▼ 初期化（背景だけ保持）
+# ▼ 初期化（背景維持）
 if st.button("★ 初期テキストに戻す"):
     keep_bg = st.session_state.bg_choice
     st.session_state.clear()
     st.session_state.bg_choice = keep_bg
     st.rerun()
 
-# ▼ JS 渡し
+# ▼ JSに渡す
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
-yellow_words_list = [w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()]
+yellow_words_list = [
+    w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()
+]
 yellow_words_js = "|".join(yellow_words_list)
 
-# ============================================================
-# Canvas 描画（9行以内 = 1200px固定、10行以上は縮小）
-# ============================================================
+# ------------------------------------------------------------------------
+# Canvas描画（7行以下は1000px固定／8行以上は縦横チェックして縮小）
+# ------------------------------------------------------------------------
 
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
@@ -117,149 +120,137 @@ canvas_html = f"""
     canvas.width = W;
     canvas.height = H;
 
-    ctx.clearRect(0,0,W,H);
     ctx.drawImage(img,0,0,W,H);
 
-    const lines = textRaw.split("\\n");  // ★ 空行保持
+    const lines = textRaw.split("\\n");
     const lineCount = lines.length;
 
     const top = H * 0.28;
     const bottom = H * 0.70;
     const left = W * 0.10;
     const right = W * 0.90;
+
     const areaW = right - left;
     const areaH = bottom - top;
 
     const lineGap = 1.3;
+
     let fontSize;
 
-    // -------------------------------
-    // ★ C案：9行までは1200px固定
-    // -------------------------------
-    if (lineCount <= 9) {{
-      fontSize = 1200;
+    // ★ 7行までは1000px固定
+    if (lineCount <= 7) {{
+        fontSize = 1000;
     }} else {{
-      // ★ 10行以上は縮小ロジックで調整
-      fontSize = 1200;
+        fontSize = 1000; // 8行以上は縮小開始
     }}
 
-    // 横幅チェック関数
     function maxLineWidth(fs) {{
-      ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
-      let maxW = 0;
-      for (const line of lines) {{
-        const w = ctx.measureText(line).width;
-        if (w > maxW) maxW = w;
-      }}
-      return maxW;
+        ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
+        let maxW = 0;
+        for (const line of lines) {{
+            const w = ctx.measureText(line).width;
+            if (w > maxW) maxW = w;
+        }}
+        return maxW;
     }}
 
-    // 縦の高さチェック
     function totalHeight(fs) {{
-      return lines.length * fs * lineGap;
+        return lines.length * fs * lineGap;
     }}
 
-    // -------------------------------
-    // ★ lineCount <= 9 の場合、
-    //    横幅が収まらない場合のみ縮小
-    // -------------------------------
-    if (lineCount <= 9) {{
-      while (fontSize >= 150) {{
-        if (maxLineWidth(fontSize) <= areaW) break;
-        fontSize -= 20;
-      }}
-    }} else {{
-      // -------------------------------
-      // ★ lineCount > 9 の場合は
-      //    横幅 → 縦方向の順で縮小
-      // -------------------------------
-      while (fontSize >= 150) {{
-        if (maxLineWidth(fontSize) <= areaW &&
-            totalHeight(fontSize) <= areaH) break;
-        fontSize -= 20;
-      }}
+    // ★ 7行以内 → 横幅だけチェック
+    if (lineCount <= 7) {{
+        while (fontSize >= 150) {{
+            if (maxLineWidth(fontSize) <= areaW) break;
+            fontSize -= 20;
+        }}
     }}
 
-    // ---- 黄色語対応の描画関数
+    // ★ 8行以上 → 横幅→縦収まりチェック
+    if (lineCount >= 8) {{
+        while (fontSize >= 150) {{
+            if (maxLineWidth(fontSize) <= areaW &&
+                totalHeight(fontSize) <= areaH) break;
+            fontSize -= 20;
+        }}
+    }}
+
+    // ---- 黄色語対応の描画
     function drawColoredLine(line, x, y) {{
-      let segs = [];
-      let pos = 0;
-
-      while (pos < line.length) {{
-        let matched = false;
-
-        for (const w of yellowWords) {{
-          if (line.startsWith(w, pos)) {{
-            segs.push({{"text": w, "yellow": true}});
-            pos += w.length;
-            matched = true;
-            break;
-          }}
+        let segs = [];
+        let pos = 0;
+        while (pos < line.length) {{
+            let matched = false;
+            for (const w of yellowWords) {{
+                if (line.startsWith(w, pos)) {{
+                    segs.push({{"text": w, "yellow": true}});
+                    pos += w.length;
+                    matched = true;
+                    break;
+                }}
+            }}
+            if (!matched) {{
+                segs.push({{"text": line[pos], "yellow": false}});
+                pos++;
+            }}
         }}
 
-        if (!matched) {{
-          segs.push({{"text": line[pos], "yellow": false}});
-          pos++;
-        }}
-      }}
-
-      ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-      let totalWidth = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
-      let cursor = x - totalWidth/2;
-
-      for (const seg of segs) {{
+        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
         ctx.lineJoin = "round";
-        ctx.strokeStyle = "black";
-        ctx.lineWidth = fontSize * 0.12;
-        ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
-        ctx.textBaseline = "middle";
 
-        ctx.strokeText(seg.text, cursor, y);
-        ctx.fillText(seg.text, cursor, y);
+        let totalWidth = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
+        let cursor = x - totalWidth/2;
 
-        cursor += ctx.measureText(seg.text).width;
-      }}
+        for (const seg of segs) {{
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = fontSize * 0.12;
+            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+            ctx.textBaseline = "middle";
+
+            ctx.strokeText(seg.text, cursor, y);
+            ctx.fillText(seg.text, cursor, y);
+
+            cursor += ctx.measureText(seg.text).width;
+        }}
     }}
 
-    // ---- 本文描画
     const totalH = totalHeight(fontSize);
     let y = top + (areaH-totalH)/2 + fontSize*0.5;
 
     for (const line of lines) {{
-      drawColoredLine(line, W*0.5, y);
-      y += fontSize * lineGap;
+        drawColoredLine(line, W*0.5, y);
+        y += fontSize * lineGap;
     }}
 
     // ---- ヘッダー（固定250px）
     const hSize = 250;
-
     ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.lineJoin = "round";
-    ctx.lineWidth = hSize*0.10;
     ctx.strokeStyle = "black";
+    ctx.lineWidth = hSize*0.10;
     ctx.fillStyle = "white";
     ctx.textBaseline = "middle";
 
     if (footerLeft.trim().length > 0) {{
-      ctx.textAlign = "left";
-      ctx.strokeText(footerLeft, W*0.15, H*0.90);
-      ctx.fillText(footerLeft, W*0.15, H*0.90);
+        ctx.textAlign = "left";
+        ctx.strokeText(footerLeft, W*0.15, H*0.90);
+        ctx.fillText(footerLeft, W*0.15, H*0.90);
     }}
 
     if (footerRight.trim().length > 0) {{
-      ctx.textAlign = "right";
-      ctx.strokeText(footerRight, W*0.85, H*0.90);
-      ctx.fillText(footerRight, W*0.85, H*0.90);
+        ctx.textAlign = "right";
+        ctx.strokeText(footerRight, W*0.85, H*0.90);
+        ctx.fillText(footerRight, W*0.85, H*0.90);
     }}
   }}
 
   img.onload = drawPoster;
 
   document.getElementById("downloadBtn").onclick = function() {{
-    const a = document.createElement("a");
-    a.download = "output.png";
-    a.href = canvas.toDataURL("image/png");
-    a.click();
+      const a = document.createElement("a");
+      a.download = "output.png";
+      a.href = canvas.toDataURL("image/png");
+      a.click();
   }};
 </script>
 """
