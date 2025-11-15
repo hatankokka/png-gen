@@ -300,27 +300,33 @@ document.getElementById("downloadBtn").onclick = function(){{
 // =========================================================
 // X投稿（画像コピー → 投稿画面へ）
 // =========================================================
-document.getElementById("tweetBtn").onclick = async function(){{
-    canvas.toBlob(async function(blob){{
-        try {{
+document.getElementById("tweetBtn").onclick = async function(){
+
+    // ★ 先に X 投稿画面を開く（ポップアップブロック対策）
+    const text = encodeURIComponent(
+        "この画像は大判焼外交部ジェネレーターを使ったパロディ画像です\n" +
+        "https://ikan-no-i-gen.streamlit.app/"
+    );
+    const url = "https://twitter.com/intent/tweet?text=" + text;
+    window.open(url, "_blank");
+
+    // ★ 次に画像コピー（この順番が重要）
+    canvas.toBlob(async function(blob){
+        try {
             await navigator.clipboard.write([
-                new ClipboardItem({{"image/png": blob}})
+                new ClipboardItem({"image/png": blob})
             ]);
-            alert("画像をコピーしました！\\nX の投稿画面で Ctrl+V（ペースト）してください。");
-        }} catch(e){{
+            alert("画像をコピーしました！\nXの投稿画面で Ctrl+V（ペースト）してください。");
+        } catch(e){
             alert("画像コピーに失敗しました。Chrome / Edge を使用してください。");
             console.error(e);
-        }}
+        }
+    });
 
-        const text = encodeURIComponent(
-            "この画像は大判焼外交部ジェネレーターを使ったパロディ画像です\\n" +
-            "https://ikan-no-i-gen.streamlit.app/"
-        );
-        const url = "https://twitter.com/intent/tweet?text=" + text;
-        window.open(url,"_blank");
-    }});
-}};
+};
+
 </script>
 """
 
 st_html(canvas_html, height=950, scrolling=True)
+
