@@ -4,12 +4,12 @@ import html
 import os
 from streamlit.components.v1 import html as st_html
 
-st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
+st.set_page_config(page_title="大判焼外交部ジェネレーター", layout="centered")
 
 # -------------------------------
 # タイトル
 # -------------------------------
-st.title("外交部風 画像ジェネレーター（7行まで1000px固定／8行以上縮小）")
+st.title("大判焼外交部ジェネレーター")
 
 # =========================================================
 # ⚠️ 注意事項（タイトルの直下に表示）
@@ -100,7 +100,7 @@ footer_right_input = st.text_input("下部ヘッダー（右）", value=st.sessi
 yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）", value=st.session_state.yellow_words)
 
 # ▼ 反映
-if st.button("★ 反映する"):
+if st.button("反映する"):
     st.session_state.main_text = main_text_input
     st.session_state.footer_left = footer_left_input
     st.session_state.footer_right = footer_right_input
@@ -108,7 +108,7 @@ if st.button("★ 反映する"):
     st.rerun()
 
 # ▼ 初期化（背景維持）
-if st.button("★ 初期テキストに戻す"):
+if st.button("初期テキストに戻す"):
     keep_bg = st.session_state.bg_choice
     st.session_state.clear()
     st.session_state.bg_choice = keep_bg
@@ -309,6 +309,7 @@ canvas_html = f"""
 """
 
 st_html(canvas_html, height=950, scrolling=True)
+
 
 
 
