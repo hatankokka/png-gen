@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（最終完全版・フォント最大化＋縦収まり対応）")
+st.title("外交部風 画像ジェネレーター（9行までは1200px固定＆最適縮小版）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -37,7 +37,7 @@ if "footer_right" not in st.session_state:
 if "yellow_words" not in st.session_state:
     st.session_state.yellow_words = DEFAULT_YELLOW_WORDS
 
-# ▼ 背景（保持する）
+# ▼ 背景設定（保持する）
 if "bg_choice" not in st.session_state:
     st.session_state.bg_choice = "背景 01"
 
@@ -52,14 +52,13 @@ BG_PATH = BACKGROUND_CHOICES[bg_name]
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力 UI
+# ▼ 入力欄
 main_text_input = st.text_area("本文", value=st.session_state.main_text)
 footer_left_input = st.text_input("下部ヘッダー（左）", value=st.session_state.footer_left)
 footer_right_input = st.text_input("下部ヘッダー（右）", value=st.session_state.footer_right)
-yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）",
-                                  value=st.session_state.yellow_words)
+yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）", value=st.session_state.yellow_words)
 
-# ▼ 反映する
+# ▼ 反映
 if st.button("★ 反映する"):
     st.session_state.main_text = main_text_input
     st.session_state.footer_left = footer_left_input
@@ -67,26 +66,24 @@ if st.button("★ 反映する"):
     st.session_state.yellow_words = yellow_words_input
     st.rerun()
 
-# ▼ 初期化（背景は保持）
+# ▼ 初期化（背景だけ保持）
 if st.button("★ 初期テキストに戻す"):
     keep_bg = st.session_state.bg_choice
     st.session_state.clear()
     st.session_state.bg_choice = keep_bg
     st.rerun()
 
-# ▼ JSへ渡す値
+# ▼ JS 渡し
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
-yellow_words_list = [
-    w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()
-]
+yellow_words_list = [w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()]
 yellow_words_js = "|".join(yellow_words_list)
 
-# =========================================================
-# Canvas 描画 HTML（最大行幅 → 縦収まりチェック方式）
-# =========================================================
+# ============================================================
+# Canvas 描画（9行以内 = 1200px固定、10行以上は縮小）
+# ============================================================
 
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
@@ -106,7 +103,7 @@ canvas_html = f"""
   const textRaw = "{main_js}".replace(/\\\\n/g, "\\n");
   const footerLeft = "{footer_left_js}";
   const footerRight = "{footer_right_js}";
-  const yellowWords = "{yellow_words_js}".split("|").filter(x => x.length > 0);
+  const yellowWords = "{yellow_words_js}".split("|").filter(x=>x.length>0);
 
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
@@ -124,6 +121,7 @@ canvas_html = f"""
     ctx.drawImage(img,0,0,W,H);
 
     const lines = textRaw.split("\\n");  // ★ 空行保持
+    const lineCount = lines.length;
 
     const top = H * 0.28;
     const bottom = H * 0.70;
@@ -132,11 +130,20 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    let fontSize = 1200;      // ★ 最大フォント
-    const minFont = 150;
     const lineGap = 1.3;
+    let fontSize;
 
-    // --- 横幅チェック（最大行幅）
+    // -------------------------------
+    // ★ C案：9行までは1200px固定
+    // -------------------------------
+    if (lineCount <= 9) {{
+      fontSize = 1200;
+    }} else {{
+      // ★ 10行以上は縮小ロジックで調整
+      fontSize = 1200;
+    }}
+
+    // 横幅チェック関数
     function maxLineWidth(fs) {{
       ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
       let maxW = 0;
@@ -147,26 +154,35 @@ canvas_html = f"""
       return maxW;
     }}
 
-    // --- 縦方向チェック（空行も含めた行数 × 行間）
+    // 縦の高さチェック
     function totalHeight(fs) {{
       return lines.length * fs * lineGap;
     }}
 
-    // ① 横幅でフォントを決定
-    while (fontSize >= minFont) {{
-      if (maxLineWidth(fontSize) <= areaW) break;
-      fontSize -= 20;
+    // -------------------------------
+    // ★ lineCount <= 9 の場合、
+    //    横幅が収まらない場合のみ縮小
+    // -------------------------------
+    if (lineCount <= 9) {{
+      while (fontSize >= 150) {{
+        if (maxLineWidth(fontSize) <= areaW) break;
+        fontSize -= 20;
+      }}
+    }} else {{
+      // -------------------------------
+      // ★ lineCount > 9 の場合は
+      //    横幅 → 縦方向の順で縮小
+      // -------------------------------
+      while (fontSize >= 150) {{
+        if (maxLineWidth(fontSize) <= areaW &&
+            totalHeight(fontSize) <= areaH) break;
+        fontSize -= 20;
+      }}
     }}
 
-    // ② 縦が収まるかチェック
-    while (fontSize >= minFont) {{
-      if (totalHeight(fontSize) <= areaH) break;
-      fontSize -= 20;
-    }}
-
-    // ---- 描画（黄色語対応）
+    // ---- 黄色語対応の描画関数
     function drawColoredLine(line, x, y) {{
-      let segments = [];
+      let segs = [];
       let pos = 0;
 
       while (pos < line.length) {{
@@ -174,23 +190,24 @@ canvas_html = f"""
 
         for (const w of yellowWords) {{
           if (line.startsWith(w, pos)) {{
-            segments.push({{ "text": w, "yellow": true }});
+            segs.push({{"text": w, "yellow": true}});
             pos += w.length;
             matched = true;
             break;
           }}
         }}
+
         if (!matched) {{
-          segments.push({{ "text": line[pos], "yellow": false }});
+          segs.push({{"text": line[pos], "yellow": false}});
           pos++;
         }}
       }}
 
       ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-      let totalWidth = segments.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
+      let totalWidth = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
       let cursor = x - totalWidth/2;
 
-      for (const seg of segments) {{
+      for (const seg of segs) {{
         ctx.lineJoin = "round";
         ctx.strokeStyle = "black";
         ctx.lineWidth = fontSize * 0.12;
@@ -206,18 +223,20 @@ canvas_html = f"""
 
     // ---- 本文描画
     const totalH = totalHeight(fontSize);
-    let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
+    let y = top + (areaH-totalH)/2 + fontSize*0.5;
 
     for (const line of lines) {{
       drawColoredLine(line, W*0.5, y);
       y += fontSize * lineGap;
     }}
 
-    // ---- ヘッダー 250px
+    // ---- ヘッダー（固定250px）
     const hSize = 250;
+
     ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = hSize*0.10;
     ctx.strokeStyle = "black";
-    ctx.lineWidth = hSize * 0.10;
     ctx.fillStyle = "white";
     ctx.textBaseline = "middle";
 
@@ -245,5 +264,4 @@ canvas_html = f"""
 </script>
 """
 
-# 描画
 st_html(canvas_html, height=950, scrolling=True)
