@@ -1,101 +1,108 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[ ]:
-
-
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 import os
 import io
-import urllib.parse
 
-st.set_page_config(page_title="画像ジェネレーター", layout="centered")
-st.title("🖼 固定背景テキストジェネレーター（PNG版）")
+st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
+st.title("外交部風 画像ジェネレーター")
 
 # ▼ 入力欄
-text = st.text_area("テキストを入力（自動縮小します）")
+main_text = st.text_area("本文（最大600px、自動縮小）", "")
+footer_text = st.text_input("ヘッダー（署名・日付、フォント200固定）", "")
 
 # ▼ フォント設定
-font_size_max = 80
-font_size_min = 10
-font_path = os.path.join("fonts", "BIZUDMincho-Medium.ttf")
+FONT_MAIN_MAX = 600
+FONT_MAIN_MIN = 150
+FONT_FOOTER   = 200
 
-# ▼ 背景PNG（固定）
+FONT_PATH = "fonts/BIZUDMincho-Regular.ttf"
+
+# ▼ ファイル存在チェック
+if not os.path.exists("background.png"):
+    st.error("❌ background.png が見つかりません。レポジトリ直下に置いてください。")
+    st.stop()
+
+if not os.path.exists(FONT_PATH):
+    st.error(f"❌ フォントが見つかりません: {FONT_PATH}")
+    st.stop()
+
+# ▼ 背景PNG
 bg = Image.open("background.png").convert("RGBA")
 W, H = bg.size
 
-# ▼ 自動フォント縮小関数
-def auto_shrink(text, draw, font_path, max_w, max_h, max_size, min_size):
-    size = max_size
-    while size >= min_size:
-        font = ImageFont.truetype(font_path, size)
-        bbox = draw.multiline_textbbox((0, 0), text, font=font)
+# ▼ テキストエリア（中央）
+CENTER_TOP    = int(H * 0.28)
+CENTER_BOTTOM = int(H * 0.70)
+CENTER_LEFT   = int(W * 0.10)
+CENTER_RIGHT  = int(W * 0.90)
+
+CENTER_W = CENTER_RIGHT - CENTER_LEFT
+CENTER_H = CENTER_BOTTOM - CENTER_TOP
+
+# ▼ wrap
+def wrap_text(text, draw, font, max_width):
+    result, cur = [], ""
+    for ch in text:
+        t = cur + ch
+        w,_ = draw.textbbox((0,0), t, font=font)[2:]
+        if w <= max_width:
+            cur = t
+        else:
+            result.append(cur)
+            cur = ch
+    if cur:
+        result.append(cur)
+    return "\n".join(result)
+
+# ▼ shrink
+def auto_font(draw, text, max_w, max_h):
+    size = FONT_MAIN_MAX
+    while size >= FONT_MAIN_MIN:
+        font = ImageFont.truetype(FONT_PATH, size)
+        wrapped = wrap_text(text, draw, font, max_w)
+        bbox = draw.multiline_textbbox((0,0), wrapped, font=font)
         w = bbox[2] - bbox[0]
         h = bbox[3] - bbox[1]
-
         if w <= max_w and h <= max_h:
-            return font
-        size -= 2
-    return ImageFont.truetype(font_path, min_size)
+            return font, wrapped
+        size -= 12
+    return ImageFont.truetype(FONT_PATH, FONT_MAIN_MIN), text
 
-# ▼ 文字入力がある場合のみ処理
-if text:
+# ▼ outline
+def draw_outline(draw, x, y, text, font, fill="#FFF", out="#000", w=8):
+    for ox in range(-w, w+1):
+        for oy in range(-w, w+1):
+            draw.multiline_text((x+ox, y+oy), text, font=font, fill=out)
+    draw.multiline_text((x, y), text, font=font, fill=fill)
 
-    # 編集用画像コピー
+# ▼ 描画
+if main_text:
     img = bg.copy()
     draw = ImageDraw.Draw(img)
 
-    # テキストを収める最大エリア
-    max_w = W * 0.85
-    max_h = H * 0.60
+    # 本文
+    font_main, wrapped = auto_font(draw, main_text, CENTER_W, CENTER_H)
+    bbox = draw.multiline_textbbox((0,0), wrapped, font=font_main)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
 
-    # 自動縮小フォント取得
-    font = auto_shrink(text, draw, font_path, max_w, max_h, font_size_max, font_size_min)
+    x_main = CENTER_LEFT + (CENTER_W - tw)//2
+    y_main = CENTER_TOP + (CENTER_H - th)//2
 
-    # サイズ計算
-    bbox = draw.multiline_textbbox((0, 0), text, font=font)
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    draw_outline(draw, x_main, y_main, wrapped, font_main)
 
-    x = int((W - text_w) / 2)
-    y = int((H - text_h) / 2)
+    # ヘッダー位置（画面の90%）
+    if footer_text:
+        font_footer = ImageFont.truetype(FONT_PATH, FONT_FOOTER)
+        fw = draw.textbbox((0,0), footer_text, font=font_footer)[2]
 
-    # ▼ 縁取り付き文字描画
-    def draw_outline(draw, x, y, t, font):
-        for ox in range(-3, 4):
-            for oy in range(-3, 4):
-                draw.multiline_text((x + ox, y + oy), t, font=font, fill="#000000")
-        draw.multiline_text((x, y), t, font=font, fill="#FFFFFF")
+        x_footer = (W - fw)//2
+        y_footer = int(H * 0.90)
 
-    draw_outline(draw, x, y, text, font)
+        draw_outline(draw, x_footer, y_footer, footer_text, font_footer, w=5)
 
-    # 表示
     st.image(img)
 
-    # ▼ ダウンロード
     buf = io.BytesIO()
-    img.save(buf, format="PNG")
+    img.save(buf, "PNG")
     st.download_button("画像をダウンロード", buf.getvalue(), "output.png", "image/png")
-
-    # ▼ X投稿ボタン（投稿文なし）
-    tweet_url = "https://twitter.com/intent/tweet"
-    st.markdown(
-        f"""
-        <a href="{tweet_url}" target="_blank">
-            <button style="
-                padding: 12px 20px;
-                font-size: 20px;
-                background-color: #1DA1F2;
-                color: white;
-                border-radius: 8px;
-                border: none;
-                cursor: pointer;
-            ">
-                X に投稿する
-            </button>
-        </a>
-        """,
-        unsafe_allow_html=True
-    )
-
