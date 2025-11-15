@@ -1,69 +1,59 @@
 import streamlit as st
 from PIL import Image
-import io
 import os
 
-st.set_page_config(page_title="PNG Generator", layout="wide")
+st.set_page_config(page_title="PNG Selector", layout="wide")
+st.title("PNG セレクター（リポジトリ内の画像から選択）")
 
-st.title("PNG Generator - 背景画像選択ツール")
+# ------------------------------
+# 画像フォルダの場所（あなたのリポジトリに合わせて変更）
+# ------------------------------
+IMAGE_FOLDER = "images"   # 例: /images に png を置く
 
-# --- 背景画像の読み込み（ローカル or GitHub repository 内） ---
-def load_local_backgrounds(folder="backgrounds"):
-    """ローカルフォルダから背景画像一覧を読み込む"""
+# ------------------------------
+# フォルダ内のPNGファイル一覧を取得
+# ------------------------------
+def get_png_files(folder):
     if not os.path.exists(folder):
         return []
-    files = [f for f in os.listdir(folder) if f.lower().endswith((".png", ".jpg", ".jpeg"))]
-    return files
+    return [
+        f for f in os.listdir(folder)
+        if f.lower().endswith(".png")
+    ]
 
-# 背景画像フォルダ（→ GitHub では /backgrounds に入れておく）
-local_backgrounds = load_local_backgrounds("backgrounds")
+png_files = get_png_files(IMAGE_FOLDER)
 
-st.sidebar.header("背景画像の選択")
+if not png_files:
+    st.error(f"フォルダ '{IMAGE_FOLDER}' に PNG がありません。配置してください。")
+    st.stop()
 
-# --- 1. ローカルフォルダから選ぶ ---
-selected_local = None
-if local_backgrounds:
-    selected_local = st.sidebar.selectbox(
-        "リポジトリ内の背景画像を選択",
-        ["（選択しない）"] + local_backgrounds
-    )
-
-# --- 2. アップロードして選ぶ ---
-uploaded_file = st.sidebar.file_uploader(
-    "または画像をアップロード（PNG/JPG）", 
-    type=["png", "jpg", "jpeg"]
+# ------------------------------
+# PNG を選択（プルダウン）
+# ------------------------------
+selected_png = st.selectbox(
+    "画像を選択してください：",
+    png_files
 )
 
-# --- 画像の決定 ---
-bg_image = None
+# ------------------------------
+# 選択された画像を読み込む
+# ------------------------------
+image_path = os.path.join(IMAGE_FOLDER, selected_png)
+image = Image.open(image_path)
 
-if uploaded_file:
-    bg_image = Image.open(uploaded_file)
-    st.sidebar.success("アップロードされた画像を使用します")
-elif selected_local and selected_local != "（選択しない）":
-    bg_image = Image.open(f"backgrounds/{selected_local}")
-    st.sidebar.success(f"ローカル背景画像: {selected_local} を使用します")
-else:
-    st.sidebar.warning("背景画像が選択されていません")
+# ------------------------------
+# 画像プレビュー
+# ------------------------------
+st.subheader("選択された画像")
+st.image(image, use_column_width=True)
 
-# --- 画像を表示 ---
-if bg_image:
-    st.subheader("背景画像プレビュー")
-    st.image(bg_image, caption="選択中の背景画像", use_column_width=True)
-
-# --- ここから下にあなたの加工ロジックを追加 ---
-st.markdown("---")
-st.subheader("ここに加工コードや文字入れ処理を追加可能")
-
-st.write("たとえば、背景画像にテキストを合成したり、生成された PNG をダウンロードさせることができます。")
-
-# 例：PNG 出力ボタン
-if bg_image:
-    buffer = io.BytesIO()
-    bg_image.save(buffer, format="PNG")
+# ------------------------------
+# PNG ダウンロード
+# ------------------------------
+with open(image_path, "rb") as f:
     st.download_button(
-        label="この画像をPNGとしてダウンロード",
-        data=buffer.getvalue(),
-        file_name="generated.png",
+        label="この PNG をダウンロード",
+        data=f,
+        file_name=selected_png,
         mime="image/png"
     )
