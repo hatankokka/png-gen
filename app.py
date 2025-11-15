@@ -5,26 +5,28 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（Canvas版 / 画像処理なし）")
+st.title("外交部風 画像ジェネレーター（Canvas版 / 下ヘッダー2つ対応）")
 
 # ▼ 入力欄
-main_text = st.text_area("本文（複数行OK・改行はそのまま反映されます）", "")
-footer_text = st.text_input("下のヘッダー（署名・日付など）", "")
+main_text = st.text_area("本文（複数行OK・改行反映）", "")
+footer_left = st.text_input("下部ヘッダー 左側（例： 中国外交部報道官）", "")
+footer_right = st.text_input("下部ヘッダー 右側（例： 2025年11月13日）", "")
 
-# ▼ 背景画像を base64 でエンコード
+# ▼ 背景画像
 BG_PATH = "background.png"
 if not os.path.exists(BG_PATH):
-    st.error("background.png が見つかりません（リポジトリ直下に置いてください）。")
+    st.error("background.png がありません（ルート直下に置いてください）")
     st.stop()
 
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
 # ▼ JS に渡すためにエスケープ
-main_text_js = html.escape(main_text).replace("\n", "\\n")
-footer_text_js = html.escape(footer_text).replace("\n", "\\n")
+main_js = html.escape(main_text).replace("\n", "\\n")
+footer_left_js = html.escape(footer_left)
+footer_right_js = html.escape(footer_right)
 
-# ▼ HTML + JS（Canvasで合成してダウンロードもできる）
+# ▼ HTML + JS （Canvasで画像合成）
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
   <div>
@@ -41,12 +43,16 @@ canvas_html = f"""
       画像をダウンロード
     </button>
   </div>
-  <canvas id="posterCanvas" style="max-width:100%;height:auto;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.5);"></canvas>
+
+  <canvas id="posterCanvas"
+    style="max-width:100%;height:auto;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.5);">
+  </canvas>
 </div>
 
 <script>
-  const mainTextRaw = "{main_text_js}".replace(/\\\\n/g, "\\n");
-  const footerTextRaw = "{footer_text_js}".replace(/\\\\n/g, "\\n");
+  const mainTextRaw = "{main_js}".replace(/\\\\n/g, "\\n");
+  const footerLeft = "{footer_left_js}";
+  const footerRight = "{footer_right_js}";
 
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
@@ -60,14 +66,12 @@ canvas_html = f"""
     canvas.width = W;
     canvas.height = H;
 
-    // 背景
     ctx.clearRect(0,0,W,H);
     ctx.drawImage(img, 0, 0, W, H);
 
     const mainText = mainTextRaw || "";
-    const footerText = footerTextRaw || "";
 
-    // レイアウト（Python版と同じ比率にしている）
+    // ===== 本文位置（元のレイアウトと同じ比率） =====
     const top = H * 0.28;
     const bottom = H * 0.70;
     const left = W * 0.10;
@@ -75,11 +79,10 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    // ===== 本文 =====
+    // ===== 本文フォント自動縮小 =====
     let maxFont = 600;
     let minFont = 150;
     let fontSize = maxFont;
-
     const lines = mainText.split("\\n");
 
     function measure(fontPx) {{
@@ -108,34 +111,43 @@ canvas_html = f"""
       const {{maxLineW, totalH}} = measure(fontSize);
       let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
 
-      // 縁取り＋白文字
       for (const line of lines) {{
         const x = left + areaW / 2;
         ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-        ctx.lineWidth = fontSize * 0.12;  // 縁取りの太さ
-        ctx.strokeStyle = "rgba(0,0,0,1)";
-        ctx.fillStyle = "rgba(255,255,255,1)";
+        ctx.lineWidth = fontSize * 0.12;
+        ctx.strokeStyle = "black";
+        ctx.fillStyle = "white";
         ctx.strokeText(line, x, y);
         ctx.fillText(line, x, y);
         y += fontSize * 1.3;
       }}
     }}
 
-    // ===== ヘッダー（署名・日付） =====
-    if (footerText.trim().length > 0) {{
-      const footerFont = 200;
-      ctx.font = footerFont + "px 'Noto Serif JP','Yu Mincho','serif'";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.lineJoin = "round";
-      ctx.lineWidth = footerFont * 0.10;
-      ctx.strokeStyle = "rgba(0,0,0,1)";
-      ctx.fillStyle = "rgba(255,255,255,1)";
+    // ===== 下部ヘッダー（左右2つ） =====
+    const footerFont = 200;
+    ctx.font = footerFont + "px 'Noto Serif JP','Yu Mincho','serif'";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = footerFont * 0.10;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
 
-      const x = W / 2;
-      const y = H * 0.90;   // 画面下 90% の位置
-      ctx.strokeText(footerText, x, y);
-      ctx.fillText(footerText, x, y);
+    // 左側（source）
+    if (footerLeft.trim().length > 0) {{
+      ctx.textAlign = "left";
+      const xL = W * 0.15;
+      const yL = H * 0.90;
+      ctx.strokeText(footerLeft, xL, yL);
+      ctx.fillText(footerLeft, xL, yL);
+    }}
+
+    // 右側（date）
+    if (footerRight.trim().length > 0) {{
+      ctx.textAlign = "right";
+      const xR = W * 0.85;
+      const yR = H * 0.90;
+      ctx.strokeText(footerRight, xR, yR);
+      ctx.fillText(footerRight, xR, yR);
     }}
   }}
 
@@ -143,7 +155,7 @@ canvas_html = f"""
     drawPoster();
   }};
 
-  // ダウンロード
+  // ダウンロード機能
   document.getElementById("downloadBtn").onclick = function() {{
     const link = document.createElement("a");
     link.download = "output.png";
@@ -155,6 +167,5 @@ canvas_html = f"""
 </script>
 """
 
-# Streamlit に埋め込み
-# height は適当に大きめにしておく（A0縦でも収まるように）
+# 表示
 st_html(canvas_html, height=900, scrolling=True)
