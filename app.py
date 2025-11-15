@@ -21,6 +21,7 @@ DEFAULT_MAIN = """“われわれは
 
 火遊びをすれば
 必ず身を滅ぼす”"""
+
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
@@ -48,28 +49,24 @@ with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
 
-# ▼ 入力欄（★ key を明示するのが超重要 ★）
+# ▼ 入力欄（★ key があると session_state と自動同期される）
 main_text = st.text_area(
     "本文",
     value=st.session_state.main_text,
-    key="main_text_input"  # ← これが必要
+    key="main_text_input"
 )
+
 footer_left = st.text_input(
     "下部ヘッダー（左）",
     value=st.session_state.footer_left,
     key="footer_left_input"
 )
+
 footer_right = st.text_input(
     "下部ヘッダー（右）",
     value=st.session_state.footer_right,
     key="footer_right_input"
 )
-
-# ▼ セッションステートを UI の値で更新
-st.session_state.main_text = main_text
-st.session_state.footer_left = footer_left
-st.session_state.footer_right = footer_right
-
 
 # ▼ 初期化ボタン
 if st.button("★ 初期テキストに戻す"):
@@ -79,10 +76,11 @@ if st.button("★ 初期テキストに戻す"):
     st.rerun()
 
 
-# ▼ JS に渡す値
+# ▼ JS に渡す値（常に session_state の最新値）
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
+
 
 # ▼ Canvas 描画 HTML
 canvas_html = f"""
