@@ -7,24 +7,24 @@ from streamlit.components.v1 import html as st_html
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
 st.title("外交部風 画像ジェネレーター（背景切替＋初期化対応）")
 
-# ▼ 背景画像の選択肢（この3つは .streamlit フォルダ内にある前提）
+# ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
 }
 
-# ▼ 初期値
-DEFAULT_MAIN = """“きのこは再び筍国主義の過ちを 
-繰り返すつもりなのか
-再びきのこ公民とチョコ人民を 
-敵に回すつもりなのか
-すぎのこ村の戦後秩序を 
-覆そうとしているのか”"""
+# ▼ 初期テキスト
+DEFAULT_MAIN = """“われわれは
+回転焼派に告げる
+大判焼問題で
+火遊びをするな
 
-DEFAULT_LEFT = "茸国外交部報道官"
+火遊びをすれば
+必ず身を滅ぼす”"""
+DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
-# ▼ セッションステートに保存（初期化ボタンのため）
+# ▼ セッションステート初期化
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 
@@ -35,7 +35,7 @@ if "footer_right" not in st.session_state:
     st.session_state.footer_right = DEFAULT_RIGHT
 
 
-# ▼ 背景選択 UI
+# ▼ 背景選択
 bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
 BG_PATH = BACKGROUND_CHOICES[bg_name]
 
@@ -43,31 +43,48 @@ if not os.path.exists(BG_PATH):
     st.error(f"{BG_PATH} が見つかりません。フォルダ構造を確認してください。")
     st.stop()
 
-# ▼ Base64 化して JS に渡す
+# ▼ Base64 化
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
 
-# ▼ 入力フォーム（セッションステートを反映）
-main_text = st.text_area("本文", st.session_state.main_text)
-footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left)
-footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right)
+# ▼ 入力欄（★ key を明示するのが超重要 ★）
+main_text = st.text_area(
+    "本文",
+    value=st.session_state.main_text,
+    key="main_text_input"  # ← これが必要
+)
+footer_left = st.text_input(
+    "下部ヘッダー（左）",
+    value=st.session_state.footer_left,
+    key="footer_left_input"
+)
+footer_right = st.text_input(
+    "下部ヘッダー（右）",
+    value=st.session_state.footer_right,
+    key="footer_right_input"
+)
+
+# ▼ セッションステートを UI の値で更新
+st.session_state.main_text = main_text
+st.session_state.footer_left = footer_left
+st.session_state.footer_right = footer_right
 
 
-# ▼ 初期化ボタン（※エラーの原因だった experimental_rerun は使用しない）
+# ▼ 初期化ボタン
 if st.button("★ 初期テキストに戻す"):
     st.session_state.main_text = DEFAULT_MAIN
     st.session_state.footer_left = DEFAULT_LEFT
     st.session_state.footer_right = DEFAULT_RIGHT
-    st.rerun()   # ← これで安全に再読み込みできる
+    st.rerun()
 
 
-# ▼ HTMLエスケープして JS に渡す
-main_js = html.escape(main_text).replace("\n", "\\n")
-footer_left_js = html.escape(footer_left)
-footer_right_js = html.escape(footer_right)
+# ▼ JS に渡す値
+main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
+footer_left_js = html.escape(st.session_state.footer_left)
+footer_right_js = html.escape(st.session_state.footer_right)
 
-# ▼ Canvas 描画 HTML（PNG生成ロジック）
+# ▼ Canvas 描画 HTML
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
   <button id="downloadBtn"
@@ -135,18 +152,17 @@ canvas_html = f"""
 
     if (mainText.trim().length > 0) {{
       while (fontSize >= minFont) {{
-        const {{maxLineW, totalH}} = measure(fontSize);
+        const {{ maxLineW, totalH }} = measure(fontSize);
         if (maxLineW <= areaW && totalH <= areaH) break;
         fontSize -= 20;
       }}
-
       if (fontSize < minFont) fontSize = minFont;
 
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.lineJoin = "round";
 
-      const {{totalH}} = measure(fontSize);
+      const {{ totalH }} = measure(fontSize);
       let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
 
       for (const line of lines) {{
