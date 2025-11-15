@@ -12,7 +12,7 @@ st.set_page_config(page_title="外交部ジェネレーター", layout="centered
 st.title("外交部風 画像ジェネレーター（7行まで1000px固定／8行以上縮小）")
 
 # =========================================================
-# ⚠️ 注意事項（タイトルのすぐ下に表示）
+# ⚠️ 注意事項（タイトルの直下に表示）
 # =========================================================
 st.markdown("""
 ### ⚠️ 注意事項・禁止事項
@@ -30,13 +30,25 @@ st.markdown("""
 
 #### 【免責事項】
 - 当アプリで生成された画像・テキストの利用・公開・拡散によって生じた  
-  **いかなる損害・トラブルについても当方は一切責任を負いません。**
-- 利用者による投稿内容についても **当方は一切責任を負いません。**
+  **いかなる損害・トラブルについても当方は一切の責任を負いません。**
+- 利用者による投稿内容についても **当方は責任を負いません。**
 
 節度を守ってご利用ください。
 
 ---
 """)
+
+# =========================================================
+# NGワードリスト読み込み (.streamlit/ng_words.txt)
+# =========================================================
+NG_WORDS_FILE = ".streamlit/ng_words.txt"
+
+if os.path.exists(NG_WORDS_FILE):
+    with open(NG_WORDS_FILE, "r", encoding="utf-8") as f:
+        NG_WORDS = [w.strip() for w in f if w.strip()]
+else:
+    NG_WORDS = []
+
 
 # ▼ 背景画像
 BACKGROUND_CHOICES = {
@@ -58,7 +70,7 @@ DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 DEFAULT_YELLOW_WORDS = "火遊び"
 
-# ▼ session_state 初期値
+# ▼ session_state 初期
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -83,12 +95,11 @@ BG_PATH = BACKGROUND_CHOICES[bg_name]
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力欄
+# ▼ 入力 UI
 main_text_input = st.text_area("本文", value=st.session_state.main_text)
 footer_left_input = st.text_input("下部ヘッダー（左）", value=st.session_state.footer_left)
 footer_right_input = st.text_input("下部ヘッダー（右）", value=st.session_state.footer_right)
-yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）",
-                                  value=st.session_state.yellow_words)
+yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）", value=st.session_state.yellow_words)
 
 # ▼ 反映
 if st.button("★ 反映する"):
@@ -105,19 +116,31 @@ if st.button("★ 初期テキストに戻す"):
     st.session_state.bg_choice = keep_bg
     st.rerun()
 
-# ▼ JS 渡し
+# =========================================================
+# NGワード検査（Canvas 描画前に実施）
+# =========================================================
+
+found_ng = []
+for ng in NG_WORDS:
+    if ng in st.session_state.main_text:
+        found_ng.append(ng)
+
+if found_ng:
+    st.error(f"エラー：NGワード（{', '.join(found_ng)}）が本文に含まれています。修正してください。")
+    st.stop()  # ← ここで停止＝Canvas が出ない
+
+
+# ▼ JS渡し
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
-yellow_words_list = [
-    w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()
-]
+yellow_words_list = [w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()]
 yellow_words_js = "|".join(yellow_words_list)
 
 
 # ============================================================
-# Canvas描画 HTML（7行以内1000px固定／8行以上縮小）
+# Canvas描画 HTML（7行以内1000px固定／8行以上は縮小）
 # ============================================================
 
 canvas_html = f"""
@@ -173,7 +196,7 @@ canvas_html = f"""
     if (lineCount <= 7) {{
         fontSize = 1000;
     }} else {{
-        fontSize = 1000; // 8行以上は縮小
+        fontSize = 1000; // 8行以上は縮小開始
     }}
 
     function maxLineWidth(fs) {{
@@ -198,7 +221,7 @@ canvas_html = f"""
         }}
     }}
 
-    // 8行以上 → 横幅・縦収まりの両方をチェック
+    // 8行以上 → 横幅→縦収まりを両方チェック
     if (lineCount >= 8) {{
         while (fontSize >= 150) {{
             if (maxLineWidth(fontSize) <= areaW &&
@@ -247,7 +270,6 @@ canvas_html = f"""
         }}
     }}
 
-    // ---- 本文描画
     const totalH = totalHeight(fontSize);
     let y = top + (areaH-totalH)/2 + fontSize*0.5;
 
@@ -256,9 +278,8 @@ canvas_html = f"""
         y += fontSize * lineGap;
     }}
 
-    // ---- ヘッダー
+    // ---- 下部ヘッダー
     const hSize = 250;
-
     ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.strokeStyle = "black";
     ctx.lineWidth = hSize*0.10;
@@ -289,5 +310,4 @@ canvas_html = f"""
 </script>
 """
 
-# 描画
 st_html(canvas_html, height=950, scrolling=True)
