@@ -1,137 +1,160 @@
 import streamlit as st
-import cv2
-import numpy as np
-import io
+import base64
+import html
 import os
+from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（OpenCV版 / Pillow不使用）")
+st.title("外交部風 画像ジェネレーター（Canvas版 / 画像処理なし）")
 
-# ========= 入力欄 =========
-main_text = st.text_area("本文（最大600px・自動縮小）", "")
-footer_text = st.text_input("下のヘッダー（署名・日付・200px固定）", "")
+# ▼ 入力欄
+main_text = st.text_area("本文（複数行OK・改行はそのまま反映されます）", "")
+footer_text = st.text_input("下のヘッダー（署名・日付など）", "")
 
-# ========= 背景PNG =========
+# ▼ 背景画像を base64 でエンコード
 BG_PATH = "background.png"
 if not os.path.exists(BG_PATH):
-    st.error(f"{BG_PATH} が見つかりません。")
+    st.error("background.png が見つかりません（リポジトリ直下に置いてください）。")
     st.stop()
 
-bg = cv2.imread(BG_PATH, cv2.IMREAD_UNCHANGED)
-if bg is None:
-    st.error(f"{BG_PATH} の読み込みに失敗しました。")
-    st.stop()
+with open(BG_PATH, "rb") as f:
+    bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# BG を BGRA に変換（透明対応）
-if bg.shape[2] == 3:
-    bg = cv2.cvtColor(bg, cv2.COLOR_BGR2BGRA)
+# ▼ JS に渡すためにエスケープ
+main_text_js = html.escape(main_text).replace("\n", "\\n")
+footer_text_js = html.escape(footer_text).replace("\n", "\\n")
 
-H, W = bg.shape[:2]
+# ▼ HTML + JS（Canvasで合成してダウンロードもできる）
+canvas_html = f"""
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+  <div>
+    <button id="downloadBtn"
+      style="
+        padding:8px 16px;
+        border-radius:999px;
+        border:none;
+        background:#f7d48b;
+        color:#3b2409;
+        font-weight:600;
+        letter-spacing:0.08em;
+        cursor:pointer;">
+      画像をダウンロード
+    </button>
+  </div>
+  <canvas id="posterCanvas" style="max-width:100%;height:auto;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,0.5);"></canvas>
+</div>
 
-# ========= フォント設定 =========
-# ⬇⬇⬇ ルート直下に置かれたフォントを使用
-FONT_PATH = "BIZUDMincho-Regular.ttf"
+<script>
+  const mainTextRaw = "{main_text_js}".replace(/\\\\n/g, "\\n");
+  const footerTextRaw = "{footer_text_js}".replace(/\\\\n/g, "\\n");
 
-if not os.path.exists(FONT_PATH):
-    st.error(f"フォントファイルが見つかりません: {FONT_PATH}")
-    st.stop()
+  const img = new Image();
+  img.src = "data:image/png;base64,{bg_b64}";
 
-# FreeType 読み込み（OpenCVの日本語描画用）
-try:
-    ft = cv2.freetype.createFreeType2()
-    ft.loadFontData(FONT_PATH, 0)
-except Exception as e:
-    st.error("OpenCV FreeType モジュールが利用できません。")
-    st.write(e)
-    st.stop()
+  const canvas = document.getElementById("posterCanvas");
+  const ctx = canvas.getContext("2d");
 
-FONT_MAIN_MAX = 600
-FONT_MAIN_MIN = 150
-FONT_FOOTER = 200
+  function drawPoster() {{
+    const W = img.naturalWidth;
+    const H = img.naturalHeight;
+    canvas.width = W;
+    canvas.height = H;
 
-# ========= 本文描画エリア =========
-CENTER_TOP    = int(H * 0.28)
-CENTER_BOTTOM = int(H * 0.70)
-CENTER_LEFT   = int(W * 0.10)
-CENTER_RIGHT  = int(W * 0.90)
+    // 背景
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(img, 0, 0, W, H);
 
-CENTER_W = CENTER_RIGHT - CENTER_LEFT
-CENTER_H = CENTER_BOTTOM - CENTER_TOP
+    const mainText = mainTextRaw || "";
+    const footerText = footerTextRaw || "";
 
-# ========= テキスト描画用関数 =========
+    // レイアウト（Python版と同じ比率にしている）
+    const top = H * 0.28;
+    const bottom = H * 0.70;
+    const left = W * 0.10;
+    const right = W * 0.90;
+    const areaW = right - left;
+    const areaH = bottom - top;
 
-def draw_text(img, text, x, y, font_size, color=(255,255,255), outline=8):
-    """縁取り（アウトライン）文字を描画"""
-    for ox in range(-outline, outline+1):
-        for oy in range(-outline, outline+1):
-            ft.putText(img, text, (x+ox, y+oy), font_size,
-                       (0,0,0), thickness=-1, line_type=cv2.LINE_AA)
-    ft.putText(img, text, (x, y), font_size,
-               color, thickness=-1, line_type=cv2.LINE_AA)
+    // ===== 本文 =====
+    let maxFont = 600;
+    let minFont = 150;
+    let fontSize = maxFont;
 
+    const lines = mainText.split("\\n");
 
-def wrap_text(text, font_size, max_width):
-    """文字幅に合わせて改行する処理（1文字ずつ判定）"""
-    lines = []
-    cur = ""
-    for ch in text:
-        size, _ = ft.getTextSize(cur + ch, font_size, thickness=-1)
-        if size[0] <= max_width:
-            cur += ch
-        else:
-            lines.append(cur)
-            cur = ch
-    if cur:
-        lines.append(cur)
-    return lines
+    function measure(fontPx) {{
+      ctx.font = fontPx + "px 'Noto Serif JP','Yu Mincho','serif'";
+      let maxLineW = 0;
+      for (const line of lines) {{
+        const w = ctx.measureText(line).width;
+        if (w > maxLineW) maxLineW = w;
+      }}
+      const totalH = lines.length * fontPx * 1.3;
+      return {{ maxLineW, totalH }};
+    }}
 
+    if (mainText.trim().length > 0) {{
+      while (fontSize >= minFont) {{
+        const {{maxLineW, totalH}} = measure(fontSize);
+        if (maxLineW <= areaW && totalH <= areaH) break;
+        fontSize -= 20;
+      }}
+      if (fontSize < minFont) fontSize = minFont;
 
-def autoshrink(text, max_w, max_h):
-    """本文のフォント自動縮小"""
-    size = FONT_MAIN_MAX
-    while size >= FONT_MAIN_MIN:
-        lines = wrap_text(text, size, max_w)
-        total_height = len(lines) * int(size * 1.3)
-        max_line_w = max(ft.getTextSize(line, size, thickness=-1)[0][0] for line in lines)
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineJoin = "round";
 
-        if total_height <= max_h and max_line_w <= max_w:
-            return size, lines
+      const {{maxLineW, totalH}} = measure(fontSize);
+      let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
 
-        size -= 15
+      // 縁取り＋白文字
+      for (const line of lines) {{
+        const x = left + areaW / 2;
+        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
+        ctx.lineWidth = fontSize * 0.12;  // 縁取りの太さ
+        ctx.strokeStyle = "rgba(0,0,0,1)";
+        ctx.fillStyle = "rgba(255,255,255,1)";
+        ctx.strokeText(line, x, y);
+        ctx.fillText(line, x, y);
+        y += fontSize * 1.3;
+      }}
+    }}
 
-    return FONT_MAIN_MIN, wrap_text(text, FONT_MAIN_MIN, max_w)
+    // ===== ヘッダー（署名・日付） =====
+    if (footerText.trim().length > 0) {{
+      const footerFont = 200;
+      ctx.font = footerFont + "px 'Noto Serif JP','Yu Mincho','serif'";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineJoin = "round";
+      ctx.lineWidth = footerFont * 0.10;
+      ctx.strokeStyle = "rgba(0,0,0,1)";
+      ctx.fillStyle = "rgba(255,255,255,1)";
 
-# ================= 描画処理 =================
+      const x = W / 2;
+      const y = H * 0.90;   // 画面下 90% の位置
+      ctx.strokeText(footerText, x, y);
+      ctx.fillText(footerText, x, y);
+    }}
+  }}
 
-if main_text:
-    img = bg.copy()
+  img.onload = function() {{
+    drawPoster();
+  }};
 
-    # ---- 本文 ----
-    font_size, lines = autoshrink(main_text, CENTER_W, CENTER_H)
-    total_height = int(len(lines) * font_size * 1.3)
-    y_start = CENTER_TOP + (CENTER_H - total_height) // 2
+  // ダウンロード
+  document.getElementById("downloadBtn").onclick = function() {{
+    const link = document.createElement("a");
+    link.download = "output.png";
+    link.href = canvas.toDataURL("image/png");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }};
+</script>
+"""
 
-    for i, line in enumerate(lines):
-        line_w, _ = ft.getTextSize(line, font_size, thickness=-1)
-        x = CENTER_LEFT + (CENTER_W - line_w[0]) // 2
-        y = int(y_start + i * font_size * 1.3)
-        draw_text(img, line, x, y, font_size)
-
-    # ---- ヘッダー ----
-    if footer_text:
-        footer_w, _ = ft.getTextSize(footer_text, FONT_FOOTER, thickness=-1)
-        x = (W - footer_w[0]) // 2
-        y = int(H * 0.90)
-        draw_text(img, footer_text, x, y, FONT_FOOTER, outline=5)
-
-    # BGR(A) → RGBA
-    preview = cv2.cvtColor(img, cv2.COLOR_BGRA2RGBA)
-    st.image(preview)
-
-    # ---- ダウンロード ----
-    buf = io.BytesIO()
-    _, enc = cv2.imencode(".png", cv2.cvtColor(preview, cv2.COLOR_RGBA2BGRA))
-    buf.write(enc.tobytes())
-
-    st.download_button("画像をダウンロード", buf.getvalue(),
-                       "output.png", "image/png")
+# Streamlit に埋め込み
+# height は適当に大きめにしておく（A0縦でも収まるように）
+st_html(canvas_html, height=900, scrolling=True)
