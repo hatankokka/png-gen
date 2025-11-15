@@ -131,9 +131,8 @@ footer_right_js = html.escape(st.session_state.footer_right)
 yellow_js = "|".join([w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML & JS（画像コピー / 保存 / X投稿）
+# HTML + JS（縁取りなし版）
 # =========================================================
-
 html_code = """
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
 
@@ -236,14 +235,10 @@ function drawPoster(){
         let cursor = x - totalW/2;
 
         for(const seg of segs){
-            ctx.strokeStyle="black";
-            ctx.lineWidth=fontSize*0.12;
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.textBaseline="middle";
 
-            ctx.strokeText(seg.text,cursor,y);
             ctx.fillText(seg.text,cursor,y);
-
             cursor += ctx.measureText(seg.text).width;
         }
     }
@@ -257,25 +252,22 @@ function drawPoster(){
 
     const hSize=250;
     ctx.font = hSize+"px serif";
-    ctx.strokeStyle="black";
-    ctx.lineWidth=hSize*0.10;
     ctx.fillStyle="white";
+    ctx.textBaseline="middle";
 
     if(footerLeft.trim().length>0){
         ctx.textAlign="left";
-        ctx.strokeText(footerLeft, W*0.15, H*0.90);
         ctx.fillText(footerLeft, W*0.15, H*0.90);
     }
 
     if(footerRight.trim().length>0){
         ctx.textAlign="right";
-        ctx.strokeText(footerRight, W*0.85, H*0.90);
         ctx.fillText(footerRight, W*0.85, H*0.90);
     }
 }
 
 // ----------------------------------------------------------
-// ① 画像コピー（PC向け）
+// 画像コピー（PC）
 // ----------------------------------------------------------
 document.getElementById("copyBtn").onclick = function(){
     canvas.toBlob(async function(blob){
@@ -291,7 +283,7 @@ document.getElementById("copyBtn").onclick = function(){
 };
 
 // ----------------------------------------------------------
-// ② 画像保存（Android / iPhone 完全対応）
+// 画像保存（スマホOK）
 // ----------------------------------------------------------
 document.getElementById("saveBtn").onclick = function(){
     canvas.toBlob(function(blob){
@@ -302,12 +294,12 @@ document.getElementById("saveBtn").onclick = function(){
         document.body.appendChild(a);
         a.click();
         setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
-        alert("画像を保存しました！（スマホは写真フォルダへ）");
+        alert("📥 画像を保存しました！（スマホは写真フォルダへ）");
     });
 };
 
 // ----------------------------------------------------------
-// ③ X投稿（投稿文だけ自動入力）
+// X投稿（投稿文だけ自動入力）
 // ----------------------------------------------------------
 document.getElementById("tweetBtn").onclick = function(){
 
@@ -323,12 +315,11 @@ document.getElementById("tweetBtn").onclick = function(){
 </script>
 """
 
-html_code = (
+st_html(
     html_code.replace("{{MAIN}}", main_js)
              .replace("{{LEFT}}", footer_left_js)
              .replace("{{RIGHT}}", footer_right_js)
              .replace("{{YELLOW}}", yellow_js)
-             .replace("{{BG}}", bg_b64)
+             .replace("{{BG}}", bg_b64),
+    height=950, scrolling=True
 )
-
-st_html(html_code, height=950, scrolling=True)
