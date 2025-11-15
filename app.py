@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（本文900px・ヘッダー250px）")
+st.title("外交部風 画像ジェネレーター（本文色付け対応）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -26,14 +26,16 @@ DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
 # ▼ session_state 初期設定
-if "main_text" not in st.session_state:
-    st.session_state.main_text = DEFAULT_MAIN
-if "footer_left" not in st.session_state:
-    st.session_state.footer_left = DEFAULT_LEFT
-if "footer_right" not in st.session_state:
-    st.session_state.footer_right = DEFAULT_RIGHT
+for key, value in {
+    "main_text": DEFAULT_MAIN,
+    "footer_left": DEFAULT_LEFT,
+    "footer_right": DEFAULT_RIGHT,
+    "yellow_words": ""
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = value
 
-# ▼ 背景選択UI
+# ▼ 背景選択
 bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
 BG_PATH = BACKGROUND_CHOICES[bg_name]
 
@@ -49,34 +51,42 @@ main_text = st.text_area("本文", st.session_state.main_text, key="main_text_in
 footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left, key="footer_left_input")
 footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right, key="footer_right_input")
 
-# ▼ 初期テキストに戻す
+yellow_words_input = st.text_area(
+    "黄色にしたい単語（改行区切り）",
+    st.session_state.yellow_words,
+    key="yellow_words_input"
+)
+
+# ▼ 初期化ボタン
 if st.button("★ 初期テキストに戻す"):
     st.session_state.main_text = DEFAULT_MAIN
     st.session_state.footer_left = DEFAULT_LEFT
     st.session_state.footer_right = DEFAULT_RIGHT
+    st.session_state.yellow_words = ""
     st.rerun()
 
-# ▼ JS に渡す
+# ▼ JSへ渡す値
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
+# 改行区切り → リストに変換
+yellow_words_list = [
+    w.strip() for w in st.session_state.yellow_words_input.split("\n")
+    if w.strip()
+]
+yellow_words_js = "|".join(yellow_words_list)  # JS側で分割する
+
 # ============================================
-# ★ Canvas版（本文最大900px・ヘッダー250px固定）
+# Canvas描画 HTML（黄色単語対応）
 # ============================================
 
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
   <button id="downloadBtn"
-    style="
-      padding:10px 20px;
-      border-radius:999px;
-      border:none;
-      background:#f7d48b;
-      color:#3b2409;
-      font-weight:600;
-      letter-spacing:0.08em;
-      cursor:pointer;">
+    style="padding:10px 20px;border-radius:999px;border:none;
+           background:#f7d48b;color:#3b2409;font-weight:600;
+           letter-spacing:0.08em;cursor:pointer;">
     画像をダウンロード
   </button>
 
@@ -91,6 +101,8 @@ canvas_html = f"""
   const footerLeft = "{footer_left_js}";
   const footerRight = "{footer_right_js}";
 
+  const yellowWords = "{yellow_words_js}".split("|").filter(x => x.length > 0);
+
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
 
@@ -100,14 +112,15 @@ canvas_html = f"""
   function drawPoster() {{
     const W = img.naturalWidth;
     const H = img.naturalHeight;
+
     canvas.width = W;
     canvas.height = H;
 
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(img, 0, 0, W, H);
 
-    // ---- 本文処理 ----
     const lines = mainTextRaw.split("\\n").filter(l => l.trim().length > 0);
+
     const top = H * 0.28;
     const bottom = H * 0.70;
     const left = W * 0.10;
@@ -115,6 +128,7 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
+    // ---- 本文フォント（最大900px） ----
     let fontSize = 900;
     const minFont = 150;
 
@@ -135,28 +149,69 @@ canvas_html = f"""
       fontSize -= 20;
     }}
 
+    // ---- 1行内で文字色切替する関数 ----
+    function drawColoredLine(line, xCenter, y) {{
+      // 単語の出現位置で split
+      let segments = [];
+      let pos = 0;
+
+      while (pos < line.length) {{
+        let matched = false;
+
+        for (const word of yellowWords) {{
+          if (word && line.startsWith(word, pos)) {{
+            segments.push({{ text: word, yellow: true }});
+            pos += word.length;
+            matched = true;
+            break;
+          }}
+        }}
+
+        if (!matched) {{
+          segments.push({{ text: line[pos], yellow: false }});
+          pos++;
+        }}
+      }}
+
+      // ---- セグメントの総幅を測定 ----
+      let totalWidth = 0;
+      for (const seg of segments) {{
+        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
+        totalWidth += ctx.measureText(seg.text).width;
+      }}
+
+      // 左端の描画開始位置
+      let cursorX = xCenter - totalWidth / 2;
+
+      // ---- 描画 ----
+      for (const seg of segments) {{
+        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
+        ctx.textBaseline = "middle";
+        ctx.lineJoin = "round";
+        ctx.lineWidth = fontSize * 0.12;
+        ctx.strokeStyle = "black";
+        ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+
+        ctx.strokeText(seg.text, cursorX, y);
+        ctx.fillText(seg.text, cursorX, y);
+
+        cursorX += ctx.measureText(seg.text).width;
+      }}
+    }}
+
     // ---- 本文描画 ----
     if (lines.length > 0) {{
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.lineJoin = "round";
-      ctx.strokeStyle = "black";
-      ctx.fillStyle = "white";
-
       const {{ totalH }} = measure(fontSize);
       let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
 
       for (const line of lines) {{
-        const x = left + areaW / 2;
-        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-        ctx.lineWidth = fontSize * 0.12;
-        ctx.strokeText(line, x, y);
-        ctx.fillText(line, x, y);
+        const cx = left + areaW / 2;
+        drawColoredLine(line, cx, y);
         y += fontSize * 1.3;
       }}
     }}
 
-    // ---- ヘッダー（固定250px） ----
+    // ---- ヘッダー（固定250px）----
     const headerSize = 250;
     ctx.font = headerSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.textBaseline = "middle";
