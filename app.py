@@ -131,22 +131,16 @@ footer_right_js = html.escape(st.session_state.footer_right)
 yellow_js      = "|".join([w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML 領域幅を90%, 全員が全員iPhoneだと思うなよ
+# HTML 埋め込み
 # =========================================================
 
 html_code = """
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
 
-  <button id="copyBtn"
-    style="padding:12px 24px;border-radius:999px;border:none;
-           background:#FFD700;color:black;font-weight:700;cursor:pointer;">
-    画像をコピー（PC/泥）
-  </button>
-
   <button id="saveBtn"
     style="padding:12px 24px;border-radius:999px;border:none;
            background:#4CAF50;color:white;font-weight:700;cursor:pointer;">
-    画像を保存（PC/リンゴ/泥）
+    画像を保存（JPEG）
   </button>
 
   <button id="tweetBtn"
@@ -189,7 +183,6 @@ function drawPoster(){
     const top = H*0.28;
     const bottom = H*0.70;
 
-    //  ここを 90% 幅 に拡張したらどうかね
     const left  = W * 0.05;
     const right = W * 0.95;
 
@@ -248,7 +241,6 @@ function drawPoster(){
             ctx.textBaseline="middle";
 
             ctx.fillText(seg.text, cursor, y);
-
             cursor += ctx.measureText(seg.text).width;
         }
     }
@@ -279,35 +271,19 @@ function drawPoster(){
 }
 
 // ----------------------------------------------------------
-// 画像コピー（PC）
-// ----------------------------------------------------------
-document.getElementById("copyBtn").onclick = function(){
-    canvas.toBlob(async function(blob){
-        try{
-            await navigator.clipboard.write([
-                new ClipboardItem({"image/png": blob})
-            ]);
-            alert("✔ 画像をコピーしました！\\nX 投稿画面で Ctrl+V してください。");
-        } catch(e){
-            alert("画像コピーに失敗しました。Chrome / Edge を使用してください。");
-        }
-    });
-};
-
-// ----------------------------------------------------------
-// 画像保存（スマホOK）
+// 画像保存（JPEGで軽量化）
 // ----------------------------------------------------------
 document.getElementById("saveBtn").onclick = function(){
     canvas.toBlob(function(blob){
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "generated.png";
+        a.download = "generated.jpg";   // JPEG 保存
         document.body.appendChild(a);
         a.click();
         setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
-        alert("画像を保存しました！");
-    });
+        alert("JPEG画像を保存しました！（PNGより軽量）");
+    }, "image/jpeg", 0.88);  // 0.88 品質で軽量化
 };
 
 // ----------------------------------------------------------
