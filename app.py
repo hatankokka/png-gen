@@ -59,6 +59,7 @@ DEFAULT_MAIN = """“われわれは
 回転焼派に告げる
 大判焼問題で
 火遊びをするな
+
 火遊びをすれば
 必ず身を滅ぼす”"""
 
@@ -100,7 +101,6 @@ yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）
 # =========================================================
 # ボタン
 # =========================================================
-
 if st.button("反映する"):
     st.session_state.main_text = main_text_input
     st.session_state.footer_left = footer_left_input
@@ -123,7 +123,7 @@ if found:
     st.stop()
 
 # =========================================================
-# JSに渡す値
+# JSへ渡す値
 # =========================================================
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
@@ -131,7 +131,7 @@ footer_right_js = html.escape(st.session_state.footer_right)
 yellow_js = "|".join([w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML & JS（画像コピー + X投稿）
+# HTML & JS（画像コピー / 保存 / X投稿）
 # =========================================================
 
 html_code = """
@@ -140,20 +140,24 @@ html_code = """
   <button id="copyBtn"
     style="padding:12px 24px;border-radius:999px;border:none;
            background:#FFD700;color:black;font-weight:700;cursor:pointer;">
-    画像をコピー
+    📋 画像をコピー（PC）
+  </button>
+
+  <button id="saveBtn"
+    style="padding:12px 24px;border-radius:999px;border:none;
+           background:#4CAF50;color:white;font-weight:700;cursor:pointer;">
+    💾 画像を保存（スマホOK）
   </button>
 
   <button id="tweetBtn"
     style="padding:12px 24px;border-radius:999px;border:none;
            background:#1DA1F2;color:white;font-weight:700;cursor:pointer;">
-    X に投稿する
+    ✕ X に投稿する
   </button>
 
   <canvas id="posterCanvas"
     style="max-width:100%;border-radius:16px;
-           box-shadow:0 10px 30px rgba(0,0,0,0.6);">
-  </canvas>
-
+           box-shadow:0 10px 30px rgba(0,0,0,0.6);"></canvas>
 </div>
 
 <script>
@@ -171,7 +175,6 @@ const ctx = canvas.getContext("2d");
 img.onload = function(){ drawPoster(); };
 
 function drawPoster(){
-
     const W = img.naturalWidth;
     const H = img.naturalHeight;
 
@@ -181,23 +184,16 @@ function drawPoster(){
     ctx.drawImage(img,0,0,W,H);
 
     const lines = textRaw.split("\\n");
-    const lineCount = lines.length;
-
     const top = H*0.28, bottom = H*0.70;
     const left = W*0.10, right = W*0.90;
 
-    const areaW = right-left;
-    const areaH = bottom-top;
+    let fontSize = 1000;
     const lineGap = 1.3;
 
-    let fontSize = 1000;
-
     function maxWidth(fs){
-        ctx.font = fs + "px serif";
-        let m = 0;
-        for(const l of lines){
-            m = Math.max(m, ctx.measureText(l).width);
-        }
+        ctx.font = fs+"px serif";
+        let m=0;
+        for(const l of lines) m = Math.max(m, ctx.measureText(l).width);
         return m;
     }
 
@@ -205,25 +201,20 @@ function drawPoster(){
         return lines.length * fs * lineGap;
     }
 
-    if(lineCount <= 7){
-        while(fontSize >= 150){
-            if(maxWidth(fontSize) <= areaW) break;
-            fontSize -= 20;
-        }
-    } else {
-        while(fontSize >= 150){
-            if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
-            fontSize -= 20;
-        }
+    const areaW = right-left;
+    const areaH = bottom-top;
+
+    while(fontSize >= 150){
+        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
+        fontSize -= 20;
     }
 
-    function drawColoredLine(line, x, y){
+    function drawColoredLine(line,x,y){
         let segs=[];
         let pos=0;
 
         while(pos < line.length){
             let matched=false;
-
             for(const w of yellowWords){
                 if(line.startsWith(w,pos)){
                     segs.push({text:w,yellow:true});
@@ -232,7 +223,6 @@ function drawPoster(){
                     break;
                 }
             }
-
             if(!matched){
                 segs.push({text:line[pos],yellow:false});
                 pos++;
@@ -247,31 +237,29 @@ function drawPoster(){
 
         for(const seg of segs){
             ctx.strokeStyle="black";
-            ctx.lineWidth = fontSize*0.12;
+            ctx.lineWidth=fontSize*0.12;
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
-            ctx.textBaseline = "middle";
+            ctx.textBaseline="middle";
 
-            ctx.strokeText(seg.text, cursor, y);
-            ctx.fillText(seg.text, cursor, y);
+            ctx.strokeText(seg.text,cursor,y);
+            ctx.fillText(seg.text,cursor,y);
 
             cursor += ctx.measureText(seg.text).width;
         }
     }
 
-    let tH = totalHeight(fontSize);
-    let y = top + (areaH - tH)/2 + fontSize*0.5;
+    let yStart = top + (areaH - totalHeight(fontSize)) / 2 + fontSize * 0.5;
 
     for(const line of lines){
-        drawColoredLine(line, W*0.5, y);
-        y += fontSize * lineGap;
+        drawColoredLine(line, W*0.5, yStart);
+        yStart += fontSize * lineGap;
     }
 
-    const hSize = 250;
+    const hSize=250;
     ctx.font = hSize+"px serif";
     ctx.strokeStyle="black";
     ctx.lineWidth=hSize*0.10;
     ctx.fillStyle="white";
-    ctx.textBaseline="middle";
 
     if(footerLeft.trim().length>0){
         ctx.textAlign="left";
@@ -287,7 +275,7 @@ function drawPoster(){
 }
 
 // ----------------------------------------------------------
-// ① 画像コピー（ユーザー操作 → 100%成功）
+// ① 画像コピー（PC向け）
 // ----------------------------------------------------------
 document.getElementById("copyBtn").onclick = function(){
     canvas.toBlob(async function(blob){
@@ -303,7 +291,23 @@ document.getElementById("copyBtn").onclick = function(){
 };
 
 // ----------------------------------------------------------
-// ② X投稿（100%成功）
+// ② 画像保存（Android / iPhone 完全対応）
+// ----------------------------------------------------------
+document.getElementById("saveBtn").onclick = function(){
+    canvas.toBlob(function(blob){
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "generated.png";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 500);
+        alert("画像を保存しました！（スマホは写真フォルダへ）");
+    });
+};
+
+// ----------------------------------------------------------
+// ③ X投稿（投稿文だけ自動入力）
 // ----------------------------------------------------------
 document.getElementById("tweetBtn").onclick = function(){
 
@@ -319,11 +323,12 @@ document.getElementById("tweetBtn").onclick = function(){
 </script>
 """
 
-html_code = html_code.replace("{{MAIN}}", main_js)
-html_code = html_code.replace("{{LEFT}}", footer_left_js)
-html_code = html_code.replace("{{RIGHT}}", footer_right_js)
-html_code = html_code.replace("{{YELLOW}}", yellow_js)
-html_code = html_code.replace("{{BG}}", bg_b64)
+html_code = (
+    html_code.replace("{{MAIN}}", main_js)
+             .replace("{{LEFT}}", footer_left_js)
+             .replace("{{RIGHT}}", footer_right_js)
+             .replace("{{YELLOW}}", yellow_js)
+             .replace("{{BG}}", bg_b64)
+)
 
 st_html(html_code, height=950, scrolling=True)
-
