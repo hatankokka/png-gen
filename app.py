@@ -17,23 +17,19 @@ st.title("大判焼外交部ジェネレーター")
 st.markdown("""
 ### ⚠️ 注意事項・禁止事項
 
-当アプリは **娯楽目的の画像生成ツール** です。以下の利用は禁止します。
+当アプリは **娯楽目的のパロディ画像生成ツール** です。
 
 #### 【禁止事項】
 - 差別・侮辱・民族憎悪を助長する表現
-- 特定の個人・団体への誹謗中傷
+- 特定個人・団体への誹謗中傷
 - 名誉毀損・プライバシー侵害
 - 公序良俗に反する内容
-- 虚偽情報や悪意あるミスリード
 - 法令違反につながる利用
 
 #### 【免責事項】
-- 当アプリで作成された画像・投稿内容について  
-  **当方は一切の責任を負いません。**
-- ユーザーによるSNS投稿・再利用についても  
-  **責任は利用者本人にあります。**
-
-節度を守ってご利用ください。
+- 当アプリで生成された画像・文章の利用によって  
+  **生じたトラブル・損害について当方は一切責任を負いません。**
+- 利用者はすべて自己責任でご利用ください。
 ---
 """)
 
@@ -94,7 +90,7 @@ with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
 # =========================================================
-# 入力UI
+# 入力部分
 # =========================================================
 main_text_input = st.text_area("本文", value=st.session_state.main_text, height=200)
 footer_left_input = st.text_input("下部ヘッダー（左）", value=st.session_state.footer_left)
@@ -112,21 +108,20 @@ if st.button("反映する"):
     st.rerun()
 
 # =========================================================
-# 初期化ボタン（背景維持）
+# 初期化
 # =========================================================
 if st.button("初期テキストに戻す"):
-    keep = st.session_state.bg_choice
+    keep_bg = st.session_state.bg_choice
     st.session_state.clear()
-    st.session_state.bg_choice = keep
+    st.session_state.bg_choice = keep_bg
     st.rerun()
 
 # =========================================================
-# NGワード検査
+# NGチェック
 # =========================================================
-found_ng = [ng for ng in NG_WORDS if ng in st.session_state.main_text]
-
-if found_ng:
-    st.error("⚠ エラー：NGワードが含まれています → " + ", ".join(found_ng))
+found = [ng for ng in NG_WORDS if ng in st.session_state.main_text]
+if found:
+    st.error("⚠ エラー：NGワードが含まれています → " + ", ".join(found))
     st.stop()
 
 # =========================================================
@@ -135,20 +130,21 @@ if found_ng:
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
+
 yellow_list = [w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()]
 yellow_js = "|".join(yellow_list)
 
 # =========================================================
-# Canvas + X投稿ボタン（f-string安全版）
+# Canvas + Copyボタン + X投稿ボタン
 # =========================================================
 
-canvas_html = """
+html_code = """
 <div style='display:flex;flex-direction:column;align-items:center;gap:16px;'>
 
-  <button id='downloadBtn'
+  <button id='copyBtn'
     style='padding:10px 20px;border-radius:999px;border:none;
-           background:#f7d48b;color:#3b2409;font-weight:600;cursor:pointer;'>
-    画像をダウンロード
+           background:#FFD700;color:black;font-weight:600;cursor:pointer;'>
+    画像をコピー
   </button>
 
   <button id='tweetBtn'
@@ -165,35 +161,30 @@ canvas_html = """
 </div>
 
 <script>
-const textRaw = "{{main}}".replace(/\\\\n/g,"\\n");
-const footerLeft = "{{left}}";
-const footerRight = "{{right}}";
-const yellowWords = "{{yellow}}".split("|").filter(x => x.length > 0);
+const textRaw = "{{MAIN}}".replace(/\\\\n/g,"\\n");
+const footerLeft = "{{LEFT}}";
+const footerRight = "{{RIGHT}}";
+const yellowWords = "{{YELLOW}}".split("|").filter(x => x.length > 0);
 
 const img = new Image();
-img.src = "data:image/png;base64,{{bg}}";
+img.src = "data:image/png;base64,{{BG}}";
 
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
-function drawPoster() {
-
+function drawPoster(){
     const W = img.naturalWidth;
     const H = img.naturalHeight;
-
     canvas.width = W;
     canvas.height = H;
 
-    ctx.drawImage(img, 0, 0, W, H);
+    ctx.drawImage(img,0,0,W,H);
 
     const lines = textRaw.split("\\n");
     const lineCount = lines.length;
 
-    const top = H * 0.28;
-    const bottom = H * 0.70;
-    const left = W * 0.10;
-    const right = W * 0.90;
-
+    const top = H*0.28, bottom = H*0.70;
+    const left = W*0.10, right = W*0.90;
     const areaW = right - left;
     const areaH = bottom - top;
     const lineGap = 1.3;
@@ -214,55 +205,50 @@ function drawPoster() {
         return lines.length * fs * lineGap;
     }
 
-    if (lineCount <= 7) {
-        while (fontSize >= 150) {
+    if (lineCount <= 7){
+        while (fontSize >= 150){
             if (maxWidth(fontSize) <= areaW) break;
             fontSize -= 20;
         }
     } else {
-        while (fontSize >= 150) {
+        while (fontSize >= 150){
             if (maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
             fontSize -= 20;
         }
     }
 
     function drawColoredLine(line, x, y){
-        let segs = [];
-        let pos = 0;
-
-        while(pos < line.length){
-            let matched = false;
-
+        let segs=[];
+        let pos=0;
+        while(pos<line.length){
+            let matched=false;
             for(const w of yellowWords){
-                if(line.startsWith(w, pos)){
-                    segs.push({text:w, yellow:true});
-                    pos += w.length;
-                    matched = true;
+                if(line.startsWith(w,pos)){
+                    segs.push({text:w,yellow:true});
+                    pos+=w.length;
+                    matched=true;
                     break;
                 }
             }
-
             if(!matched){
-                segs.push({text:line[pos], yellow:false});
+                segs.push({text:line[pos],yellow:false});
                 pos++;
             }
         }
 
-        ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-        ctx.lineJoin = "round";
+        ctx.font = fontSize+"px 'Noto Serif JP','Yu Mincho','serif'";
+        ctx.lineJoin="round";
 
-        let totalW = 0;
-        for(const s of segs){
-            totalW += ctx.measureText(s.text).width;
-        }
+        let totalW=0;
+        for(const s of segs) totalW += ctx.measureText(s.text).width;
 
-        let cursor = x - totalW / 2;
+        let cursor = x - totalW/2;
 
         for(const seg of segs){
-            ctx.strokeStyle = "black";
-            ctx.lineWidth = fontSize * 0.12;
+            ctx.strokeStyle="black";
+            ctx.lineWidth=fontSize*0.12;
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
-            ctx.textBaseline = "middle";
+            ctx.textBaseline="middle";
 
             ctx.strokeText(seg.text, cursor, y);
             ctx.fillText(seg.text, cursor, y);
@@ -272,77 +258,70 @@ function drawPoster() {
     }
 
     const tH = totalHeight(fontSize);
-    let y = top + (areaH - tH) / 2 + fontSize * 0.5;
+    let y = top + (areaH - tH)/2 + fontSize*0.5;
 
     for(const line of lines){
-        drawColoredLine(line, W * 0.5, y);
+        drawColoredLine(line, W*0.5, y);
         y += fontSize * lineGap;
     }
 
-    const hSize = 250;
-    ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = hSize * 0.10;
-    ctx.fillStyle = "white";
-    ctx.textBaseline = "middle";
+    const hSize=250;
+    ctx.font = hSize+"px 'Noto Serif JP','Yu Mincho','serif'";
+    ctx.strokeStyle="black";
+    ctx.lineWidth=hSize*0.10;
+    ctx.fillStyle="white";
+    ctx.textBaseline="middle";
 
-    if(footerLeft.trim().length > 0){
-        ctx.textAlign = "left";
-        ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
-        ctx.fillText(footerLeft, W * 0.15, H * 0.90);
+    if(footerLeft.trim().length>0){
+        ctx.textAlign="left";
+        ctx.strokeText(footerLeft, W*0.15, H*0.90);
+        ctx.fillText(footerLeft, W*0.15, H*0.90);
     }
 
-    if(footerRight.trim().length > 0){
-        ctx.textAlign = "right";
-        ctx.strokeText(footerRight, W * 0.85, H * 0.90);
-        ctx.fillText(footerRight, W * 0.85, H * 0.90);
+    if(footerRight.trim().length>0){
+        ctx.textAlign="right";
+        ctx.strokeText(footerRight, W*0.85, H*0.90);
+        ctx.fillText(footerRight, W*0.85, H*0.90);
     }
 }
 
 img.onload = drawPoster;
 
-// 画像ダウンロード
-document.getElementById("downloadBtn").onclick = function(){
-    const a = document.createElement("a");
-    a.download = "output.png";
-    a.href = canvas.toDataURL("image/png");
-    a.click();
+// ==========================================================
+// ① 画像コピー
+// ==========================================================
+document.getElementById("copyBtn").onclick = function(){
+    canvas.toBlob(async function(blob){
+        try{
+            await navigator.clipboard.write([
+                new ClipboardItem({"image/png": blob})
+            ]);
+            alert("✔ 画像をコピーしました！\\nX投稿画面で Ctrl+V で貼り付けてください。");
+        } catch(e){
+            alert("画像コピーに失敗しました。Chrome / Edge を使用してください。");
+            console.error(e);
+        }
+    });
 };
 
-// X 投稿（確実に開く版）
-document.getElementById("tweetBtn").onclick = async function(){
-
-    // 先に X 投稿画面を開く
+// ==========================================================
+// ② X投稿ページを開く（確実に成功）
+// ==========================================================
+document.getElementById("tweetBtn").onclick = function(){
     const text = encodeURIComponent(
         "この画像は大判焼外交部ジェネレーターを使ったパロディ画像です\\n" +
         "https://ikan-no-i-gen.streamlit.app/"
     );
     const url = "https://twitter.com/intent/tweet?text=" + text;
     window.open(url, "_blank");
-
-    // 次に画像コピー
-    canvas.toBlob(async function(blob){
-        try {
-            await navigator.clipboard.write([
-                new ClipboardItem({"image/png": blob})
-            ]);
-            alert("画像をコピーしました！\\nX の投稿画面で Ctrl+V（ペースト）してください。");
-        } catch(e){
-            alert("画像コピーに失敗しました。Chrome / Edge を使用してください。");
-            console.error(e);
-        }
-    });
-
 };
 </script>
 """
 
-# Python 側で HTML にパラメータを埋め込む
-canvas_html = canvas_html.replace("{{main}}", main_js)
-canvas_html = canvas_html.replace("{{left}}", footer_left_js)
-canvas_html = canvas_html.replace("{{right}}", footer_right_js)
-canvas_html = canvas_html.replace("{{yellow}}", yellow_js)
-canvas_html = canvas_html.replace("{{bg}}", bg_b64)
+html_code = html_code.replace("{{MAIN}}", main_js)
+html_code = html_code.replace("{{LEFT}}", footer_left_js)
+html_code = html_code.replace("{{RIGHT}}", footer_right_js)
+html_code = html_code.replace("{{YELLOW}}", yellow_js)
+html_code = html_code.replace("{{BG}}", bg_b64)
 
-st_html(canvas_html, height=950, scrolling=True)
-
+st_html(html_code, height=950, scrolling=True)
