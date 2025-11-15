@@ -5,9 +5,9 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（背景切替＋初期化対応＋最大フォント900px）")
+st.title("外交部風 画像ジェネレーター（本文拡大・ヘッダー固定120px）")
 
-# ▼ 背景画像の選択肢
+# ▼ 背景画像
 BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
@@ -25,61 +25,46 @@ DEFAULT_MAIN = """“われわれは
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
-# ▼ セッションステート初期化
+# ▼ session_state 初期設定
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
-
 if "footer_left" not in st.session_state:
     st.session_state.footer_left = DEFAULT_LEFT
-
 if "footer_right" not in st.session_state:
     st.session_state.footer_right = DEFAULT_RIGHT
 
-
-# ▼ 背景選択
+# ▼ 背景選択UI
 bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
 BG_PATH = BACKGROUND_CHOICES[bg_name]
 
 if not os.path.exists(BG_PATH):
-    st.error(f"{BG_PATH} が見つかりません。フォルダ構造を確認してください。")
+    st.error(f"{BG_PATH} が見つかりません")
     st.stop()
 
-# ▼ Base64 化
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-
 # ▼ 入力欄
-main_text = st.text_area(
-    "本文",
-    value=st.session_state.main_text,
-    key="main_text_input"
-)
-footer_left = st.text_input(
-    "下部ヘッダー（左）",
-    value=st.session_state.footer_left,
-    key="footer_left_input"
-)
-footer_right = st.text_input(
-    "下部ヘッダー（右）",
-    value=st.session_state.footer_right,
-    key="footer_right_input"
-)
+main_text = st.text_area("本文", st.session_state.main_text, key="main_text_input")
+footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left, key="footer_left_input")
+footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right, key="footer_right_input")
 
-# ▼ 初期テキストに戻す
+# ▼ 初期値に戻す
 if st.button("★ 初期テキストに戻す"):
     st.session_state.main_text = DEFAULT_MAIN
     st.session_state.footer_left = DEFAULT_LEFT
     st.session_state.footer_right = DEFAULT_RIGHT
     st.rerun()
 
-
-# ▼ JS へ渡す値
+# ▼ JS に渡す
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
-# ▼ Canvas 描画 HTML（最大フォント900px・幅優先）
+# ============================================
+# ★ Canvas版（本文のみ900pxまで拡大、ヘッダーは固定120px）
+# ============================================
+
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
   <button id="downloadBtn"
@@ -107,7 +92,6 @@ canvas_html = f"""
 
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
-
   const canvas = document.getElementById("posterCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -117,11 +101,10 @@ canvas_html = f"""
     canvas.width = W;
     canvas.height = H;
 
-    ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0, 0, W, H);
     ctx.drawImage(img, 0, 0, W, H);
 
-    const mainText = mainTextRaw.trim();
-    const lines = mainText.split("\\n").filter(l => l.trim().length > 0);
+    const lines = mainTextRaw.split("\\n").filter(l => l.trim().length > 0);
 
     const top = H * 0.28;
     const bottom = H * 0.70;
@@ -130,36 +113,32 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    // === 本文フォント決定（最大900px → 最長行優先） ===
-    let maxFont = 900;
-    let minFont = 150;
-    let fontSize = maxFont;
+    // ========= 本文フォント決定（最大900px） =========
+    let fontSize = 900;
+    const minFont = 150;
 
-    function measure(fontPx) {{
-      ctx.font = fontPx + "px 'Noto Serif JP','Yu Mincho','serif'";
-      let maxLineW = 0;
+    function measure(fs) {{
+      ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
+      let maxW = 0;
       for (const line of lines) {{
         const w = ctx.measureText(line).width;
-        if (w > maxLineW) maxLineW = w;
+        if (w > maxW) maxW = w;
       }}
-      const totalH = lines.length * fontPx * 1.30;
-      return {{ maxLineW, totalH }};
+      const totalH = lines.length * fs * 1.3;
+      return {{ maxW, totalH }};
     }}
 
     while (fontSize >= minFont) {{
-      const {{ maxLineW, totalH }} = measure(fontSize);
-      if (maxLineW <= areaW && totalH <= areaH) break;
+      const {{ maxW, totalH }} = measure(fontSize);
+      if (maxW <= areaW && totalH <= areaH) break;
       fontSize -= 20;
     }}
-    if (fontSize < minFont) fontSize = minFont;
 
-    // === 本文描画 ===
-    if (mainText.length > 0) {{
+    // ========= 本文描画 =========
+    if (lines.length > 0) {{
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.lineJoin = "round";
-      ctx.strokeStyle = "black";
-      ctx.fillStyle = "white";
 
       const {{ totalH }} = measure(fontSize);
       let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
@@ -168,42 +147,36 @@ canvas_html = f"""
         const x = left + areaW / 2;
         ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
         ctx.lineWidth = fontSize * 0.12;
+        ctx.strokeStyle = "black";
+        ctx.fillStyle = "white";
         ctx.strokeText(line, x, y);
         ctx.fillText(line, x, y);
-        y += fontSize * 1.30;
+        y += fontSize * 1.3;
       }}
     }}
 
-    // === ヘッダー（左右）も最大900pxで幅優先 ===
-    function drawFooter(text, xPos, align) {{
-      if (text.trim().length === 0) return;
+    // ========= ヘッダー（固定120px） =========
+    const headerSize = 120;
+    ctx.font = headerSize + "px 'Noto Serif JP','Yu Mincho','serif'";
+    ctx.textBaseline = "middle";
+    ctx.lineJoin = "round";
+    ctx.lineWidth = headerSize * 0.10;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
 
-      let footSize = 900;
-      const minF = 100;
-
-      while (footSize >= minF) {{
-        ctx.font = footSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-        const w = ctx.measureText(text).width;
-        if (w <= W * 0.70) break;  // 横70%以内に収める
-        footSize -= 20;
-      }}
-
-      ctx.font = footSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-      ctx.textAlign = align;
-      ctx.textBaseline = "middle";
-      ctx.lineJoin = "round";
-      ctx.lineWidth = footSize * 0.10;
-      ctx.strokeStyle = "black";
-      ctx.fillStyle = "white";
-      ctx.strokeText(text, xPos, H * 0.90);
-      ctx.fillText(text, xPos, H * 0.90);
+    // 左
+    if (footerLeft.trim().length > 0) {{
+      ctx.textAlign = "left";
+      ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
+      ctx.fillText(footerLeft, W * 0.15, H * 0.90);
     }}
 
-    // 左下
-    drawFooter(footerLeft, W * 0.15, "left");
-
-    // 右下
-    drawFooter(footerRight, W * 0.85, "right");
+    // 右
+    if (footerRight.trim().length > 0) {{
+      ctx.textAlign = "right";
+      ctx.strokeText(footerRight, W * 0.85, H * 0.90);
+      ctx.fillText(footerRight, W * 0.85, H * 0.90);
+    }}
   }}
 
   img.onload = drawPoster;
