@@ -5,9 +5,9 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（本文拡大・ヘッダー固定120px）")
+st.title("外交部風 画像ジェネレーター（本文900px・ヘッダー300px）")
 
-# ▼ 背景画像
+# ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
@@ -25,7 +25,7 @@ DEFAULT_MAIN = """“われわれは
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
-# ▼ session_state 初期設定
+# ▼ セッションステート初期化
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -49,7 +49,7 @@ main_text = st.text_area("本文", st.session_state.main_text, key="main_text_in
 footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left, key="footer_left_input")
 footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right, key="footer_right_input")
 
-# ▼ 初期値に戻す
+# ▼ 初期テキストに戻す
 if st.button("★ 初期テキストに戻す"):
     st.session_state.main_text = DEFAULT_MAIN
     st.session_state.footer_left = DEFAULT_LEFT
@@ -62,7 +62,7 @@ footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
 # ============================================
-# ★ Canvas版（本文のみ900pxまで拡大、ヘッダーは固定120px）
+# ★ Canvas版（本文最大900px、ヘッダー300px固定）
 # ============================================
 
 canvas_html = f"""
@@ -81,7 +81,8 @@ canvas_html = f"""
   </button>
 
   <canvas id="posterCanvas"
-    style="max-width:100%;height:auto;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.6);">
+    style="max-width:100%;height:auto;border-radius:16px;
+           box-shadow:0 10px 30px rgba(0,0,0,0.6);">
   </canvas>
 </div>
 
@@ -104,8 +105,8 @@ canvas_html = f"""
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(img, 0, 0, W, H);
 
+    // ---- 本文処理 ----
     const lines = mainTextRaw.split("\\n").filter(l => l.trim().length > 0);
-
     const top = H * 0.28;
     const bottom = H * 0.70;
     const left = W * 0.10;
@@ -113,7 +114,6 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    // ========= 本文フォント決定（最大900px） =========
     let fontSize = 900;
     const minFont = 150;
 
@@ -134,11 +134,13 @@ canvas_html = f"""
       fontSize -= 20;
     }}
 
-    // ========= 本文描画 =========
+    // ---- 本文描画 ----
     if (lines.length > 0) {{
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.lineJoin = "round";
+      ctx.strokeStyle = "black";
+      ctx.fillStyle = "white";
 
       const {{ totalH }} = measure(fontSize);
       let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
@@ -147,16 +149,14 @@ canvas_html = f"""
         const x = left + areaW / 2;
         ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
         ctx.lineWidth = fontSize * 0.12;
-        ctx.strokeStyle = "black";
-        ctx.fillStyle = "white";
         ctx.strokeText(line, x, y);
         ctx.fillText(line, x, y);
         y += fontSize * 1.3;
       }}
     }}
 
-    // ========= ヘッダー（固定120px） =========
-    const headerSize = 120;
+    // ---- ヘッダー（固定300px） ----
+    const headerSize = 300;
     ctx.font = headerSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
@@ -164,14 +164,14 @@ canvas_html = f"""
     ctx.strokeStyle = "black";
     ctx.fillStyle = "white";
 
-    // 左
+    // 左下
     if (footerLeft.trim().length > 0) {{
       ctx.textAlign = "left";
       ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
       ctx.fillText(footerLeft, W * 0.15, H * 0.90);
     }}
 
-    // 右
+    // 右下
     if (footerRight.trim().length > 0) {{
       ctx.textAlign = "right";
       ctx.strokeText(footerRight, W * 0.85, H * 0.90);
