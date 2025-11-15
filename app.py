@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（本文900px・ヘッダー300px）")
+st.title("外交部風 画像ジェネレーター（本文900px・ヘッダー250px）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -25,7 +25,7 @@ DEFAULT_MAIN = """“われわれは
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 
-# ▼ セッションステート初期化
+# ▼ session_state 初期設定
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -62,7 +62,7 @@ footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
 # ============================================
-# ★ Canvas版（本文最大900px、ヘッダー300px固定）
+# ★ Canvas版（本文最大900px・ヘッダー250px固定）
 # ============================================
 
 canvas_html = f"""
@@ -93,6 +93,7 @@ canvas_html = f"""
 
   const img = new Image();
   img.src = "data:image/png;base64,{bg_b64}";
+
   const canvas = document.getElementById("posterCanvas");
   const ctx = canvas.getContext("2d");
 
@@ -155,8 +156,8 @@ canvas_html = f"""
       }}
     }}
 
-    // ---- ヘッダー（固定300px） ----
-    const headerSize = 300;
+    // ---- ヘッダー（固定250px） ----
+    const headerSize = 250;
     ctx.font = headerSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.textBaseline = "middle";
     ctx.lineJoin = "round";
