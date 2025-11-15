@@ -59,7 +59,6 @@ DEFAULT_MAIN = """“われわれは
 回転焼派に告げる
 大判焼問題で
 火遊びをするな
-
 火遊びをすれば
 必ず身を滅ぼす”"""
 
@@ -323,3 +322,4 @@ st_html(
              .replace("{{BG}}", bg_b64),
     height=950, scrolling=True
 )
+
