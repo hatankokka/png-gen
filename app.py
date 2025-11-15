@@ -5,38 +5,65 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（背景切替版 Canvas 完全対応）")
+st.title("外交部風 画像ジェネレーター（背景切替＋初期化対応）")
 
-# ▼ 背景画像の選択肢（あなたのフォルダに合わせて設定済み）
+# ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
 }
 
-# ▼ UI：背景を選択
-bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
+# ▼ 初期値
+DEFAULT_MAIN = """“きのこは再び筍国主義の過ちを 
+繰り返すつもりなのか
+再びきのこ公民とチョコ人民を 
+敵に回すつもりなのか
+すぎのこ村の戦後秩序を 
+覆そうとしているのか”"""
 
+DEFAULT_LEFT = "茸国外交部報道官"
+DEFAULT_RIGHT = "2015年11月1日"  # ← ここを変更！
+
+# ▼ セッションステートに保存
+if "main_text" not in st.session_state:
+    st.session_state.main_text = DEFAULT_MAIN
+
+if "footer_left" not in st.session_state:
+    st.session_state.footer_left = DEFAULT_LEFT
+
+if "footer_right" not in st.session_state:
+    st.session_state.footer_right = DEFAULT_RIGHT
+
+# ▼ 背景選択
+bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
 BG_PATH = BACKGROUND_CHOICES[bg_name]
 
 if not os.path.exists(BG_PATH):
-    st.error(f"{BG_PATH} が見つかりません。フォルダ構造を確認してください。")
+    st.error(f"{BG_PATH} が見つかりません（フォルダ構造を確認してください）")
     st.stop()
 
-# ▼ 背景画像を Base64 化
+# ▼ Base64 化
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力 UI
-main_text = st.text_area("本文（複数行OK・自動縮小対応）", "")
-footer_left = st.text_input("下部ヘッダー（左）", "")
-footer_right = st.text_input("下部ヘッダー（右）", "")
+# ▼ UI入力欄
+main_text = st.text_area("本文", st.session_state.main_text)
+footer_left = st.text_input("下部ヘッダー（左）", st.session_state.footer_left)
+footer_right = st.text_input("下部ヘッダー（右）", st.session_state.footer_right)
+
+# ▼ リセットボタン
+if st.button("★ 初期テキストに戻す"):
+    st.session_state.main_text = DEFAULT_MAIN
+    st.session_state.footer_left = DEFAULT_LEFT
+    st.session_state.footer_right = DEFAULT_RIGHT
+    st.experimental_rerun()
 
 # ▼ HTMLエスケープ
 main_js = html.escape(main_text).replace("\n", "\\n")
 footer_left_js = html.escape(footer_left)
 footer_right_js = html.escape(footer_right)
 
-# ▼ Canvas 描画用 HTML（すべて再現版）
+# ▼ Canvas 描画 HTML
 canvas_html = f"""
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
   <button id="downloadBtn"
@@ -79,7 +106,6 @@ canvas_html = f"""
 
     const mainText = mainTextRaw || "";
 
-    // ★ 本文エリア（背景画像の比率から算出）
     const top = H * 0.28;
     const bottom = H * 0.70;
     const left = W * 0.10;
@@ -87,7 +113,6 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    // ★ 本文フォント自動縮小
     let maxFont = 600;
     let minFont = 150;
     let fontSize = maxFont;
@@ -110,6 +135,7 @@ canvas_html = f"""
         if (maxLineW <= areaW && totalH <= areaH) break;
         fontSize -= 20;
       }}
+
       if (fontSize < minFont) fontSize = minFont;
 
       ctx.textAlign = "center";
@@ -131,7 +157,6 @@ canvas_html = f"""
       }}
     }}
 
-    // ★ 下部ヘッダー（左右）
     const footerFont = 200;
     ctx.font = footerFont + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.textBaseline = "middle";
@@ -140,14 +165,12 @@ canvas_html = f"""
     ctx.strokeStyle = "black";
     ctx.fillStyle = "white";
 
-    // 左側
     if (footerLeft.trim().length > 0) {{
       ctx.textAlign = "left";
       ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
       ctx.fillText(footerLeft, W * 0.15, H * 0.90);
     }}
 
-    // 右側
     if (footerRight.trim().length > 0) {{
       ctx.textAlign = "right";
       ctx.strokeText(footerRight, W * 0.85, H * 0.90);
