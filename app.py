@@ -66,7 +66,7 @@ DEFAULT_MAIN = """“われわれは
 
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
-DEFAULT_YELLOW_WORDS = "火遊び""大判焼問題"
+DEFAULT_YELLOW_WORDS = "火遊び", "大判焼問題"
 
 # ▼ session_state 初期
 if "main_text" not in st.session_state:
@@ -309,4 +309,5 @@ canvas_html = f"""
 """
 
 st_html(canvas_html, height=950, scrolling=True)
+
 
