@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（完全安定版／本文1200px）")
+st.title("外交部風 画像ジェネレーター（空行保持・完全安定版）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -19,6 +19,7 @@ DEFAULT_MAIN = """“われわれは
 大判焼問題で
 火遊びをするな
 
+
 火遊びをすれば
 必ず身を滅ぼす”"""
 
@@ -26,7 +27,7 @@ DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 DEFAULT_YELLOW_WORDS = "火遊び"
 
-# ▼ session_state 初期値（UI 依存ではなく本体値）
+# ▼ session_state 初期設定
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -36,11 +37,11 @@ if "footer_right" not in st.session_state:
 if "yellow_words" not in st.session_state:
     st.session_state.yellow_words = DEFAULT_YELLOW_WORDS
 
-# ▼ 背景設定（背景だけは保持）
+# ▼ 背景は「最後の選択を保持」
 if "bg_choice" not in st.session_state:
     st.session_state.bg_choice = "背景 01"
 
-# ▼ 背景 UI
+# ▼ 背景セレクトボックス（背景は初期化しない）
 bg_name = st.selectbox(
     "背景画像を選択",
     list(BACKGROUND_CHOICES.keys()),
@@ -52,13 +53,14 @@ BG_PATH = BACKGROUND_CHOICES[bg_name]
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力欄（value は session_state 本体のみ参照）
+# ▼ 入力欄（valueは session_state 本体のみ）
 main_text_input = st.text_area("本文", value=st.session_state.main_text)
 footer_left_input = st.text_input("下部ヘッダー（左）", value=st.session_state.footer_left)
 footer_right_input = st.text_input("下部ヘッダー（右）", value=st.session_state.footer_right)
-yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）", value=st.session_state.yellow_words)
+yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）",
+                                  value=st.session_state.yellow_words)
 
-# ▼ ★ 反映ボタン → 本体値を上書きして rerun
+# ▼ 反映ボタン
 if st.button("★ 反映する"):
     st.session_state.main_text = main_text_input
     st.session_state.footer_left = footer_left_input
@@ -66,14 +68,14 @@ if st.button("★ 反映する"):
     st.session_state.yellow_words = yellow_words_input
     st.rerun()
 
-# ▼ ★ 初期テキストに戻す（背景だけ保持）
+# ▼ 初期化（背景だけ保持して F5 相当）
 if st.button("★ 初期テキストに戻す"):
     keep_bg = st.session_state.bg_choice
     st.session_state.clear()
     st.session_state.bg_choice = keep_bg
     st.rerun()
 
-# ▼ JS に渡す値
+# ▼ JS に渡す文字列作成
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
@@ -83,8 +85,9 @@ yellow_words_list = [
 ]
 yellow_words_js = "|".join(yellow_words_list)
 
+
 # =========================================================
-# Canvas 描画 HTML（本文1200px・黄色語・背景維持）
+# Canvas描画（空行保持対応）
 # =========================================================
 
 canvas_html = f"""
@@ -122,7 +125,8 @@ canvas_html = f"""
     ctx.clearRect(0,0,W,H);
     ctx.drawImage(img,0,0,W,H);
 
-    const lines = mainTextRaw.split("\\n").filter(l => l.trim().length > 0);
+    // ★ 空行も保持する split
+    const lines = mainTextRaw.split("\\n");  
 
     const top = H * 0.28;
     const bottom = H * 0.70;
@@ -141,7 +145,7 @@ canvas_html = f"""
         const w = ctx.measureText(line).width;
         if (w > maxW) maxW = w;
       }}
-      const totalH = lines.length * fs * 1.3;
+      const totalH = lines.length * fs * 1.3;  // 空行も正しく高さに含める
       return {{ maxW, totalH }};
     }}
 
@@ -154,10 +158,8 @@ canvas_html = f"""
     function drawColoredLine(line, cx, y) {{
       let segs = [];
       let pos = 0;
-
       while (pos < line.length) {{
         let matched = false;
-
         for (const w of yellowWords) {{
           if (line.startsWith(w, pos)) {{
             segs.push({{ "text": w, "yellow": true }});
@@ -166,7 +168,6 @@ canvas_html = f"""
             break;
           }}
         }}
-
         if (!matched) {{
           segs.push({{ "text": line[pos], "yellow": false }});
           pos++;
@@ -193,13 +194,15 @@ canvas_html = f"""
     }}
 
     const {{ totalH }} = measure(fontSize);
-    let yStart = top + (areaH - totalH)/2 + fontSize*0.5;
+    let y = top + (areaH - totalH) / 2 + fontSize * 0.5;
 
+    // ★ 空行("")もそのまま描画（スペース行として高さだけ進む）
     for (const line of lines) {{
-      drawColoredLine(line, W * 0.5, yStart);
-      yStart += fontSize * 1.3;
+      drawColoredLine(line, W * 0.5, y);
+      y += fontSize * 1.3;
     }}
 
+    // ---- ヘッダー（固定250px）
     const hSize = 250;
     ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
     ctx.lineJoin = "round";
@@ -210,14 +213,14 @@ canvas_html = f"""
 
     if (footerLeft.trim().length > 0) {{
       ctx.textAlign = "left";
-      ctx.strokeText(footerLeft, W * 0.15, H * 0.90);
-      ctx.fillText(footerLeft, W * 0.15, H * 0.90);
+      ctx.strokeText(footerLeft, W*0.15, H*0.90);
+      ctx.fillText(footerLeft, W*0.15, H*0.90);
     }}
 
     if (footerRight.trim().length > 0) {{
       ctx.textAlign = "right";
-      ctx.strokeText(footerRight, W * 0.85, H * 0.90);
-      ctx.fillText(footerRight, W * 0.85, H * 0.90);
+      ctx.strokeText(footerRight, W*0.85, H*0.90);
+      ctx.fillText(footerRight, W*0.85, H*0.90);
     }}
   }}
 
