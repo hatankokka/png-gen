@@ -6,18 +6,21 @@ from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
 
+# -------------------------------
+# タイトル
+# -------------------------------
+st.title("外交部風 画像ジェネレーター（7行まで1000px固定／8行以上縮小）")
+
 # =========================================================
-# ⚠️ 注意事項（アプリ最上部に表示）
+# ⚠️ 注意事項（タイトルのすぐ下に表示）
 # =========================================================
 st.markdown("""
----
-
-## ⚠️ 注意事項・禁止事項
+### ⚠️ 注意事項・禁止事項
 
 当アプリは **娯楽目的の画像生成ツール** です。  
-以下の行為は禁止しています。  
+以下の行為は禁止しています。
 
-### 【禁止事項】
+#### 【禁止事項】
 - 差別・侮辱・民族憎悪を助長する表現  
 - 特定の個人・団体への誹謗中傷  
 - 名誉毀損・プライバシー侵害  
@@ -25,17 +28,15 @@ st.markdown("""
 - なりすまし、虚偽情報の拡散  
 - 法令違反につながる利用  
 
-### 【免責事項】
-- 当アプリで生成された画像やテキストの利用・公開・拡散によって生じた  
-  **いかなる損害・トラブルについても、当方は一切の責任を負いません。**
-- 利用者同士の紛争・炎上・法的問題についても **当方は関与いたしません。**
+#### 【免責事項】
+- 当アプリで生成された画像・テキストの利用・公開・拡散によって生じた  
+  **いかなる損害・トラブルについても当方は一切責任を負いません。**
+- 利用者による投稿内容についても **当方は一切責任を負いません。**
 
-節度ある範囲でお楽しみください。
+節度を守ってご利用ください。
 
 ---
 """)
-
-st.title("外交部風 画像ジェネレーター（7行まで1000px固定／8行以上縮小）")
 
 # ▼ 背景画像
 BACKGROUND_CHOICES = {
@@ -57,7 +58,7 @@ DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月1日"
 DEFAULT_YELLOW_WORDS = "火遊び"
 
-# ▼ session_state 初期
+# ▼ session_state 初期値
 if "main_text" not in st.session_state:
     st.session_state.main_text = DEFAULT_MAIN
 if "footer_left" not in st.session_state:
@@ -104,7 +105,7 @@ if st.button("★ 初期テキストに戻す"):
     st.session_state.bg_choice = keep_bg
     st.rerun()
 
-# ▼ JSに渡す
+# ▼ JS 渡し
 main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
@@ -114,8 +115,9 @@ yellow_words_list = [
 ]
 yellow_words_js = "|".join(yellow_words_list)
 
+
 # ============================================================
-# Canvas描画 HTML
+# Canvas描画 HTML（7行以内1000px固定／8行以上縮小）
 # ============================================================
 
 canvas_html = f"""
@@ -167,14 +169,13 @@ canvas_html = f"""
 
     let fontSize;
 
-    // ★ 7行以内は1000px固定（縮小なし）
+    // ★ 7行以内 → 1000px固定
     if (lineCount <= 7) {{
         fontSize = 1000;
     }} else {{
-        fontSize = 1000; // 8行以上は縮小開始
+        fontSize = 1000; // 8行以上は縮小
     }}
 
-    // 横幅チェック
     function maxLineWidth(fs) {{
         ctx.font = fs + "px 'Noto Serif JP','Yu Mincho','serif'";
         let maxW = 0;
@@ -185,12 +186,11 @@ canvas_html = f"""
         return maxW;
     }}
 
-    // 縦方向チェック
     function totalHeight(fs) {{
         return lines.length * fs * lineGap;
     }}
 
-    // 7行以内 → 横幅だけチェックして縮小
+    // 7行以内 → 横幅だけチェック
     if (lineCount <= 7) {{
         while (fontSize >= 150) {{
             if (maxLineWidth(fontSize) <= areaW) break;
@@ -198,7 +198,7 @@ canvas_html = f"""
         }}
     }}
 
-    // 8行以上 → 横幅→縦収まりの順で縮小
+    // 8行以上 → 横幅・縦収まりの両方をチェック
     if (lineCount >= 8) {{
         while (fontSize >= 150) {{
             if (maxLineWidth(fontSize) <= areaW &&
@@ -207,10 +207,11 @@ canvas_html = f"""
         }}
     }}
 
-    // ---- 黄色語対応描画
+    // ---- 黄色語描画
     function drawColoredLine(line, x, y) {{
         let segs = [];
         let pos = 0;
+
         while (pos < line.length) {{
             let matched = false;
             for (const w of yellowWords) {{
@@ -246,6 +247,7 @@ canvas_html = f"""
         }}
     }}
 
+    // ---- 本文描画
     const totalH = totalHeight(fontSize);
     let y = top + (areaH-totalH)/2 + fontSize*0.5;
 
@@ -254,10 +256,10 @@ canvas_html = f"""
         y += fontSize * lineGap;
     }}
 
-    // ---- ヘッダー（固定250px）
+    // ---- ヘッダー
     const hSize = 250;
+
     ctx.font = hSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-    ctx.lineJoin = "round";
     ctx.strokeStyle = "black";
     ctx.lineWidth = hSize*0.10;
     ctx.fillStyle = "white";
