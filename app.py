@@ -5,7 +5,7 @@ import os
 from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="外交部ジェネレーター", layout="centered")
-st.title("外交部風 画像ジェネレーター（反映ボタン版）")
+st.title("外交部風 画像ジェネレーター（本文1200px・ヘッダー250px）")
 
 # ▼ 背景画像の選択肢
 BACKGROUND_CHOICES = {
@@ -48,7 +48,7 @@ if not os.path.exists(BG_PATH):
 with open(BG_PATH, "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode("utf-8")
 
-# ▼ 入力欄（UI → 入力中の値）
+# ▼ 入力欄（UI側入力）
 main_text_input = st.text_area("本文", st.session_state.main_text, key="main_text_input")
 footer_left_input = st.text_input("下部ヘッダー（左）", st.session_state.footer_left, key="footer_left_input")
 footer_right_input = st.text_input("下部ヘッダー（右）", st.session_state.footer_right, key="footer_right_input")
@@ -79,14 +79,14 @@ main_js = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
 footer_right_js = html.escape(st.session_state.footer_right)
 
-# 黄色単語リスト（改行区切り → list）
+# 黄色単語を JS に渡す形式に変換
 yellow_words_list = [
     w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()
 ]
 yellow_words_js = "|".join(yellow_words_list)
 
 # ============================================
-# Canvas描画 HTML（黄色語対応）
+# Canvas描画 HTML（本文最大1200px対応）
 # ============================================
 
 canvas_html = f"""
@@ -125,7 +125,7 @@ canvas_html = f"""
     ctx.clearRect(0, 0, W, H);
     ctx.drawImage(img, 0, 0, W, H);
 
-    // ---- 本文処理 ----
+    // ---- 本文行処理 ----
     const lines = mainTextRaw.split("\\n").filter(l => l.trim().length > 0);
 
     const top = H * 0.28;
@@ -135,7 +135,8 @@ canvas_html = f"""
     const areaW = right - left;
     const areaH = bottom - top;
 
-    let fontSize = 900;
+    // ===== 本文フォント：最大1200px =====
+    let fontSize = 1200;
     const minFont = 150;
 
     function measure(fs) {{
@@ -149,13 +150,14 @@ canvas_html = f"""
       return {{ maxW, totalH }};
     }}
 
+    // 自動縮小ループ
     while (fontSize >= minFont) {{
       const {{ maxW, totalH }} = measure(fontSize);
       if (maxW <= areaW && totalH <= areaH) break;
       fontSize -= 20;
     }}
 
-    // ---- 1行中で黄色語を適用 ----
+    // ---- 黄色語処理 ----
     function drawColoredLine(line, xCenter, y) {{
       let segments = [];
       let pos = 0;
@@ -188,8 +190,8 @@ canvas_html = f"""
 
       for (const seg of segments) {{
         ctx.font = fontSize + "px 'Noto Serif JP','Yu Mincho','serif'";
-        ctx.lineJoin = "round";
         ctx.textBaseline = "middle";
+        ctx.lineJoin = "round";
         ctx.strokeStyle = "black";
         ctx.lineWidth = fontSize * 0.12;
         ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
