@@ -146,7 +146,7 @@ html_code = """
   <button id="tweetBtn"
     style="padding:12px 24px;border-radius:999px;border:none;
            background:#1DA1F2;color:white;font-weight:700;cursor:pointer;">
-    𝕏に投稿する
+    𝕏に投稿する(画像は自動投稿されません)
   </button>
 
   <canvas id="posterCanvas"
@@ -287,7 +287,7 @@ document.getElementById("saveBtn").onclick = function(){
 };
 
 // ----------------------------------------------------------
-// 𝕏に投稿する(画像は自動投稿されません)
+// 𝕏に投稿する
 // ----------------------------------------------------------
 document.getElementById("tweetBtn").onclick = function(){
 
@@ -313,4 +313,5 @@ html_code = (html_code
 )
 
 st_html(html_code, height=950, scrolling=True)
+
 
