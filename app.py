@@ -119,7 +119,7 @@ if st.button("初期テキストに戻す"):
 # =========================================================
 found = [ng for ng in NG_WORDS if ng in st.session_state.main_text]
 if found:
-    st.error("⚠ エラー：NGワードが含まれています → " + ", ".join(found))
+    st.error("⚠ エラー：NGワードが含まれているよ！コラッ！ → " + ", ".join(found))
     st.stop()
 
 # =========================================================
@@ -313,5 +313,6 @@ html_code = (html_code
 )
 
 st_html(html_code, height=950, scrolling=True)
+
 
 
