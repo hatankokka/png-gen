@@ -287,7 +287,7 @@ document.getElementById("saveBtn").onclick = function(){
 };
 
 // ----------------------------------------------------------
-// 𝕏に投稿する
+// 𝕏に投稿する(画像は自動投稿されません)
 // ----------------------------------------------------------
 document.getElementById("tweetBtn").onclick = function(){
 
@@ -313,3 +313,4 @@ html_code = (html_code
 )
 
 st_html(html_code, height=950, scrolling=True)
+
