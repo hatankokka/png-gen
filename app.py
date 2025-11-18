@@ -51,7 +51,7 @@ BACKGROUND_CHOICES = {
     "背景 01": ".streamlit/background01.png",
     "背景 02": ".streamlit/background02.png",
     "背景 03": ".streamlit/background03.png",
-    # "背景 04": ".streamlit/background04.png",
+    "背景 04": ".streamlit/background04.png",
 }
 
 # =========================================================
@@ -102,7 +102,6 @@ yellow_words_input = st.text_area("黄色にしたい単語（改行区切り）
 # =========================================================
 # ボタン
 # =========================================================
-
 if st.button("反映する"):
     st.session_state.main_text = main_text_input
     st.session_state.footer_left = footer_left_input
@@ -121,7 +120,7 @@ if st.button("初期テキストに戻す"):
 # =========================================================
 found = [ng for ng in NG_WORDS if ng in st.session_state.main_text]
 if found:
-    st.error("⚠ エラー：NGワードが含まれているよ！コラッ！ → " + ", ".join(found))
+    st.error("⚠ エラー：NGワードが含まれているよ！ → " + ", ".join(found))
     st.stop()
 
 # =========================================================
@@ -133,7 +132,7 @@ footer_right_js = html.escape(st.session_state.footer_right)
 yellow_js      = "|".join([w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML 埋め込み
+# HTML 埋め込み（全て書き換え済）
 # =========================================================
 
 html_code = """
@@ -172,6 +171,7 @@ img.onload = function(){ drawPoster(); };
 
 function drawPoster(){
 
+    // 実際の画像サイズ
     const W = img.naturalWidth;
     const H = img.naturalHeight;
 
@@ -180,45 +180,62 @@ function drawPoster(){
 
     ctx.drawImage(img,0,0,W,H);
 
+    // ===============================
+    // ★ 仮想キャンバス（統一座標系）
+    // ===============================
+    const VW = 7000;
+    const VH = 9000;
+
+    const scaleX = W / VW;
+    const scaleY = H / VH;
+
+    // 歪み防止のため均一縮尺
+    const S = Math.min(scaleX, scaleY);
+
+    // ===============================
+    // ★ 本文配置位置（仮想座標で同一）
+    // ===============================
+    const virtualTop = 2500;
+    const virtualBottom = 6500;
+
+    const areaW = VW * 0.90;
+    const areaH = virtualBottom - virtualTop;
+
     const lines = textRaw.split("\\n");
-
-    const top = H*0.28;
-    const bottom = H*0.70;
-
-    const left  = W * 0.05;
-    const right = W * 0.95;
-
-    const areaW = right-left;
-    const areaH = bottom-top;
-
     const lineGap = 1.3;
-    let fontSize = 1000;
+
+    // フォント自動調整（仮想座標）
+    let fontSize = 400;
 
     function maxWidth(fs){
-        ctx.font = fs+"px serif";
+        ctx.font = `${fs * S}px serif`;
         let m=0;
-        for(const l of lines) m = Math.max(m, ctx.measureText(l).width);
-        return m;
+        for(const l of lines){
+            m = Math.max(m, ctx.measureText(l).width);
+        }
+        return m / S;
     }
 
     function totalHeight(fs){
         return lines.length * fs * lineGap;
     }
 
-    while(fontSize >= 150){
+    while(fontSize >= 80){
         if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
         fontSize -= 20;
     }
 
-    function drawColoredLine(line, x, y){
+    function drawColoredLine(line, vx, vy){
+        ctx.font = `${fontSize * S}px serif`;
+
+        const x = vx * S;
+        const y = vy * S;
 
         let segs=[];
         let pos=0;
 
         while(pos < line.length){
-
             let matched=false;
-
             for(const w of yellowWords){
                 if(line.startsWith(w,pos)){
                     segs.push({text:w,yellow:true});
@@ -233,63 +250,61 @@ function drawPoster(){
             }
         }
 
-        ctx.font = fontSize+"px serif";
-
         let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
         let cursor = x - totalW/2;
 
         for(const seg of segs){
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.textBaseline="middle";
-
             ctx.fillText(seg.text, cursor, y);
             cursor += ctx.measureText(seg.text).width;
         }
     }
 
     let tH = totalHeight(fontSize);
-    let yStart = top + (areaH - tH)/2 + fontSize*0.5;
+    let yStart = virtualTop + (areaH - tH)/2;
 
     for(const line of lines){
-        drawColoredLine(line, W*0.5, yStart);
-        yStart += fontSize*lineGap;
+        drawColoredLine(line, VW*0.5, yStart);
+        yStart += fontSize * lineGap;
     }
 
-    // ---- 下部ヘッダー（250固定）
-    const hSize = 250;
-    ctx.font = hSize+"px serif";
+    // ===============================
+    // ★ フッター（仮想座標）
+    // ===============================
+    const footerY = 8200;
+
     ctx.fillStyle="white";
     ctx.textBaseline="middle";
+    ctx.font = `${280 * S}px serif`;
 
-    if(footerLeft.trim().length>0){
-        ctx.textAlign="left";
-        ctx.fillText(footerLeft, W*0.15, H*0.90);
-    }
+    // 左
+    ctx.textAlign="left";
+    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
 
-    if(footerRight.trim().length>0){
-        ctx.textAlign="right";
-        ctx.fillText(footerRight, W*0.85, H*0.90);
-    }
+    // 右
+    ctx.textAlign="right";
+    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
 }
 
 // ----------------------------------------------------------
-// 画像保存（JPEGで軽量化）
+// JPEG保存
 // ----------------------------------------------------------
 document.getElementById("saveBtn").onclick = function(){
     canvas.toBlob(function(blob){
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "generated.jpg";   // JPEG 保存
+        a.download = "generated.jpg";
         document.body.appendChild(a);
         a.click();
         setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
         alert("JPEG画像を保存しました！（PNGより軽量）");
-    }, "image/jpeg", 0.88);  // 0.88 品質で軽量化
+    }, "image/jpeg", 0.88);
 };
 
 // ----------------------------------------------------------
-// 𝕏に投稿する
+// 𝕏投稿
 // ----------------------------------------------------------
 document.getElementById("tweetBtn").onclick = function(){
 
@@ -302,7 +317,6 @@ document.getElementById("tweetBtn").onclick = function(){
     const url = "https://twitter.com/intent/tweet?text=" + text;
     window.open(url, "_blank");
 };
-
 </script>
 """
 
@@ -315,4 +329,3 @@ html_code = (html_code
 )
 
 st_html(html_code, height=950, scrolling=True)
-
