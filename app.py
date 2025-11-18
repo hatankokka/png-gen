@@ -185,11 +185,8 @@ function drawPoster(){
     const top = H*0.28;
     const bottom = H*0.70;
 
-    const left  = W * 0.05;
-    const right = W * 0.95;
-
-    const areaW = right-left;
-    const areaH = bottom-top;
+    const areaW = W * 0.90;
+    const areaH = bottom - top;
 
     const lineGap = 1.3;
     let fontSize = 1000;
@@ -211,12 +208,10 @@ function drawPoster(){
     }
 
     function drawColoredLine(line, x, y){
-
         let segs=[];
         let pos=0;
 
         while(pos < line.length){
-
             let matched=false;
 
             for(const w of yellowWords){
@@ -241,7 +236,6 @@ function drawPoster(){
         for(const seg of segs){
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.textBaseline="middle";
-
             ctx.fillText(seg.text, cursor, y);
             cursor += ctx.measureText(seg.text).width;
         }
@@ -255,27 +249,36 @@ function drawPoster(){
         yStart += fontSize*lineGap;
     }
 
-        // ---- 下部ヘッダー（背景画像ごとに見た目を統一） ----
-    const BASE_WIDTH = 3000;   // 基準画像の幅
-    const BASE_FONT  = 250;    // 基準フォントサイズ（元の見た目）
+    // ==========================================
+    // ★ フッター：左右半分でフォント調整 ★
+    // ==========================================
 
-    // 背景画像との差をスケール
-    const scale = W / BASE_WIDTH;
-    const hSize = BASE_FONT * scale;
-
-    ctx.font = hSize + "px serif";
-    ctx.fillStyle="white";
-    ctx.textBaseline="middle";
-
-    if(footerLeft.trim().length>0){
-        ctx.textAlign="left";
-        ctx.fillText(footerLeft, W*0.15, H*0.90);
+    function fitFontSizeToBox(text, maxWidth, baseFont) {
+        let fs = baseFont;
+        ctx.font = fs + "px serif";
+        while (ctx.measureText(text).width > maxWidth && fs > 10) {
+            fs -= 4;
+            ctx.font = fs + "px serif";
+        }
+        return fs;
     }
 
-    if(footerRight.trim().length>0){
-        ctx.textAlign="right";
-        ctx.fillText(footerRight, W*0.85, H*0.90);
-    }
+    const halfW = W / 2;
+    const bottomY = H * 0.90;
+
+    // 左
+    const leftFont = fitFontSizeToBox(footerLeft, halfW * 0.85, 250);
+    ctx.font = leftFont + "px serif";
+    ctx.fillStyle = "white";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "left";
+    ctx.fillText(footerLeft, W * 0.05, bottomY);
+
+    // 右
+    const rightFont = fitFontSizeToBox(footerRight, halfW * 0.85, 250);
+    ctx.font = rightFont + "px serif";
+    ctx.textAlign = "right";
+    ctx.fillText(footerRight, W * 0.95, bottomY);
 }
 
 // ----------------------------------------------------------
@@ -321,6 +324,7 @@ html_code = (html_code
 )
 
 st_html(html_code, height=950, scrolling=True)
+
 
 
 
