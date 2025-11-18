@@ -255,9 +255,15 @@ function drawPoster(){
         yStart += fontSize*lineGap;
     }
 
-    // ---- 下部ヘッダー（250固定）
-    const hSize = 250;
-    ctx.font = hSize+"px serif";
+        // ---- 下部ヘッダー（背景画像ごとに見た目を統一） ----
+    const BASE_WIDTH = 3000;   // 基準画像の幅
+    const BASE_FONT  = 250;    // 基準フォントサイズ（元の見た目）
+
+    // 背景画像との差をスケール
+    const scale = W / BASE_WIDTH;
+    const hSize = BASE_FONT * scale;
+
+    ctx.font = hSize + "px serif";
     ctx.fillStyle="white";
     ctx.textBaseline="middle";
 
@@ -315,6 +321,7 @@ html_code = (html_code
 )
 
 st_html(html_code, height=950, scrolling=True)
+
 
 
 
