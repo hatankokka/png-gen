@@ -319,7 +319,7 @@ document.getElementById("saveBtn").onclick = function(){
 
 document.getElementById("tweetBtn").onclick=function(){
     const text=encodeURIComponent(
-        "この画像は『大判焼外交部ジェネレーター』で作りました。\\n※画像は自動投稿されません。自分で貼ってください。"
+        "この画像は『大判焼外交部ジェネレーター』で作りました。\\nhttps://ikan-no-i-gen.streamlit.app/\\n※画像は自動投稿されません。自分で貼ってください。"
     );
     window.open("https://twitter.com/intent/tweet?text="+text,"_blank");
 };
@@ -338,3 +338,4 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
