@@ -338,7 +338,7 @@ function drawPoster() {
     }
 
     // フッター描画（下側）
-    const footerY = H * 0.92;
+    const footerY = H * 0.90;
     ctx.textBaseline = "middle";
     ctx.fillStyle = "white";
 
@@ -394,3 +394,4 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
