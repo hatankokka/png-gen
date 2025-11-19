@@ -1,9 +1,8 @@
 import traceback
 
 try:
-
     # ================================
-    # ここから本体コード（全部 try の中）
+    # ここから本体コード（全部 try の中に入れる）
     # ================================
 
     import streamlit as st
@@ -89,11 +88,11 @@ try:
     # 初期値
     # =========================================================
     DEFAULT_MAIN = """“われわれは
-    回転焼派に告げる
-    大判焼問題で
-    火遊びをするな
-    火遊びをすれば
-    必ず身を滅ぼす”"""
+回転焼派に告げる
+大判焼問題で
+火遊びをするな
+火遊びをすれば
+必ず身を滅ぼす”"""
 
     DEFAULT_LEFT = "大判焼外交部報道官"
     DEFAULT_RIGHT = "2015年11月15日"
@@ -117,10 +116,20 @@ try:
     if "bg_choice" not in st.session_state:
         st.session_state.bg_choice = "背景 01"
 
+    # -----------------------------------------
+    # ★session_state の破損対策（超重要）
+    # -----------------------------------------
+    if st.session_state.bg_choice not in BACKGROUND_CHOICES.keys():
+        st.session_state.bg_choice = "背景 01"
+
     # =========================================================
-    # 背景 UI
+    # 背景 UI（安全版）
     # =========================================================
-    bg_name = st.selectbox("背景画像を選択", list(BACKGROUND_CHOICES.keys()))
+    bg_name = st.selectbox(
+        "背景画像を選択",
+        list(BACKGROUND_CHOICES.keys()),
+        index=list(BACKGROUND_CHOICES.keys()).index(st.session_state.bg_choice)
+    )
     st.session_state.bg_choice = bg_name
 
     BG_PATH = BACKGROUND_CHOICES[bg_name]
@@ -168,148 +177,137 @@ try:
     footer_left_js = html.escape(st.session_state.footer_left)
     footer_right_js = html.escape(st.session_state.footer_right)
 
-    yellow_list = [
-        w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()
-    ]
+    yellow_list = [w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()]
     yellow_js = "|".join(yellow_list)
 
     # =========================================================
-    # HTML テンプレ
+    # HTML テンプレート（f-string 不使用）
     # =========================================================
     html_template = """
-    <style>
-    @font-face {
-        font-family: "customFont";
-        src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
-    }
-    </style>
+<style>
+@font-face {
+    font-family: "customFont";
+    src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
+}
+</style>
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+<button id="saveBtn">画像を保存（JPEG）</button>
+<canvas id="posterCanvas"></canvas>
+</div>
 
-    <button id="saveBtn">画像を保存（JPEG）</button>
-    <button id="tweetBtn">𝕏に投稿する</button>
+<script>
+const textRaw = "{{MAIN}}".replace(/\\\\n/g, "\\n");
+const footerLeft = "{{LEFT}}";
+const footerRight = "{{RIGHT}}";
+const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
 
-    <canvas id="posterCanvas"></canvas>
-    </div>
+const img = new Image();
+img.src = "data:image/png;base64,{{BG}}";
 
-    <script>
-    const textRaw = "{{MAIN}}".replace(/\\\\n/g,"\\n");
-    const footerLeft = "{{LEFT}}";
-    const footerRight = "{{RIGHT}}";
-    const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
+const canvas = document.getElementById("posterCanvas");
+const ctx = canvas.getContext("2d");
 
-    const img = new Image();
-    img.src = "data:image/png;base64,{{BG}}";
+img.onload = function() { drawPoster(); };
 
-    const canvas = document.getElementById("posterCanvas");
-    const ctx = canvas.getContext("2d");
+function drawPoster() {
 
-    img.onload = function() {
-        drawPoster();
-    };
+    const W = img.naturalWidth;
+    const H = img.naturalHeight;
 
-    function drawPoster() {
+    canvas.width = W;
+    canvas.height = H;
+    ctx.drawImage(img, 0, 0, W, H);
 
-        const W = img.naturalWidth;
-        const H = img.naturalHeight;
+    const VW = 7000;
+    const VH = 9000;
+    const S = Math.min(W / VW, H / VH);
 
-        canvas.width = W;
-        canvas.height = H;
+    const virtualTop = 2500;
+    const virtualBottom = 6500;
+    const areaW = VW * 0.90;
+    const areaH = virtualBottom - virtualTop;
 
-        ctx.drawImage(img, 0, 0, W, H);
+    const lines = textRaw.split("\\n");
+    const lineGap = 1.3;
 
-        const VW = 7000;
-        const VH = 9000;
+    let fontSize = 400;
 
-        const S = Math.min(W / VW, H / VH);
-
-        const virtualTop = 2500;
-        const virtualBottom = 6500;
-
-        const areaW = VW * 0.90;
-        const areaH = virtualBottom - virtualTop;
-
-        const lines = textRaw.split("\\n");
-        const lineGap = 1.3;
-
-        let fontSize = 400;
-
-        function maxWidth(fs){
-            ctx.font = `${fs * S}px customFont`;
-            let m=0;
-            for(const l of lines){
-                m = Math.max(m, ctx.measureText(l).width);
-            }
-            return m / S;
+    function maxWidth(fs){
+        ctx.font = `${fs * S}px customFont`;
+        let m = 0;
+        for(const l of lines){
+            m = Math.max(m, ctx.measureText(l).width);
         }
-
-        function totalHeight(fs){
-            return lines.length * fs * lineGap;
-        }
-
-        while(fontSize >= 80){
-            if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
-            fontSize -= 20;
-        }
-
-        function drawColoredLine(line, vx, vy){
-            ctx.font = `${fontSize * S}px customFont`;
-
-            const x = vx * S;
-            const y = vy * S;
-
-            let segs = [];
-            let pos = 0;
-
-            while(pos < line.length){
-                let matched = false;
-                for(const w of yellowWords){
-                    if(line.startsWith(w,pos)){
-                        segs.push({ text:w, yellow:true });
-                        pos += w.length;
-                        matched = true;
-                        break;
-                    }
-                }
-                if(!matched){
-                    segs.push({ text:line[pos], yellow:false });
-                    pos++;
-                }
-            }
-
-            let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
-            let cursor = x - totalW/2;
-
-            for(const seg of segs){
-                ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
-                ctx.textBaseline = "middle";
-                ctx.fillText(seg.text, cursor, y);
-                cursor += ctx.measureText(seg.text).width;
-            }
-        }
-
-        let tH = totalHeight(fontSize);
-        let yStart = virtualTop + (areaH - tH)/2;
-
-        for(const line of lines){
-            drawColoredLine(line, VW*0.5, yStart);
-            yStart += fontSize * lineGap;
-        }
-
-        const footerY = 8200;
-        ctx.fillStyle = "white";
-        ctx.textBaseline = "middle";
-        ctx.font = `${280 * S}px customFont`;
-
-        ctx.textAlign="left";
-        ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
-
-        ctx.textAlign="right";
-        ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
+        return m / S;
     }
 
-    </script>
-    """
+    function totalHeight(fs){
+        return lines.length * fs * lineGap;
+    }
+
+    while(fontSize >= 80){
+        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
+        fontSize -= 20;
+    }
+
+    function drawColoredLine(line, vx, vy){
+        ctx.font = `${fontSize * S}px customFont`;
+
+        const x = vx * S;
+        const y = vy * S;
+
+        let segs = [];
+        let pos = 0;
+
+        while(pos < line.length){
+            let matched = false;
+            for(const w of yellowWords){
+                if(line.startsWith(w,pos)){
+                    segs.push({ text:w, yellow:true });
+                    pos += w.length;
+                    matched = true;
+                    break;
+                }
+            }
+            if(!matched){
+                segs.push({ text:line[pos], yellow:false });
+                pos++;
+            }
+        }
+
+        let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
+        let cursor = x - totalW/2;
+
+        for(const seg of segs){
+            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+            ctx.textBaseline = "middle";
+            ctx.fillText(seg.text, cursor, y);
+            cursor += ctx.measureText(seg.text).width;
+        }
+    }
+
+    let tH = totalHeight(fontSize);
+    let yStart = virtualTop + (areaH - tH)/2;
+
+    for(const line of lines){
+        drawColoredLine(line, VW*0.5, yStart);
+        yStart += fontSize * lineGap;
+    }
+
+    const footerY = 8200;
+    ctx.fillStyle = "white";
+    ctx.textBaseline = "middle";
+    ctx.font = `${280 * S}px customFont`;
+
+    ctx.textAlign="left";
+    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
+
+    ctx.textAlign="right";
+    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
+}
+</script>
+"""
 
     html_final = (
         html_template
@@ -324,9 +322,9 @@ try:
     st_html(html_final, height=900, scrolling=True)
 
     # ================================
-    # ここまで本体コード
+    # ここまで 本体コード
     # ================================
 
-except Exception as e:
-    st.error("アプリ内でエラーが発生しました。ログは以下です。")
+except Exception:
+    st.error("アプリ内でエラーが発生しました👇")
     st.code(traceback.format_exc())
