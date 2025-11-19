@@ -85,6 +85,7 @@ if mode == "通常モード":
     selected_label = st.selectbox(
         "フォントを選択（通常モードのみ）",
         FONT_LABEL_LIST,
+    
         index=default_font_idx
     )
     ss.font_choice = selected_label
@@ -192,17 +193,21 @@ if mode == "通常モード":
 if mode == "通常モード":
     main_js = html.escape(ss.main_text).replace("\n", "\\n")
 else:
-    # ASCIIアートモード → HTML escape禁止
+    # ASCIIアートモード → HTML escape禁止（最小限のJS安全処理のみ）
     main_js = (
         ss.main_text
-        .replace("\\", "\\\\")
-        .replace("\n", "\\n")
-        .replace("'", "\\'")
-        .replace('"', '\\"')
+        .replace("\\", "\\\\")  # バックスラッシュだけ2重化
+        .replace("\n", "\\n")   # 改行だけJS用に変換
     )
 
-footer_left_js = html.escape(ss.footer_left)
-footer_right_js = html.escape(ss.footer_right)
+if mode == "通常モード":
+    footer_left_js = html.escape(ss.footer_left)
+    footer_right_js = html.escape(ss.footer_right)
+else:
+    # ASCIIアートモード → エスケープ禁止
+    footer_left_js = ss.footer_left.replace("\\", "\\\\")
+    footer_right_js = ss.footer_right.replace("\\", "\\\\")
+
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 mode_js = "AA" if mode == "ASCIIアートモード" else "NORMAL"
 
@@ -423,5 +428,6 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
