@@ -55,6 +55,31 @@ BACKGROUND_CHOICES = {
 }
 
 # =========================================================
+# フォント設定（表示名と実ファイル名のマッピング）
+# =========================================================
+FONT_DIR = "fonts"
+
+FONT_LABELS = {
+    "BIZUDMincho-Regular.ttf": "01. 明朝",
+    "kppuskum.ttf": "02. 국규",
+}
+
+FONT_FILES = [f for f in os.listdir(FONT_DIR) if f.lower().endswith(".ttf")]
+
+FONT_OPTIONS = [FONT_LABELS[f] for f in FONT_FILES if f in FONT_LABELS]
+
+if "font_choice" not in st.session_state:
+    st.session_state.font_choice = FONT_OPTIONS[0] if FONT_OPTIONS else ""
+
+selected_label = st.selectbox("フォントを選択", FONT_OPTIONS)
+st.session_state.font_choice = selected_label
+
+font_filename = [k for k, v in FONT_LABELS.items() if v == selected_label][0]
+
+with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
+    font_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+# =========================================================
 # 初期値
 # =========================================================
 DEFAULT_MAIN = """“われわれは
@@ -78,7 +103,7 @@ if "yellow_words" not in st.session_state:  st.session_state.yellow_words = DEFA
 if "bg_choice" not in st.session_state:     st.session_state.bg_choice = "背景 01"
 
 # =========================================================
-# 背景選択
+# 背景選択 UI
 # =========================================================
 bg_name = st.selectbox(
     "背景画像を選択",
@@ -111,8 +136,10 @@ if st.button("反映する"):
 
 if st.button("初期テキストに戻す"):
     keep_bg = st.session_state.bg_choice
+    keep_font = st.session_state.font_choice
     st.session_state.clear()
     st.session_state.bg_choice = keep_bg
+    st.session_state.font_choice = keep_font
     st.rerun()
 
 # =========================================================
@@ -124,7 +151,7 @@ if found:
     st.stop()
 
 # =========================================================
-# JSへ渡す値
+# JS へ渡す値生成
 # =========================================================
 main_js        = html.escape(st.session_state.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(st.session_state.footer_left)
@@ -132,10 +159,16 @@ footer_right_js = html.escape(st.session_state.footer_right)
 yellow_js      = "|".join([w.strip() for w in st.session_state.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML 埋め込み（全て書き換え済）
+# HTML / JS（完全統合・フォント対応）
 # =========================================================
+html_code = f"""
+<style>
+@font-face {{
+    font-family: "customFont";
+    src: url("data:font/ttf;base64,{font_b64}") format("truetype");
+}}
+</style>
 
-html_code = """
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
 
   <button id="saveBtn"
@@ -156,22 +189,23 @@ html_code = """
 </div>
 
 <script>
-const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");
-const footerLeft = "{{LEFT}}";
-const footerRight = "{{RIGHT}}";
-const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
+const textRaw     = "{main_js}".replace(/\\\\n/g,"\\n");
+const footerLeft  = "{footer_left_js}";
+const footerRight = "{footer_right_js}";
+const yellowWords = "{yellow_js}".split("|").filter(x=>x.length>0);
 
 const img = new Image();
-img.src = "data:image/png;base64,{{BG}}";
+img.src = "data:image/png;base64,{bg_b64}";
 
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
-img.onload = function(){ drawPoster(); };
+img.onload = function() {{
+    drawPoster();
+}};
 
-function drawPoster(){
+function drawPoster() {{
 
-    // 実際の画像サイズ
     const W = img.naturalWidth;
     const H = img.naturalHeight;
 
@@ -180,22 +214,14 @@ function drawPoster(){
 
     ctx.drawImage(img,0,0,W,H);
 
-    // ===============================
-    // ★ 仮想キャンバス（統一座標系）
-    // ===============================
     const VW = 7000;
     const VH = 9000;
 
     const scaleX = W / VW;
     const scaleY = H / VH;
-
-    // 歪み防止のため均一縮尺
     const S = Math.min(scaleX, scaleY);
 
-    // ===============================
-    // ★ 本文配置位置（仮想座標で同一）
-    // ===============================
-    const virtualTop = 2500;
+    const virtualTop    = 2500;
     const virtualBottom = 6500;
 
     const areaW = VW * 0.90;
@@ -204,29 +230,28 @@ function drawPoster(){
     const lines = textRaw.split("\\n");
     const lineGap = 1.3;
 
-    // フォント自動調整（仮想座標）
     let fontSize = 400;
 
-    function maxWidth(fs){
-        ctx.font = `${fs * S}px serif`;
+    function maxWidth(fs){{
+        ctx.font = `${{fs * S}}px customFont`;
         let m=0;
-        for(const l of lines){
+        for(const l of lines){{
             m = Math.max(m, ctx.measureText(l).width);
-        }
+        }}
         return m / S;
-    }
+    }}
 
-    function totalHeight(fs){
+    function totalHeight(fs){{
         return lines.length * fs * lineGap;
-    }
+    }}
 
-    while(fontSize >= 80){
+    while(fontSize >= 80){{
         if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
         fontSize -= 20;
-    }
+    }}
 
-    function drawColoredLine(line, vx, vy){
-        ctx.font = `${fontSize * S}px serif`;
+    function drawColoredLine(line, vx, vy){{
+        ctx.font = `${{fontSize * S}}px customFont`;
 
         const x = vx * S;
         const y = vy * S;
@@ -234,98 +259,77 @@ function drawPoster(){
         let segs=[];
         let pos=0;
 
-        while(pos < line.length){
+        while(pos < line.length){{
             let matched=false;
-            for(const w of yellowWords){
-                if(line.startsWith(w,pos)){
-                    segs.push({text:w,yellow:true});
+            for(const w of yellowWords){{
+                if(line.startsWith(w,pos)){{
+                    segs.push({{text:w,yellow:true}});
                     pos+=w.length;
                     matched=true;
                     break;
-                }
-            }
-            if(!matched){
-                segs.push({text:line[pos],yellow:false});
+                }}
+            }}
+            if(!matched){{
+                segs.push({{text:line[pos],yellow:false}});
                 pos++;
-            }
-        }
+            }}
+        }}
 
         let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
         let cursor = x - totalW/2;
 
-        for(const seg of segs){
+        for(const seg of segs){{
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.textBaseline="middle";
             ctx.fillText(seg.text, cursor, y);
             cursor += ctx.measureText(seg.text).width;
-        }
-    }
+        }}
+    }}
 
     let tH = totalHeight(fontSize);
     let yStart = virtualTop + (areaH - tH)/2;
 
-    for(const line of lines){
+    for(const line of lines){{
         drawColoredLine(line, VW*0.5, yStart);
         yStart += fontSize * lineGap;
-    }
+    }}
 
-    // ===============================
-    // ★ フッター（仮想座標）
-    // ===============================
     const footerY = 8200;
 
     ctx.fillStyle="white";
     ctx.textBaseline="middle";
-    ctx.font = `${280 * S}px serif`;
+    ctx.font = `${{280 * S}}px customFont`;
 
-    // 左
     ctx.textAlign="left";
     ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
 
-    // 右
     ctx.textAlign="right";
     ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
-}
+}}
 
-// ----------------------------------------------------------
-// JPEG保存
-// ----------------------------------------------------------
-document.getElementById("saveBtn").onclick = function(){
-    canvas.toBlob(function(blob){
+document.getElementById("saveBtn").onclick = function(){{
+    canvas.toBlob(function(blob){{
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = "generated.jpg";
         document.body.appendChild(a);
         a.click();
-        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
+        setTimeout(()=>{{ URL.revokeObjectURL(url); a.remove(); }}, 400);
         alert("JPEG画像を保存しました！（PNGより軽量）");
-    }, "image/jpeg", 0.88);
-};
+    }}, "image/jpeg", 0.88);
+}};
 
-// ----------------------------------------------------------
-// 𝕏投稿
-// ----------------------------------------------------------
-document.getElementById("tweetBtn").onclick = function(){
-
+document.getElementById("tweetBtn").onclick = function(){{
     const text = encodeURIComponent(
         "この画像は大判焼外交部ジェネレーターを使ったパロディ画像です\\n" +
         "@InsHatanCountry\\n" +
         "https://ikan-no-i-gen.streamlit.app/"
     );
-
     const url = "https://twitter.com/intent/tweet?text=" + text;
     window.open(url, "_blank");
-};
+}};
 </script>
 """
-
-html_code = (html_code
-    .replace("{{MAIN}}", main_js)
-    .replace("{{LEFT}}", footer_left_js)
-    .replace("{{RIGHT}}", footer_right_js)
-    .replace("{{YELLOW}}", yellow_js)
-    .replace("{{BG}}", bg_b64)
-)
 
 st_html(html_code, height=950, scrolling=True)
