@@ -328,7 +328,7 @@ function drawPoster() {
         }
     }
 
-    fontSize = best;
+    let fontSize = best;
 
     // ========== Y開始位置（中央寄せ） ==========
     const totalH = lines.length * fontSize * LINE_GAP;
@@ -398,3 +398,4 @@ html_final = (
 )
 
 st_html(html_final, height=1100, scrolling=True)
+
