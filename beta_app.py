@@ -61,7 +61,7 @@ FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
     "UnGungseo.ttf": "02. KOREA FONT",
 }
-AA_FONT_FILE = "Migu-1M-Regular.ttf"  # 等幅フォント
+AA_FONT_FILE = "Migu 1M Regular.ttf"
 
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 FONT_LABEL_LIST = list(FONT_LABELS.values())
@@ -389,3 +389,4 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
