@@ -2,14 +2,15 @@ import streamlit as st
 import base64
 import html
 import os
+import json
 from streamlit.components.v1 import html as st_html
 
-st.set_page_config(page_title="大判焼外交部ジェネレーター ver.3.3.1", layout="centered")
+st.set_page_config(page_title="大判焼外交部ジェネレーター ver.3.4", layout="centered")
 
 # =========================================================
 # タイトル
 # =========================================================
-st.title("大判焼外交部ジェネレーター ver.3.3.1（通常 / ASCIIアート切替版）")
+st.title("大判焼外交部ジェネレーター ver.3.4（通常 / ASCIIアート切替版）")
 
 # =========================================================
 # 注意事項
@@ -61,6 +62,7 @@ FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
     "UnGungseo.ttf": "02. KOREA FONT",
 }
+# ASCIIアートモード用フォント（ms PGothic 風）
 AA_FONT_FILE = "ms-pgothic-regular.ttf"
 
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
@@ -85,7 +87,6 @@ if mode == "通常モード":
     selected_label = st.selectbox(
         "フォントを選択（通常モードのみ）",
         FONT_LABEL_LIST,
-    
         index=default_font_idx
     )
     ss.font_choice = selected_label
@@ -93,12 +94,11 @@ if mode == "通常モード":
 
     with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
-
 else:
-    # ASCIIアートモード：等幅フォント固定
+    # ASCIIアートモード：ms PGothic
     aa_path = os.path.join(FONT_DIR, AA_FONT_FILE)
     if not os.path.exists(aa_path):
-        st.error(f"等幅フォント {AA_FONT_FILE} が見つかりません。fonts/ に配置してください。")
+        st.error(f"フォント {AA_FONT_FILE} が見つかりません。fonts/ に配置してください。")
         st.stop()
 
     with open(aa_path, "rb") as f:
@@ -158,7 +158,7 @@ ss.footer_right = st.text_input("下部（右）", ss.footer_right)
 if mode == "通常モード":
     ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
 else:
-    ss.yellow_words = ""   # AAモードでは無効
+    ss.yellow_words = ""   # AAモードでは無効（ハイライト無し）
 
 # =========================================================
 # Apply / Reset
@@ -188,28 +188,15 @@ if mode == "通常モード":
         st.stop()
 
 # =========================================================
-# JS用データ生成
+# JS用データ生成（JSON経由で安全に渡す）
 # =========================================================
-if mode == "通常モード":
-    main_js = html.escape(ss.main_text).replace("\n", "\\n")
-else:
-    # ASCIIアートモード → HTML escape禁止（最小限のJS安全処理のみ）
-    main_js = (
-        ss.main_text
-        .replace("\\", "\\\\")  # バックスラッシュだけ2重化
-        .replace("\n", "\\n")   # 改行だけJS用に変換
-    )
-
-if mode == "通常モード":
-    footer_left_js = html.escape(ss.footer_left)
-    footer_right_js = html.escape(ss.footer_right)
-else:
-    # ASCIIアートモード → エスケープ禁止
-    footer_left_js = ss.footer_left.replace("\\", "\\\\")
-    footer_right_js = ss.footer_right.replace("\\", "\\\\")
+# どちらのモードでも JSON 文字列として JS に渡す
+main_js = json.dumps(ss.main_text)
+footer_left_js = json.dumps(ss.footer_left)
+footer_right_js = json.dumps(ss.footer_right)
+mode_js = json.dumps("AA" if mode == "ASCIIアートモード" else "NORMAL")
 
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
-mode_js = "AA" if mode == "ASCIIアートモード" else "NORMAL"
 
 # =========================================================
 # HTML + JS（全部入り）
@@ -246,11 +233,11 @@ body { margin: 0; padding: 0; }
 
 <script>
 const bgData      = "{{BGDATA}}";
-const textRaw     = "{{MAIN}}".replace(/\\\\n/g,"\\n");
-const footerLeft  = "{{LEFT}}";
-const footerRight = "{{RIGHT}}";
+const textRaw     = {{MAIN}};        // JSON 文字列 → JS 文字列
+const footerLeft  = {{LEFT}};
+const footerRight = {{RIGHT}};
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
-const mode        = "{{MODE}}";
+const mode        = {{MODE}};
 
 const MAX_WIDTH = 1300;
 const FONT_MAX = 420;
@@ -404,7 +391,6 @@ document.getElementById("saveBtn").onclick = function() {
     }, "image/jpeg", 0.90);
 };
 
-// === X 投稿ボタン復活 ===
 document.getElementById("tweetBtn").onclick = function() {
     const text = encodeURIComponent(
         "この画像は『大判焼外交部ジェネレーター』で作りました。\\n" +
@@ -428,6 +414,3 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
-
-
-
