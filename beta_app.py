@@ -312,10 +312,10 @@ function drawPoster() {
     const maxLen = Math.max(...lines.map(line => line.length), 0);
 
     // ① 行数補正
-    const K_line = 1.0 / (1.0 + 0.015 * Math.max(lineCount - 3, 0));
+    const K_line = 1.0 / (1.0 + 0.010 * Math.max(lineCount - 3, 0));
 
     // ② 最大文字数補正
-    const K_len = 1.0 / (1.0 + 0.015 * Math.max(maxLen - 10, 0));
+    const K_len = 1.0 / (1.0 + 0.010 * Math.max(maxLen - 10, 0));
 
     let fontSize = best * K_line * K_len;
 
@@ -432,4 +432,5 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
