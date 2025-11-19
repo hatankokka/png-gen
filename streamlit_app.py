@@ -229,7 +229,7 @@ function drawPoster() {
 
     const lines = textRaw.split("\\n");
     const lineGap = 1.3;
-    let fontSize = 800;
+    let fontSize = 400;
 
     function maxWidth(fs) {
         ctx.font = `${fs*S}px customFont`;
@@ -338,6 +338,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
