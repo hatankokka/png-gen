@@ -82,7 +82,7 @@ DEFAULT_MAIN = """“われわれは
 大判焼問題で
 火遊びをするな
 火遊びをすれば
-시체는파괴되어야한다”"""
+今川焼と同盟を組む”"""
 
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月15日"
@@ -316,3 +316,4 @@ html_final = (
 )
 
 st_html(html_final, height=980, scrolling=True)
+
