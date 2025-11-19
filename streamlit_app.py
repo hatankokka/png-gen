@@ -127,7 +127,7 @@ with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
 # =========================================================
 # 入力
 # =========================================================
-ss.main_text = st.text_area("本文", ss.main_text, height=220)
+ss.main_text  = st.text_area("本文", ss.main_text, height=220)
 ss.footer_left  = st.text_input("下部（左）", ss.footer_left)
 ss.footer_right = st.text_input("下部（右）", ss.footer_right)
 ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
@@ -139,152 +139,181 @@ if found:
     st.stop()
 
 # =========================================================
-# JS 処理
+# JS へ渡す値
 # =========================================================
-main_js = html.escape(ss.main_text).replace("\n", "\\n")
-footer_left_js  = html.escape(ss.footer_left)
+main_js        = html.escape(ss.main_text).replace("\n", "\\n")
+footer_left_js = html.escape(ss.footer_left)
 footer_right_js = html.escape(ss.footer_right)
-yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
+yellow_js      = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
+# =========================================================
+# HTMLテンプレ（SyntaxError回避のため join 形式）
+# =========================================================
 
-html_template = """
-<style>
-@font-face {
-    font-family: "customFont";
-    src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
-}
-</style>
+html_parts = [
 
-<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
-  <button id="saveBtn" style="
-      padding:12px 24px;
-      border-radius:999px;
-      border:none;
-      background:#4CAF50;
-      color:white;
-      font-weight:700;
-      cursor:pointer;">
-    画像を保存（JPEG）
-  </button>
+"<style>",
+"@font-face {",
+'    font-family: "customFont";',
+'    src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");',
+"}",
+"</style>",
 
-  <canvas id="posterCanvas" style="
-      max-width:100%;
-      border-radius:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.6);"></canvas>
-</div>
+'<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">',
 
-<script>
-const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");
-const footerLeft = "{{LEFT}}";
-const footerRight = "{{RIGHT}}";
-const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
+'  <button id="saveBtn" style="',
+'      padding:12px 24px;',
+'      border-radius:999px;',
+'      border:none;',
+'      background:#4CAF50;',
+'      color:white;',
+'      font-weight:700;',
+'      cursor:pointer;">',
+'    画像を保存（JPEG）',
+'  </button>',
 
-const img = new Image();
-img.src = "data:image/png;base64,{{BG}}";
+'  <canvas id="posterCanvas" style="',
+'      max-width:100%;',
+'      border-radius:16px;',
+'      box-shadow:0 10px 30px rgba(0,0,0,0.6);"></canvas>',
 
-const canvas = document.getElementById("posterCanvas");
-const ctx = canvas.getContext("2d");
+"</div>",
 
-// ★フォントロードを待つ（これがないと絶対反映されない）
-img.onload = async function() {
-    await document.fonts.load("20px customFont");
-    drawPoster();
-};
+"<script>",
 
-function drawPoster() {
+'const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");',
+'const footerLeft = "{{LEFT}}";',
+'const footerRight = "{{RIGHT}}";',
+'const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);',
 
-    const W = img.naturalWidth;
-    const H = img.naturalHeight;
-    canvas.width = W;
-    canvas.height = H;
-    ctx.drawImage(img,0,0,W,H);
+'const img = new Image();',
+'img.src = "data:image/png;base64,{{BG}}";',
 
-    const VW = 7000, VH = 9000;
-    const S = Math.min(W/VW, H/VH);
+'const canvas = document.getElementById("posterCanvas");',
+'const ctx = canvas.getContext("2d");',
 
-    const virtualTop = 2500;
-    const virtualBottom = 6500;
-    const areaW = VW*0.9, areaH = virtualBottom - virtualTop;
+'img.onload = async function() {',
+'    await document.fonts.load("20px customFont");',
+'    drawPoster();',
+'};',
 
-    const lines = textRaw.split("\\n");
-    const lineGap = 1.3;
+"function drawPoster() {",
 
-    let fontSize = 400;
+"    const W = img.naturalWidth;",
+"    const H = img.naturalHeight;",
+"    canvas.width = W;",
+"    canvas.height = H;",
+"    ctx.drawImage(img,0,0,W,H);",
 
-    function maxWidth(fs) {
-        ctx.font = `${fs*S}px customFont`;
-        let m=0;
-        for(const l of lines){
-            m = Math.max(m, ctx.measureText(l).width);
-        }
-        return m/S;
-    }
+"    const VW = 7000, VH = 9000;",
+"    const S = Math.min(W/VW, H/VH);",
 
-    function totalHeight(fs){
-        return lines.length * fs * lineGap;
-    }
+"    const virtualTop = 2500;",
+"    const virtualBottom = 6500;",
+"    const areaW = VW*0.9, areaH = virtualBottom - virtualTop;",
 
-    while(fontSize >= 80){
-        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
-        fontSize -= 20;
-    }
+"    const lines = textRaw.split(\"\\\\n\");",
+"    const lineGap = 1.3;",
 
-    function drawColoredLine(line,vx,vy){
-        ctx.font = `${fontSize*S}px customFont`;
-        const x = vx*S, y = vy*S;
+"    let fontSize = 400;",
 
-        let segs=[], pos=0;
+"    function maxWidth(fs) {",
+"        ctx.font = `${fs*S}px customFont`;",
+"        let m=0;",
+"        for(const l of lines){",
+"            m = Math.max(m, ctx.measureText(l).width);",
+"        }",
+"        return m/S;",
+"    }",
 
-        while(pos < line.length){
-            let matched=false;
-            for(const w of yellowWords){
-                if(line.startsWith(w,pos)){
-                    segs.push({text:w,yellow:true});
-                    pos+=w.length;
-                    matched=true;
-                    break;
-                }
-            }
-            if(!matched){
-                segs.push({text:line[pos],yellow:false});
-                pos++;
-            }
-        }
+"    function totalHeight(fs){",
+"        return lines.length * fs * lineGap;",
+"    }",
 
-        let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
-        let cursor = x - totalW/2;
+"    while(fontSize >= 80){",
+"        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;",
+"        fontSize -= 20;",
+"    }",
 
-        for(const seg of segs){
-            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
-            ctx.textBaseline="middle";
-            ctx.fillText(seg.text, cursor, y);
-            cursor += ctx.measureText(seg.text).width;
-        }
-    }
+"    function drawColoredLine(line,vx,vy){",
+"        ctx.font = `${fontSize*S}px customFont`;",
+"        const x = vx*S, y = vy*S;",
 
-    let tH = totalHeight(fontSize);
-    let yStart = virtualTop + (areaH - tH)/2;
+"        let segs=[], pos=0;",
 
-    for(const line of lines){
-        drawColoredLine(line,VW*0.5,yStart);
-        yStart += fontSize*lineGap;
-    }
+"        while(pos < line.length){",
+"            let matched=false;",
+"            for(const w of yellowWords){",
+"                if(line.startsWith(w,pos)){",
+"                    segs.push({text:w,yellow:true});",
+"                    pos+=w.length;",
+"                    matched=true;",
+"                    break;",
+"                }",
+"            }",
+"            if(!matched){",
+"                segs.push({text:line[pos],yellow:false});",
+"                pos++;",
+"            }",
+"        }",
 
-    const footerY = 8200;
-    ctx.fillStyle="white";
-    ctx.textBaseline="middle";
-    ctx.font = `${280*S}px customFont`;
+"        let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);",
+"        let cursor = x - totalW/2;",
 
-    ctx.textAlign="left";
-    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
+"        for(const seg of segs){",
+"            ctx.fillStyle = seg.yellow ? \"#FFD700\" : \"white\";",
+"            ctx.textBaseline=\"middle\";",
+"            ctx.fillText(seg.text, cursor, y);",
+"            cursor += ctx.measureText(seg.text).width;",
+"        }",
+"    }",
 
-    ctx.textAlign="right";
-    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
-}
+"    let tH = totalHeight(fontSize);",
+"    let yStart = virtualTop + (areaH - tH)/2;",
 
-document.getElementById("saveBtn").onclick = function(){
-    canvas.toBlob(function(blob){
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download
+"    for(const line of lines){",
+"        drawColoredLine(line,VW*0.5,yStart);",
+"        yStart += fontSize*lineGap;",
+"    }",
+
+"    const footerY = 8200;",
+"    ctx.fillStyle=\"white\";",
+"    ctx.textBaseline=\"middle\";",
+"    ctx.font = `${280*S}px customFont`;",
+
+"    ctx.textAlign=\"left\";",
+"    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);",
+
+"    ctx.textAlign=\"right\";",
+"    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);",
+"}",
+
+'document.getElementById("saveBtn").onclick = function(){',
+'    canvas.toBlob(function(blob){',
+'        const url = URL.createObjectURL(blob);',
+'        const a = document.createElement("a");',
+'        a.href = url;',
+'        a.download = "generated.jpg";',
+'        document.body.appendChild(a);',
+'        a.click();',
+'        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);',
+'    }, "image/jpeg", 0.88);',
+'};',
+
+"</script>"
+
+]
+
+# ========= HTML 出力 =========
+html_final = "".join(html_parts)
+html_final = (
+    html_final
+    .replace("{{MAIN}}",        main_js)
+    .replace("{{LEFT}}",        footer_left_js)
+    .replace("{{RIGHT}}",       footer_right_js)
+    .replace("{{YELLOW}}",      yellow_js)
+    .replace("{{BG}}",          bg_b64)
+    .replace("{{FONTDATA}}",    font_b64)
+)
+
+st_html(html_final, height=980, scrolling=True)
 
