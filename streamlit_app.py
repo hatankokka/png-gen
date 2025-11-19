@@ -87,11 +87,16 @@ DEFAULT_YELLOW = "火遊び"
 # session_state
 # =========================================================
 ss = st.session_state
-if "main_text" not in ss: ss.main_text = DEFAULT_MAIN
-if "footer_left" not in ss: ss.footer_left = DEFAULT_LEFT
-if "footer_right" not in ss: ss.footer_right = DEFAULT_RIGHT
-if "yellow_words" not in ss: ss.yellow_words = DEFAULT_YELLOW
-if "bg_choice" not in ss: ss.bg_choice = "背景 01"
+if "main_text" not in ss:
+    ss.main_text = DEFAULT_MAIN
+if "footer_left" not in ss:
+    ss.footer_left = DEFAULT_LEFT
+if "footer_right" not in ss:
+    ss.footer_right = DEFAULT_RIGHT
+if "yellow_words" not in ss:
+    ss.yellow_words = DEFAULT_YELLOW
+if "bg_choice" not in ss:
+    ss.bg_choice = "背景 01"
 
 # =========================================================
 # 背景選択
@@ -99,7 +104,7 @@ if "bg_choice" not in ss: ss.bg_choice = "背景 01"
 bg_choice = st.selectbox(
     "背景画像を選択",
     list(BACKGROUND_CHOICES.keys()),
-    index=list(BACKGROUND_CHOICES.keys()).index(ss.bg_choice)
+    index=list(BACKGROUND_CHOICES.keys()).index(ss.bg_choice),
 )
 ss.bg_choice = bg_choice
 
@@ -113,24 +118,27 @@ bg_b64_safe = html.escape(bg_b64)
 # =========================================================
 # 入力欄
 # =========================================================
-ss.main_text  = st.text_area("本文", ss.main_text, height=220)
-ss.footer_left  = st.text_input("下部（左）", ss.footer_left)
+ss.main_text = st.text_area("本文", ss.main_text, height=220)
+ss.footer_left = st.text_input("下部（左）", ss.footer_left)
 ss.footer_right = st.text_input("下部（右）", ss.footer_right)
 ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
 
 # =========================================================
 # Apply / Reset
 # =========================================================
-if st.button("反映する"):
-    st.rerun()
+col_apply, col_reset = st.columns(2)
+with col_apply:
+    if st.button("反映する"):
+        st.rerun()
 
-if st.button("初期テキストに戻す"):
-    keep_bg = ss.bg_choice
-    keep_font = selected_label
-    st.session_state.clear()
-    st.session_state.bg_choice = keep_bg
-    st.session_state.font_choice = keep_font
-    st.rerun()
+with col_reset:
+    if st.button("初期テキストに戻す"):
+        keep_bg = ss.bg_choice
+        keep_font = selected_label
+        st.session_state.clear()
+        st.session_state.bg_choice = keep_bg
+        st.session_state.font_choice = keep_font
+        st.rerun()
 
 # =========================================================
 # NGワードチェック
@@ -149,7 +157,7 @@ footer_right_js = html.escape(ss.footer_right)
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML + JS（背景画像修正版）
+# HTML + JS（スマホ最適化版）
 # =========================================================
 html_template = """
 <style>
@@ -191,7 +199,7 @@ html_template = """
 
 <script>
 // ===== Python → JS で安全受け取り =====
-const bgData = "{{BGDATA}}";  // ← ここが重要（壊れない）
+const bgData = "{{BGDATA}}";  // Base64 PNG
 // ======================================
 
 const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");
@@ -199,129 +207,177 @@ const footerLeft = "{{LEFT}}";
 const footerRight = "{{RIGHT}}";
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
 
+// スマホ優先：最大横幅 1300px
+const MAX_WIDTH = 1300;
+const FONT_MAX = 400;  // 最大フォントサイズ
+const FONT_MIN = 60;   // 最小フォントサイズ
+const LINE_GAP = 1.3;
+
 const img = new Image();
-img.src = "data:image/png;base64," + bgData;  // ← JS 内で連結（安全）
+img.src = "data:image/png;base64," + bgData;
 
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
 img.onload = async function() {
-    await document.fonts.load("30px customFont");
+    try {
+        await document.fonts.load("30px customFont");
+    } catch(e) {
+        console.warn("font load failed, continue anyway:", e);
+    }
     drawPoster();
 };
 
 function drawPoster() {
+    // 元画像のサイズ
+    const origW = img.naturalWidth;
+    const origH = img.naturalHeight;
 
-    const W = img.naturalWidth;
-    const H = img.naturalHeight;
+    // 縦横比維持したまま MAX_WIDTH 以下に縮小
+    let scale = 1.0;
+    if (origW > MAX_WIDTH) {
+        scale = MAX_WIDTH / origW;
+    }
+    const W = Math.floor(origW * scale);
+    const H = Math.floor(origH * scale);
+
     canvas.width = W;
     canvas.height = H;
 
+    // 背景描画（縮小後）
     ctx.drawImage(img, 0, 0, W, H);
 
-    const VW = 7000, VH = 9000;
-    const S = Math.min(W / VW, H / VH);
+    // テキスト描画エリア（上下10%ずつ余白、本文エリアは中央あたり）
+    const marginX = W * 0.08;
+    const marginTop = H * 0.18;
+    const marginBottom = H * 0.20;
 
-    const virtualTop = 2500;
-    const virtualBottom = 6500;
-    const areaW = VW * 0.9;
-    const areaH = virtualBottom - virtualTop;
+    const areaX = marginX;
+    const areaW = W - marginX * 2;
+    const areaY = marginTop;
+    const areaH = H - marginTop - marginBottom;
 
     const lines = textRaw.split("\\n");
-    const lineGap = 1.3;
-    let fontSize = 800;
 
-    function maxWidth(fs) {
-        ctx.font = `${fs*S}px customFont`;
-        let m=0;
-        for(const l of lines){
-            m = Math.max(m, ctx.measureText(l).width);
+    // バイナリサーチでフォントサイズ決定
+    function canFit(fontSize) {
+        ctx.font = fontSize + "px customFont";
+
+        let maxLineWidth = 0;
+        for (const line of lines) {
+            const w = ctx.measureText(line).width;
+            if (w > maxLineWidth) {
+                maxLineWidth = w;
+            }
         }
-        return m/S;
+        const totalHeight = lines.length * fontSize * LINE_GAP;
+
+        return (maxLineWidth <= areaW) && (totalHeight <= areaH);
     }
 
-    function totalHeight(fs){
-        return lines.length * fs * lineGap;
+    let low = FONT_MIN;
+    let high = FONT_MAX;
+    let best = FONT_MIN;
+
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        if (canFit(mid)) {
+            best = mid;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
     }
 
-    while(fontSize >= 80){
-        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
-        fontSize -= 20;
-    }
+    const fontSize = best;
+    ctx.font = fontSize + "px customFont";
+    ctx.textBaseline = "middle";
 
-    function drawColoredLine(line, vx, vy) {
-        ctx.font = `${fontSize*S}px customFont`;
-        const xCenter = vx*S;
-        const y = vy*S;
+    const totalTextHeight = lines.length * fontSize * LINE_GAP;
+    let currentY = areaY + (areaH - totalTextHeight) / 2 + fontSize * 0.5;
 
-        let segs=[], pos=0;
-        while(pos < line.length){
-            let matched=false;
-            for(const w of yellowWords){
-                if(w && line.startsWith(w,pos)){
-                    segs.push({text:w,yellow:true});
-                    pos+=w.length;
-                    matched=true;
+    function drawColoredLine(line, centerX, y) {
+        ctx.font = fontSize + "px customFont";
+
+        // 黄色単語分割
+        let segs = [];
+        let pos = 0;
+        while (pos < line.length) {
+            let matched = false;
+            for (const w of yellowWords) {
+                if (w && line.startsWith(w, pos)) {
+                    segs.push({ text: w, yellow: true });
+                    pos += w.length;
+                    matched = true;
                     break;
                 }
             }
-            if(!matched){
-                segs.push({text:line[pos],yellow:false});
+            if (!matched) {
+                segs.push({ text: line[pos], yellow: false });
                 pos++;
             }
         }
 
-        let totalW=0;
-        for(const seg of segs){
-            totalW+=ctx.measureText(seg.text).width;
+        // 全体幅を測定
+        let totalW = 0;
+        for (const seg of segs) {
+            totalW += ctx.measureText(seg.text).width;
         }
 
-        let cursor=xCenter-totalW/2;
-        for(const seg of segs){
+        let cursorX = centerX - totalW / 2;
+        for (const seg of segs) {
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
-            ctx.textBaseline = "middle";
-            ctx.fillText(seg.text, cursor, y);
-            cursor+=ctx.measureText(seg.text).width;
+            ctx.fillText(seg.text, cursorX, y);
+            cursorX += ctx.measureText(seg.text).width;
         }
     }
 
-    let tH = totalHeight(fontSize);
-    let yStart = virtualTop + (areaH - tH) / 2;
-
-    for(const line of lines){
-        drawColoredLine(line, VW*0.5, yStart);
-        yStart += fontSize*lineGap;
+    for (const line of lines) {
+        drawColoredLine(line, W * 0.5, currentY);
+        currentY += fontSize * LINE_GAP;
     }
 
-    const footerY = 8200;
-    ctx.fillStyle="white";
-    ctx.textBaseline="middle";
-    ctx.font = `${280*S}px customFont`;
+    // フッター描画（下側）
+    const footerY = H * 0.90;
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = "white";
 
-    ctx.textAlign="left";
-    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
+    // フッターのフォントサイズは画像高さに応じて決定
+    const footerFontSize = Math.max(24, Math.floor(H * 0.035));
+    ctx.font = footerFontSize + "px customFont";
 
-    ctx.textAlign="right";
-    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
+    // 左下
+    ctx.textAlign = "left";
+    ctx.fillText(footerLeft, W * 0.06, footerY);
+
+    // 右下
+    ctx.textAlign = "right";
+    ctx.fillText(footerRight, W * 0.94, footerY);
 }
 
-document.getElementById("saveBtn").onclick = function(){
-    canvas.toBlob(function(blob){
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement("a");
-        a.href=url;
-        a.download="generated.jpg";
+// JPEG 保存ボタン
+document.getElementById("saveBtn").onclick = function() {
+    canvas.toBlob(function(blob) {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "generated.jpg";
         document.body.appendChild(a);
         a.click();
-        setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},400);
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+            a.remove();
+        }, 400);
     }, "image/jpeg", 0.88);
 };
 
-document.getElementById("tweetBtn").onclick=function(){
-    const text=encodeURIComponent(
+// X 投稿ボタン
+document.getElementById("tweetBtn").onclick = function() {
+    const text = encodeURIComponent(
         "この画像は『大判焼外交部ジェネレーター』で作りました。\\nhttps://ikan-no-i-gen.streamlit.app/\\n※画像は自動投稿されません。自分で貼ってください。"
     );
-    window.open("https://twitter.com/intent/tweet?text="+text,"_blank");
+    window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
 };
 </script>
 """
@@ -334,12 +390,7 @@ html_final = (
     .replace("{{RIGHT}}", footer_right_js)
     .replace("{{YELLOW}}", yellow_js)
     .replace("{{FONTDATA}}", font_b64)
-    .replace("{{BGDATA}}", bg_b64_safe)     # ← ここが重要
+    .replace("{{BGDATA}}", bg_b64_safe)
 )
 
 st_html(html_final, height=1050, scrolling=True)
-
-
-
-
-
