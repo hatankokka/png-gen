@@ -326,8 +326,8 @@ function drawPoster() {
 
         if (mode === "AA") {
             ctx.fillStyle = "white";
-            ctx.textAlign = "center";
-            ctx.fillText(line, centerX, y);
+            ctx.textAlign = "left";
+            ctx.fillText(line, marginX, y);
             return;
         }
 
@@ -414,3 +414,4 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
