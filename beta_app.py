@@ -4,12 +4,12 @@ import html
 import os
 from streamlit.components.v1 import html as st_html
 
-st.set_page_config(page_title="大判焼外交部ジェネレーター ver.3.3", layout="centered")
+st.set_page_config(page_title="大判焼外交部ジェネレーター ver.3.3.1", layout="centered")
 
 # =========================================================
 # タイトル
 # =========================================================
-st.title("大判焼外交部ジェネレーター ver.3.3（通常 / ASCIIアート切替版）")
+st.title("大判焼外交部ジェネレーター ver.3.3.1（通常 / ASCIIアート切替版）")
 
 # =========================================================
 # 注意事項
@@ -61,7 +61,7 @@ FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
     "UnGungseo.ttf": "02. KOREA FONT",
 }
-AA_FONT_FILE = "Migu 1M Regular.ttf"
+AA_FONT_FILE = "Migu 1M Regular.ttf"   # 等幅フォント（要注意：スペース2個）
 
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 FONT_LABEL_LIST = list(FONT_LABELS.values())
@@ -69,7 +69,7 @@ FONT_LABEL_LIST = list(FONT_LABELS.values())
 ss = st.session_state
 
 # =========================================================
-# モード選択（追加）
+# モード選択（通常 / ASCIIアート）
 # =========================================================
 mode = st.radio("モード選択", ["通常モード", "ASCIIアートモード"])
 
@@ -87,14 +87,20 @@ if mode == "通常モード":
         FONT_LABEL_LIST,
         index=default_font_idx
     )
-    ss.font_choice = selected_label  # 状態保存
+    ss.font_choice = selected_label
     font_filename = FONT_MAP[selected_label]
 
     with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
+
 else:
-    # ASCIIアート用：等幅フォント固定
-    with open(os.path.join(FONT_DIR, AA_FONT_FILE), "rb") as f:
+    # ASCIIアートモード：等幅フォント固定
+    aa_path = os.path.join(FONT_DIR, AA_FONT_FILE)
+    if not os.path.exists(aa_path):
+        st.error(f"等幅フォント {AA_FONT_FILE} が見つかりません。fonts/ に配置してください。")
+        st.stop()
+
+    with open(aa_path, "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
 
 # =========================================================
@@ -151,7 +157,7 @@ ss.footer_right = st.text_input("下部（右）", ss.footer_right)
 if mode == "通常モード":
     ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
 else:
-    ss.yellow_words = ""  # AAではハイライト無効
+    ss.yellow_words = ""   # AAモードでは無効
 
 # =========================================================
 # Apply / Reset
@@ -164,12 +170,15 @@ with col_apply:
 with col_reset:
     if st.button("初期テキストに戻す"):
         keep_bg = ss.bg_choice
+        keep_font = ss.font_choice if "font_choice" in ss else None
         st.session_state.clear()
         st.session_state.bg_choice = keep_bg
+        if keep_font:
+            st.session_state.font_choice = keep_font
         st.rerun()
 
 # =========================================================
-# NGワードチェック
+# NGワードチェック（通常モードのみ）
 # =========================================================
 if mode == "通常モード":
     found = [ng for ng in NG_WORDS if ng and ng in ss.main_text]
@@ -183,7 +192,7 @@ if mode == "通常モード":
 if mode == "通常モード":
     main_js = html.escape(ss.main_text).replace("\n", "\\n")
 else:
-    # ASCIIアート → エスケープ禁止
+    # ASCIIアートモード → HTML escape禁止
     main_js = (
         ss.main_text
         .replace("\\", "\\\\")
@@ -195,11 +204,10 @@ else:
 footer_left_js = html.escape(ss.footer_left)
 footer_right_js = html.escape(ss.footer_right)
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
-bg_name_js = html.escape(ss.bg_choice)
 mode_js = "AA" if mode == "ASCIIアートモード" else "NORMAL"
 
 # =========================================================
-# HTML + JS
+# HTML + JS（全部入り）
 # =========================================================
 html_template = """
 <style>
@@ -207,9 +215,7 @@ html_template = """
     font-family: "customFont";
     src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
 }
-body {
-    margin: 0; padding: 0;
-}
+body { margin: 0; padding: 0; }
 </style>
 
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
@@ -221,18 +227,25 @@ body {
     画像を保存（JPEG）
   </button>
 
+  <button id="tweetBtn" style="
+      padding:12px 24px;border-radius:999px;border:none;
+      background:#1DA1F2;color:white;font-weight:700;
+      cursor:pointer;font-size:14px;">
+    𝕏に投稿する（画像は自分で貼ってね）
+  </button>
+
   <canvas id="posterCanvas" style="
       max-width:100%;border-radius:16px;
       box-shadow:0 10px 30px rgba(0,0,0,0.6);"></canvas>
 </div>
 
 <script>
-const bgData   = "{{BGDATA}}";
-const textRaw  = "{{MAIN}}".replace(/\\\\n/g,"\\n");
+const bgData      = "{{BGDATA}}";
+const textRaw     = "{{MAIN}}".replace(/\\\\n/g,"\\n");
 const footerLeft  = "{{LEFT}}";
 const footerRight = "{{RIGHT}}";
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
-const mode = "{{MODE}}";
+const mode        = "{{MODE}}";
 
 const MAX_WIDTH = 1300;
 const FONT_MAX = 420;
@@ -253,6 +266,7 @@ img.onload = async function() {
 
 function drawPoster() {
     const lines = textRaw.split("\\n");
+
     const origW = img.naturalWidth;
     const origH = img.naturalHeight;
 
@@ -272,8 +286,10 @@ function drawPoster() {
     const areaW = W - marginX * 2;
     const areaH = H - marginTop - marginBottom;
 
+    // === バイナリサーチ: 物理的に収まる最大フォント ===
     function canFit(fontSize) {
         ctx.font = fontSize + "px customFont";
+
         let maxLineWidth = 0;
         for (const line of lines) {
             const w = ctx.measureText(line).width;
@@ -286,21 +302,21 @@ function drawPoster() {
     let low = FONT_MIN, high = FONT_MAX, best = FONT_MIN;
     while (low <= high) {
         const mid = Math.floor((low + high)/2);
-        if (canFit(mid)) { best = mid; low = mid+1; }
-        else { high = mid-1; }
+        if (canFit(mid)) { best = mid; low = mid + 1; }
+        else { high = mid - 1; }
     }
 
     let fontSize = best;
 
+    // === モード別 補正 ===
     if (mode === "AA") {
-        // AAは縮小弱め
-        fontSize = fontSize * 0.96;
+        fontSize *= 0.96;
     } else {
         const lineCount = lines.length;
         const maxLen = Math.max(...lines.map(x=>x.length), 0);
 
-        const K_line = 1.0 / (1.0 + 0.010 * Math.max(lineCount - 3, 0));
-        const K_len  = 1.0 / (1.0 + 0.010 * Math.max(maxLen - 10, 0));
+        const K_line = 1 / (1 + 0.010 * Math.max(lineCount - 3, 0));
+        const K_len  = 1 / (1 + 0.010 * Math.max(maxLen - 10, 0));
 
         fontSize = best * K_line * K_len;
     }
@@ -314,11 +330,11 @@ function drawPoster() {
     let currentY = marginTop + (areaH - totalTextHeight) / 2 + fontSize*0.5;
 
     function drawColoredLine(line, centerX, y) {
-        ctx.font = fontSize+"px customFont";
+        ctx.font = fontSize + "px customFont";
 
         if (mode === "AA") {
-            ctx.fillStyle="white";
-            ctx.textAlign="center";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
             ctx.fillText(line, centerX, y);
             return;
         }
@@ -330,21 +346,27 @@ function drawPoster() {
             for (const w of yellowWords) {
                 if (w && line.startsWith(w, pos)) {
                     segs.push({text:w, yellow:true});
-                    pos+=w.length;
-                    matched=true; break;
+                    pos += w.length;
+                    matched = True;
+                    break;
                 }
             }
-            if (!matched) { segs.push({text:line[pos], yellow:false}); pos++; }
+            if (!matched) {
+                segs.push({text:line[pos], yellow:false});
+                pos++;
+            }
         }
 
-        let totalW=0;
-        for (const seg of segs) totalW+=ctx.measureText(seg.text).width;
-
-        let cursorX=centerX-totalW/2;
+        let totalW = 0;
         for (const seg of segs) {
-            ctx.fillStyle= seg.yellow? "#FFD700":"white";
+            totalW += ctx.measureText(seg.text).width;
+        }
+
+        let cursorX = centerX - totalW / 2;
+        for (const seg of segs) {
+            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.fillText(seg.text, cursorX, y);
-            cursorX+=ctx.measureText(seg.text).width;
+            cursorX += ctx.measureText(seg.text).width;
         }
     }
 
@@ -353,25 +375,38 @@ function drawPoster() {
         currentY += fontSize * LINE_GAP;
     }
 
-    const footerY = H*0.90;
-    const footerFont = Math.max(22, Math.floor(H*0.035));
+    // === フッター ===
+    const footerY = H * 0.90;
+    const footerFont = Math.max(22, Math.floor(H * 0.035));
     ctx.font = footerFont + "px customFont";
-    ctx.textAlign="left"; ctx.fillStyle="white";
-    ctx.fillText(footerLeft,  W*0.06, footerY);
 
-    ctx.textAlign="right";
-    ctx.fillText(footerRight, W*0.94, footerY);
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.fillText(footerLeft, W * 0.06, footerY);
+
+    ctx.textAlign = "right";
+    ctx.fillText(footerRight, W * 0.94, footerY);
 }
 
 document.getElementById("saveBtn").onclick = function() {
     canvas.toBlob(function(blob){
         if (!blob) return;
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement("a");
-        a.href=url; a.download="generated.jpg";
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "generated.jpg";
         document.body.appendChild(a); a.click();
-        setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},400);
-    },"image/jpeg",0.90);
+        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
+    }, "image/jpeg", 0.90);
+};
+
+// === X 投稿ボタン復活 ===
+document.getElementById("tweetBtn").onclick = function() {
+    const text = encodeURIComponent(
+        "この画像は『大判焼外交部ジェネレーター』で作りました。\\n" +
+        "https://ikan-no-i-gen.streamlit.app/\\n" +
+        "※画像は自動投稿されません。画像は自分で貼ってください。"
+    );
+    window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
 };
 </script>
 """
@@ -384,9 +419,7 @@ html_final = (
         .replace("{{YELLOW}}", yellow_js)
         .replace("{{FONTDATA}}", font_b64)
         .replace("{{BGDATA}}", bg_b64_safe)
-        .replace("{{BGNAME}}", bg_name_js)
         .replace("{{MODE}}", mode_js)
 )
 
 st_html(html_final, height=1050, scrolling=True)
-
