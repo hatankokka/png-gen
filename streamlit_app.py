@@ -90,7 +90,7 @@ DEFAULT_MAIN = """“われわれは
 大判焼問題で
 火遊びをするな
 火遊びをすれば
-必ず身を滅ぼす”"""
+시체는파괴되어야한다”"""
 
 DEFAULT_LEFT = "大判焼外交部報道官"
 DEFAULT_RIGHT = "2015年11月15日"
@@ -149,171 +149,171 @@ yellow_js      = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.s
 # HTMLテンプレ（SyntaxError回避のため join 形式）
 # =========================================================
 
-html_parts = [
+html_template = """
+<style>
+@font-face {
+    font-family: "customFont";
+    src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
+}
+</style>
 
-"<style>",
-"@font-face {",
-'    font-family: "customFont";',
-'    src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");',
-"}",
-"</style>",
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+  <button id="saveBtn" style="
+      padding:12px 24px;
+      border-radius:999px;
+      border:none;
+      background:#4CAF50;
+      color:white;
+      font-weight:700;
+      cursor:pointer;">
+    画像を保存（JPEG）
+  </button>
 
-'<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">',
+  <canvas id="posterCanvas" style="
+      max-width:100%;
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.6);"></canvas>
+</div>
 
-'  <button id="saveBtn" style="',
-'      padding:12px 24px;',
-'      border-radius:999px;',
-'      border:none;',
-'      background:#4CAF50;',
-'      color:white;',
-'      font-weight:700;',
-'      cursor:pointer;">',
-'    画像を保存（JPEG）',
-'  </button>',
+<script>
+const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");
+const footerLeft = "{{LEFT}}";
+const footerRight = "{{RIGHT}}";
+const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
 
-'  <canvas id="posterCanvas" style="',
-'      max-width:100%;',
-'      border-radius:16px;',
-'      box-shadow:0 10px 30px rgba(0,0,0,0.6);"></canvas>',
+const img = new Image();
+img.src = "data:image/png;base64,{{BG}}";
 
-"</div>",
+const canvas = document.getElementById("posterCanvas");
+const ctx = canvas.getContext("2d");
 
-"<script>",
+// フォントロード
+img.onload = async function() {
+    await document.fonts.load("30px customFont");
+    drawPoster();
+};
 
-'const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");',
-'const footerLeft = "{{LEFT}}";',
-'const footerRight = "{{RIGHT}}";',
-'const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);',
+function drawPoster() {
 
-'const img = new Image();',
-'img.src = "data:image/png;base64,{{BG}}";',
+    const W = img.naturalWidth;
+    const H = img.naturalHeight;
+    canvas.width = W;
+    canvas.height = H;
+    ctx.drawImage(img,0,0,W,H);
 
-'const canvas = document.getElementById("posterCanvas");',
-'const ctx = canvas.getContext("2d");',
+    const VW = 7000, VH = 9000;
+    const S = Math.min(W/VW, H/VH);
 
-'img.onload = async function() {',
-'    await document.fonts.load("20px customFont");',
-'    drawPoster();',
-'};',
+    const virtualTop = 2500;
+    const virtualBottom = 6500;
+    const areaW = VW*0.9, areaH = virtualBottom - virtualTop;
 
-"function drawPoster() {",
+    // ←←← 改行を100％復活させるポイント
+    const lines = textRaw
+        .replace(/\\r\\n/g, "\\n")
+        .replace(/\\n/g, "\\n")
+        .split("\\n");
 
-"    const W = img.naturalWidth;",
-"    const H = img.naturalHeight;",
-"    canvas.width = W;",
-"    canvas.height = H;",
-"    ctx.drawImage(img,0,0,W,H);",
+    const lineGap = 1.3;
+    let fontSize = 400;
 
-"    const VW = 7000, VH = 9000;",
-"    const S = Math.min(W/VW, H/VH);",
+    function maxWidth(fs) {
+        ctx.font = `${fs*S}px customFont`;
+        let m=0;
+        for(const l of lines){
+            m = Math.max(m, ctx.measureText(l).width);
+        }
+        return m/S;
+    }
 
-"    const virtualTop = 2500;",
-"    const virtualBottom = 6500;",
-"    const areaW = VW*0.9, areaH = virtualBottom - virtualTop;",
+    function totalHeight(fs){
+        return lines.length * fs * lineGap;
+    }
 
-"    const lines = textRaw.split(\"\\\\n\");",
-"    const lineGap = 1.3;",
+    while(fontSize >= 80){
+        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;
+        fontSize -= 20;
+    }
 
-"    let fontSize = 400;",
+    function drawColoredLine(line,vx,vy){
+        ctx.font = `${fontSize*S}px customFont`;
+        const x = vx*S, y = vy*S;
 
-"    function maxWidth(fs) {",
-"        ctx.font = `${fs*S}px customFont`;",
-"        let m=0;",
-"        for(const l of lines){",
-"            m = Math.max(m, ctx.measureText(l).width);",
-"        }",
-"        return m/S;",
-"    }",
+        let segs=[], pos=0;
 
-"    function totalHeight(fs){",
-"        return lines.length * fs * lineGap;",
-"    }",
+        while(pos < line.length){
+            let matched=false;
+            for(const w of yellowWords){
+                if(line.startsWith(w,pos)){
+                    segs.push({text:w,yellow:true});
+                    pos+=w.length;
+                    matched=true;
+                    break;
+                }
+            }
+            if(!matched){
+                segs.push({text:line[pos],yellow:false});
+                pos++;
+            }
+        }
 
-"    while(fontSize >= 80){",
-"        if(maxWidth(fontSize) <= areaW && totalHeight(fontSize) <= areaH) break;",
-"        fontSize -= 20;",
-"    }",
+        let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
+        let cursor = x - totalW/2;
 
-"    function drawColoredLine(line,vx,vy){",
-"        ctx.font = `${fontSize*S}px customFont`;",
-"        const x = vx*S, y = vy*S;",
+        for(const seg of segs){
+            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+            ctx.textBaseline="middle";
+            ctx.fillText(seg.text, cursor, y);
+            cursor += ctx.measureText(seg.text).width;
+        }
+    }
 
-"        let segs=[], pos=0;",
+    let tH = totalHeight(fontSize);
+    let yStart = virtualTop + (areaH - tH)/2;
 
-"        while(pos < line.length){",
-"            let matched=false;",
-"            for(const w of yellowWords){",
-"                if(line.startsWith(w,pos)){",
-"                    segs.push({text:w,yellow:true});",
-"                    pos+=w.length;",
-"                    matched=true;",
-"                    break;",
-"                }",
-"            }",
-"            if(!matched){",
-"                segs.push({text:line[pos],yellow:false});",
-"                pos++;",
-"            }",
-"        }",
+    for(const line of lines){
+        drawColoredLine(line,VW*0.5,yStart);
+        yStart += fontSize*lineGap;
+    }
 
-"        let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);",
-"        let cursor = x - totalW/2;",
+    const footerY = 8200;
+    ctx.fillStyle="white";
+    ctx.textBaseline="middle";
+    ctx.font = `${280*S}px customFont`;
 
-"        for(const seg of segs){",
-"            ctx.fillStyle = seg.yellow ? \"#FFD700\" : \"white\";",
-"            ctx.textBaseline=\"middle\";",
-"            ctx.fillText(seg.text, cursor, y);",
-"            cursor += ctx.measureText(seg.text).width;",
-"        }",
-"    }",
+    ctx.textAlign="left";
+    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
 
-"    let tH = totalHeight(fontSize);",
-"    let yStart = virtualTop + (areaH - tH)/2;",
+    ctx.textAlign="right";
+    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
+}
 
-"    for(const line of lines){",
-"        drawColoredLine(line,VW*0.5,yStart);",
-"        yStart += fontSize*lineGap;",
-"    }",
+document.getElementById("saveBtn").onclick = function(){
+    canvas.toBlob(function(blob){
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "generated.jpg";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
+    }, "image/jpeg", 0.88);
+};
+</script>
+"""
 
-"    const footerY = 8200;",
-"    ctx.fillStyle=\"white\";",
-"    ctx.textBaseline=\"middle\";",
-"    ctx.font = `${280*S}px customFont`;",
 
-"    ctx.textAlign=\"left\";",
-"    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);",
-
-"    ctx.textAlign=\"right\";",
-"    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);",
-"}",
-
-'document.getElementById("saveBtn").onclick = function(){',
-'    canvas.toBlob(function(blob){',
-'        const url = URL.createObjectURL(blob);',
-'        const a = document.createElement("a");',
-'        a.href = url;',
-'        a.download = "generated.jpg";',
-'        document.body.appendChild(a);',
-'        a.click();',
-'        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);',
-'    }, "image/jpeg", 0.88);',
-'};',
-
-"</script>"
-
-]
-
-# ========= HTML 出力 =========
-html_final = "".join(html_parts)
 html_final = (
-    html_final
-    .replace("{{MAIN}}",        main_js)
-    .replace("{{LEFT}}",        footer_left_js)
-    .replace("{{RIGHT}}",       footer_right_js)
-    .replace("{{YELLOW}}",      yellow_js)
-    .replace("{{BG}}",          bg_b64)
-    .replace("{{FONTDATA}}",    font_b64)
+    html_template
+    .replace("{{MAIN}}", main_js)
+    .replace("{{LEFT}}", footer_left_js)
+    .replace("{{RIGHT}}", footer_right_js)
+    .replace("{{YELLOW}}", yellow_js)
+    .replace("{{BG}}", bg_b64)
+    .replace("{{FONTDATA}}", font_b64)
 )
 
+
 st_html(html_final, height=980, scrolling=True)
+
 
