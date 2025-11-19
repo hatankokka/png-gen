@@ -34,12 +34,12 @@ st.markdown("""
 """)
 
 # =========================================================
-# NGワード
+# NGワード読み込み
 # =========================================================
 NG_FILE = ".streamlit/ng_words.txt"
 if os.path.exists(NG_FILE):
     with open(NG_FILE, "r", encoding="utf-8") as f:
-        NG_WORDS = [x.strip() for x in f if x.strip()]
+        NG_WORDS = [w.strip() for w in f if w.strip()]
 else:
     NG_WORDS = []
 
@@ -59,28 +59,20 @@ BACKGROUND_CHOICES = {
 FONT_DIR = "fonts"
 FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
-    "kppuskum.ttf": "02. 国規",
+    "Pwksbubo.ttf": "02.KOREA FONT",
 }
 
-FONT_FILES = [f for f in os.listdir(FONT_DIR) if f.endswith(".ttf")]
-FONT_OPTIONS = [FONT_LABELS.get(f, f) for f in FONT_FILES]
+# ラベル → ファイル名 の安定マップ
+FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 
-if "font_choice" not in st.session_state:
-    st.session_state.font_choice = FONT_OPTIONS[0]
+# フォント選択（1つだけ、正しいロジック）
+selected_label = st.selectbox("フォントを選択", list(FONT_LABELS.values()))
+font_filename = FONT_MAP[selected_label]
 
-selected_label = st.selectbox("フォントを選択", FONT_OPTIONS)
-st.session_state.font_choice = selected_label
-
-# ラベル → フォントファイル
-font_filename = None
-for fname, label in FONT_LABELS.items():
-    if label == selected_label:
-        font_filename = fname
-if font_filename is None:
-    font_filename = selected_label
-
+# フォント Base64 読み込み
 with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
     font_b64 = base64.b64encode(f.read()).decode()
+
 
 # =========================================================
 # 初期値
@@ -100,16 +92,11 @@ DEFAULT_YELLOW = "火遊び"
 # session_state
 # =========================================================
 ss = st.session_state
-if "main_text" not in ss:
-    ss.main_text = DEFAULT_MAIN
-if "footer_left" not in ss:
-    ss.footer_left = DEFAULT_LEFT
-if "footer_right" not in ss:
-    ss.footer_right = DEFAULT_RIGHT
-if "yellow_words" not in ss:
-    ss.yellow_words = DEFAULT_YELLOW
-if "bg_choice" not in ss:
-    ss.bg_choice = "背景 01"
+if "main_text" not in ss: ss.main_text = DEFAULT_MAIN
+if "footer_left" not in ss: ss.footer_left = DEFAULT_LEFT
+if "footer_right" not in ss: ss.footer_right = DEFAULT_RIGHT
+if "yellow_words" not in ss: ss.yellow_words = DEFAULT_YELLOW
+if "bg_choice" not in ss: ss.bg_choice = "背景 01"
 
 # =========================================================
 # 背景 UI
@@ -124,8 +111,9 @@ ss.bg_choice = bg_choice
 with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode()
 
+
 # =========================================================
-# 入力
+# 入力欄
 # =========================================================
 ss.main_text  = st.text_area("本文", ss.main_text, height=220)
 ss.footer_left  = st.text_input("下部（左）", ss.footer_left)
@@ -138,6 +126,7 @@ if found:
     st.error("⚠ NGワード → " + ", ".join(found))
     st.stop()
 
+
 # =========================================================
 # JS へ渡す値
 # =========================================================
@@ -145,10 +134,11 @@ main_js        = html.escape(ss.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(ss.footer_left)
 footer_right_js = html.escape(ss.footer_right)
 yellow_js      = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
-# =========================================================
-# HTMLテンプレ（SyntaxError回避のため join 形式）
-# =========================================================
 
+
+# =========================================================
+# HTML + JavaScript（Canvas 描画）
+# =========================================================
 html_template = """
 <style>
 @font-face {
@@ -187,7 +177,7 @@ img.src = "data:image/png;base64,{{BG}}";
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
-// フォントロード
+// フォントロード待ち
 img.onload = async function() {
     await document.fonts.load("30px customFont");
     drawPoster();
@@ -206,14 +196,10 @@ function drawPoster() {
 
     const virtualTop = 2500;
     const virtualBottom = 6500;
-    const areaW = VW*0.9, areaH = virtualBottom - virtualTop;
+    const areaW = VW * 0.9;
+    const areaH = virtualBottom - virtualTop;
 
-    // ←←← 改行を100％復活させるポイント
-    const lines = textRaw
-        .replace(/\\r\\n/g, "\\n")
-        .replace(/\\n/g, "\\n")
-        .split("\\n");
-
+    const lines = textRaw.split("\\n");
     const lineGap = 1.3;
     let fontSize = 400;
 
@@ -235,24 +221,25 @@ function drawPoster() {
         fontSize -= 20;
     }
 
-    function drawColoredLine(line,vx,vy){
+    function drawColoredLine(line, vx, vy){
         ctx.font = `${fontSize*S}px customFont`;
         const x = vx*S, y = vy*S;
 
-        let segs=[], pos=0;
+        let segs = [];
+        let pos = 0;
 
         while(pos < line.length){
             let matched=false;
             for(const w of yellowWords){
                 if(line.startsWith(w,pos)){
-                    segs.push({text:w,yellow:true});
+                    segs.push({text:w, yellow:true});
                     pos+=w.length;
                     matched=true;
                     break;
                 }
             }
             if(!matched){
-                segs.push({text:line[pos],yellow:false});
+                segs.push({text:line[pos], yellow:false});
                 pos++;
             }
         }
@@ -272,7 +259,7 @@ function drawPoster() {
     let yStart = virtualTop + (areaH - tH)/2;
 
     for(const line of lines){
-        drawColoredLine(line,VW*0.5,yStart);
+        drawColoredLine(line, VW*0.5, yStart);
         yStart += fontSize*lineGap;
     }
 
@@ -288,6 +275,7 @@ function drawPoster() {
     ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
 }
 
+// 保存
 document.getElementById("saveBtn").onclick = function(){
     canvas.toBlob(function(blob){
         const url = URL.createObjectURL(blob);
@@ -302,18 +290,17 @@ document.getElementById("saveBtn").onclick = function(){
 </script>
 """
 
-
+# =========================================================
+# HTML 出力
+# =========================================================
 html_final = (
     html_template
-    .replace("{{MAIN}}", main_js)
-    .replace("{{LEFT}}", footer_left_js)
-    .replace("{{RIGHT}}", footer_right_js)
-    .replace("{{YELLOW}}", yellow_js)
-    .replace("{{BG}}", bg_b64)
-    .replace("{{FONTDATA}}", font_b64)
+        .replace("{{MAIN}}", main_js)
+        .replace("{{LEFT}}", footer_left_js)
+        .replace("{{RIGHT}}", footer_right_js)
+        .replace("{{YELLOW}}", yellow_js)
+        .replace("{{BG}}", bg_b64)
+        .replace("{{FONTDATA}}", font_b64)
 )
 
-
 st_html(html_final, height=980, scrolling=True)
-
-
