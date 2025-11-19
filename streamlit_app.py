@@ -104,7 +104,11 @@ bg_choice = st.selectbox(
 ss.bg_choice = bg_choice
 
 with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
-    bg_b64 = base64.b64encode(f.read()).decode()
+    bg_b64_raw = f.read()
+    bg_b64 = base64.b64encode(bg_b64_raw).decode()
+
+# HTML embed は JS 文字列で壊れるため HTML エスケープする（重要）
+bg_b64_safe = html.escape(bg_b64)
 
 # =========================================================
 # 入力欄
@@ -137,7 +141,7 @@ if found:
     st.stop()
 
 # =========================================================
-# JS 化
+# JS 用データ
 # =========================================================
 main_js = html.escape(ss.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(ss.footer_left)
@@ -145,7 +149,7 @@ footer_right_js = html.escape(ss.footer_right)
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML / JS（Canvas + Tweet ボタン付き）
+# HTML + JS（背景画像修正版）
 # =========================================================
 html_template = """
 <style>
@@ -157,7 +161,6 @@ html_template = """
 
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
 
-  <!-- 保存ボタン -->
   <button id="saveBtn" style="
       padding:12px 24px;
       border-radius:999px;
@@ -169,7 +172,6 @@ html_template = """
     画像を保存（JPEG）
   </button>
 
-  <!-- Tweetボタン（復活版） -->
   <button id="tweetBtn" style="
       padding:12px 24px;
       border-radius:999px;
@@ -188,32 +190,37 @@ html_template = """
 </div>
 
 <script>
+// ===== Python → JS で安全受け取り =====
+const bgData = "{{BGDATA}}";  // ← ここが重要（壊れない）
+// ======================================
+
 const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");
 const footerLeft = "{{LEFT}}";
 const footerRight = "{{RIGHT}}";
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
 
 const img = new Image();
-img.src = "data:image/png;base64,{{BG}}";
+img.src = "data:image/png;base64," + bgData;  // ← JS 内で連結（安全）
 
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
-// フォントロード
 img.onload = async function() {
     await document.fonts.load("30px customFont");
     drawPoster();
 };
 
 function drawPoster() {
+
     const W = img.naturalWidth;
     const H = img.naturalHeight;
     canvas.width = W;
     canvas.height = H;
-    ctx.drawImage(img,0,0,W,H);
+
+    ctx.drawImage(img, 0, 0, W, H);
 
     const VW = 7000, VH = 9000;
-    const S  = Math.min(W/VW, H/VH);
+    const S = Math.min(W / VW, H / VH);
 
     const virtualTop = 2500;
     const virtualBottom = 6500;
@@ -224,7 +231,7 @@ function drawPoster() {
     const lineGap = 1.3;
     let fontSize = 400;
 
-    function maxWidth(fs){
+    function maxWidth(fs) {
         ctx.font = `${fs*S}px customFont`;
         let m=0;
         for(const l of lines){
@@ -242,7 +249,7 @@ function drawPoster() {
         fontSize -= 20;
     }
 
-    function drawColoredLine(line, vx, vy){
+    function drawColoredLine(line, vx, vy) {
         ctx.font = `${fontSize*S}px customFont`;
         const xCenter = vx*S;
         const y = vy*S;
@@ -271,35 +278,34 @@ function drawPoster() {
 
         let cursor=xCenter-totalW/2;
         for(const seg of segs){
-            ctx.fillStyle=seg.yellow?"#FFD700":"white";
-            ctx.textBaseline="middle";
-            ctx.fillText(seg.text,cursor,y);
+            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+            ctx.textBaseline = "middle";
+            ctx.fillText(seg.text, cursor, y);
             cursor+=ctx.measureText(seg.text).width;
         }
     }
 
-    let tH=totalHeight(fontSize);
-    let yStart=virtualTop+(areaH-tH)/2;
+    let tH = totalHeight(fontSize);
+    let yStart = virtualTop + (areaH - tH) / 2;
 
     for(const line of lines){
-        drawColoredLine(line,VW*0.5,yStart);
-        yStart+=fontSize*lineGap;
+        drawColoredLine(line, VW*0.5, yStart);
+        yStart += fontSize*lineGap;
     }
 
-    const footerY=8200;
+    const footerY = 8200;
     ctx.fillStyle="white";
     ctx.textBaseline="middle";
-    ctx.font=`${280*S}px customFont`;
+    ctx.font = `${280*S}px customFont`;
 
     ctx.textAlign="left";
-    ctx.fillText(footerLeft,(VW*0.05)*S,footerY*S);
+    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
 
     ctx.textAlign="right";
-    ctx.fillText(footerRight,(VW*0.95)*S,footerY*S);
+    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
 }
 
-// 保存
-document.getElementById("saveBtn").onclick=function(){
+document.getElementById("saveBtn").onclick = function(){
     canvas.toBlob(function(blob){
         const url=URL.createObjectURL(blob);
         const a=document.createElement("a");
@@ -308,13 +314,12 @@ document.getElementById("saveBtn").onclick=function(){
         document.body.appendChild(a);
         a.click();
         setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},400);
-    },"image/jpeg",0.88);
+    }, "image/jpeg", 0.88);
 };
 
-// Tweetボタン（復活）
 document.getElementById("tweetBtn").onclick=function(){
     const text=encodeURIComponent(
-        "この画像は『大判焼外交部ジェネレーター』で作りました。\n※画像は自動投稿されません。自分で貼ってください。\nhttps://ikan-no-i-gen.streamlit.app/"
+        "この画像は『大判焼外交部ジェネレーター』で作りました。\\n※画像は自動投稿されません。自分で貼ってください。"
     );
     window.open("https://twitter.com/intent/tweet?text="+text,"_blank");
 };
@@ -328,8 +333,8 @@ html_final = (
     .replace("{{LEFT}}", footer_left_js)
     .replace("{{RIGHT}}", footer_right_js)
     .replace("{{YELLOW}}", yellow_js)
-    .replace("{{BG}}", bg_b64)
     .replace("{{FONTDATA}}", font_b64)
+    .replace("{{BGDATA}}", bg_b64_safe)     # ← ここが重要
 )
 
 st_html(html_final, height=1050, scrolling=True)
