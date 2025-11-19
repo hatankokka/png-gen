@@ -62,7 +62,6 @@ FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
     "UnGungseo.ttf": "02. KOREA FONT",
 }
-# ASCIIアートモード用フォント（ms PGothic 互換）
 AA_FONT_FILE = "ms-pgothic-regular.ttf"
 
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
@@ -71,7 +70,7 @@ FONT_LABEL_LIST = list(FONT_LABELS.values())
 ss = st.session_state
 
 # =========================================================
-# モード選択（通常 / ASCIIアート）
+# モード選択
 # =========================================================
 mode = st.radio("モード選択", ["通常モード", "ASCIIアートモード"])
 
@@ -80,14 +79,13 @@ mode = st.radio("モード選択", ["通常モード", "ASCIIアートモード"
 # =========================================================
 if mode == "通常モード":
     if "font_choice" in ss and ss.font_choice in FONT_LABEL_LIST:
-        default_font_idx = FONT_LABEL_LIST.index(ss.font_choice)
+        default_idx = FONT_LABEL_LIST.index(ss.font_choice)
     else:
-        default_font_idx = 0
+        default_idx = 0
 
     selected_label = st.selectbox(
         "フォントを選択（通常モードのみ）",
-        FONT_LABEL_LIST,
-        index=default_font_idx
+        FONT_LABEL_LIST, index=default_idx
     )
     ss.font_choice = selected_label
     font_filename = FONT_MAP[selected_label]
@@ -95,12 +93,10 @@ if mode == "通常モード":
     with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
 else:
-    # ASCIIアートモード → ms PGothic を always 使用
     aa_path = os.path.join(FONT_DIR, AA_FONT_FILE)
     if not os.path.exists(aa_path):
-        st.error(f"フォント {AA_FONT_FILE} が見つかりません。fonts/ に配置してください。")
+        st.error(f"フォント {AA_FONT_FILE} がありません。fonts/ に置いてください。")
         st.stop()
-
     with open(aa_path, "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
 
@@ -119,7 +115,7 @@ DEFAULT_RIGHT = "2015年11月15日"
 DEFAULT_YELLOW = "火遊び"
 
 # =========================================================
-# session_state 初期化
+# session_state
 # =========================================================
 if "main_text" not in ss:
     ss.main_text = DEFAULT_MAIN
@@ -138,15 +134,13 @@ if "bg_choice" not in ss:
 bg_choice = st.selectbox(
     "背景画像を選択",
     list(BACKGROUND_CHOICES.keys()),
-    index=list(BACKGROUND_CHOICES.keys()).index(ss.bg_choice),
+    index=list(BACKGROUND_CHOICES.keys()).index(ss.bg_choice)
 )
 ss.bg_choice = bg_choice
 
 with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
-    bg_b64_raw = f.read()
-    bg_b64 = base64.b64encode(bg_b64_raw).decode()
-
-bg_b64_safe = html.escape(bg_b64)
+    bg_data = base64.b64encode(f.read()).decode()
+bg_safe = html.escape(bg_data)
 
 # =========================================================
 # 入力欄
@@ -160,62 +154,69 @@ if mode == "通常モード":
 else:
     ss.yellow_words = ""
 
+
 # =========================================================
 # Apply / Reset
 # =========================================================
-col_apply, col_reset = st.columns(2)
-with col_apply:
+col1, col2 = st.columns(2)
+with col1:
     if st.button("反映する"):
         st.rerun()
 
-with col_reset:
+with col2:
     if st.button("初期テキストに戻す"):
         keep_bg = ss.bg_choice
         keep_font = ss.font_choice if "font_choice" in ss else None
         st.session_state.clear()
-        st.session_state.bg_choice = keep_bg
+        ss.bg_choice = keep_bg
         if keep_font:
-            st.session_state.font_choice = keep_font
+            ss.font_choice = keep_font
         st.rerun()
 
 # =========================================================
 # NGワードチェック
 # =========================================================
 if mode == "通常モード":
-    found = [ng for ng in NG_WORDS if ng and ng in ss.main_text]
+    found = [ng for ng in NG_WORDS if ng in ss.main_text]
     if found:
-        st.error("⚠ NGワードが含まれています → " + ", ".join(found))
+        st.error("NGワードが含まれています: " + ", ".join(found))
         st.stop()
 
 # =========================================================
-# JS 用データ（JSON をそのまま埋め込む）
+# JSに渡すテキスト（JSON）
 # =========================================================
 main_js = json.dumps(ss.main_text)
-footer_left_js = json.dumps(ss.footer_left)
-footer_right_js = json.dumps(ss.footer_right)
+left_js = json.dumps(ss.footer_left)
+right_js = json.dumps(ss.footer_right)
 mode_js = json.dumps("AA" if mode == "ASCIIアートモード" else "NORMAL")
 
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
+
 # =========================================================
-# HTML + JS
+# HTML + JS（黄色対応・AA対応の修復版）
 # =========================================================
+#
+# ★ 通常：drawColoredLine() で黄色ハイライト
+# ★ AA：左寄せ・単色
+# ★ フォントサイズ探索は marginTop/marginBottom を厳守
+#
 html_template = """
 <style>
 @font-face {
     font-family: "customFont";
-    src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
+    src: url("data:font/ttf;base64,{{FONT}}") format("truetype");
 }
 </style>
 
-<div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+<div style="display:flex;flex-direction:column;align-items:center;">
   <button id="saveBtn">画像を保存（JPEG）</button>
   <button id="tweetBtn">Xに投稿する（画像は貼ってね）</button>
   <canvas id="posterCanvas" style="max-width:100%;border-radius:12px;"></canvas>
 </div>
 
 <script>
-const bgData      = "{{BGDATA}}";
+const bgData      = "{{BG}}";
 const textRaw     = {{MAIN}};
 const footerLeft  = {{LEFT}};
 const footerRight = {{RIGHT}};
@@ -233,10 +234,12 @@ img.src = "data:image/png;base64," + bgData;
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
+
 img.onload = async () => {
     await document.fonts.load("30px customFont");
     drawPoster();
 };
+
 
 function drawPoster() {
 
@@ -258,12 +261,48 @@ function drawPoster() {
     const marginTop = H * 0.18;
     const marginBottom = H * 0.20;
 
-    const areaW = W - marginX * 2;
+    const areaW = W - marginX*2;
     const areaH = H - marginTop - marginBottom;
 
-    // === フォントサイズ探索（安定版） ===
-    function canFit(fontSize) {
+    // ========== 黄色対応の描画関数 ==========
+    function drawColoredLine(line, centerX, y) {
         ctx.font = fontSize + "px customFont";
+
+        let segs = [];
+        let pos = 0;
+        while (pos < line.length) {
+            let found = false;
+            for (const w of yellowWords) {
+                if (w && line.startsWith(w, pos)) {
+                    segs.push({text:w, yellow:true});
+                    pos += w.length;
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                segs.push({text:line[pos], yellow:false});
+                pos++;
+            }
+        }
+
+        let totalW = 0;
+        for (const s of segs) {
+            totalW += ctx.measureText(s.text).width;
+        }
+
+        let x = centerX - totalW/2;
+
+        for (const s of segs) {
+            ctx.fillStyle = s.yellow ? "#FFD700" : "white";
+            ctx.fillText(s.text, x, y);
+            x += ctx.measureText(s.text).width;
+        }
+    }
+
+    // ========== フォントサイズ探索 ==========
+    function canFit(size) {
+        ctx.font = size + "px customFont";
 
         let maxWidth = 0;
         for (const line of lines) {
@@ -271,9 +310,8 @@ function drawPoster() {
             if (w > maxWidth) maxWidth = w;
         }
 
-        const totalHeight = lines.length * fontSize * LINE_GAP;
-
-        return maxWidth <= areaW && totalHeight <= areaH;
+        const totalH = lines.length * size * LINE_GAP;
+        return maxWidth <= areaW && totalH <= areaH;
     }
 
     let low = FONT_MIN;
@@ -281,7 +319,7 @@ function drawPoster() {
     let best = FONT_MIN;
 
     while (low <= high) {
-        const mid = Math.floor((low + high) / 2);
+        const mid = Math.floor((low + high)/2);
         if (canFit(mid)) {
             best = mid;
             low = mid + 1;
@@ -290,47 +328,50 @@ function drawPoster() {
         }
     }
 
-    let fontSize = best;
+    fontSize = best;
 
-    ctx.font = fontSize + "px customFont";
-    ctx.textBaseline = "middle";
+    // ========== Y開始位置（中央寄せ） ==========
+    const totalH = lines.length * fontSize * LINE_GAP;
+    let currentY = marginTop + (areaH - totalH)/2 + fontSize*0.5;
 
-    const totalHeight = lines.length * fontSize * LINE_GAP;
-    let currentY = marginTop + (areaH - totalHeight)/2 + fontSize*0.5;
-
+    // ========== 各行描画（通常：黄色 / AA：左寄せ） ==========
     for (const line of lines) {
 
         if (mode === "AA") {
             ctx.textAlign = "left";
             ctx.fillStyle = "white";
             ctx.fillText(line, marginX, currentY);
+
         } else {
             ctx.textAlign = "center";
-            ctx.fillStyle = "white";
-            ctx.fillText(line, W/2, currentY);
+            drawColoredLine(line, W/2, currentY);
         }
 
         currentY += fontSize * LINE_GAP;
     }
 
-    // フッター
+    // ========== フッター ==========
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
-    ctx.font = footerFont + "px customFont";
 
+    ctx.font = footerFont + "px customFont";
     ctx.textAlign = "left";
+    ctx.fillStyle = "white";
     ctx.fillText(footerLeft, W*0.06, footerY);
 
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W*0.94, footerY);
 }
 
+
 document.getElementById("saveBtn").onclick = function() {
-    canvas.toBlob((b)=>{ 
-        const url = URL.createObjectURL(b);
+    canvas.toBlob((blob)=> {
+        const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = url; a.download = "generated.jpg";
-        document.body.appendChild(a); a.click();
+        a.href = url;
+        a.download = "generated.jpg";
+        document.body.appendChild(a);
+        a.click();
         setTimeout(()=>{URL.revokeObjectURL(url); a.remove();}, 400);
     }, "image/jpeg", 0.90);
 };
@@ -344,15 +385,16 @@ document.getElementById("tweetBtn").onclick = function() {
 </script>
 """
 
+
 html_final = (
     html_template
         .replace("{{MAIN}}", main_js)
-        .replace("{{LEFT}}", footer_left_js)
-        .replace("{{RIGHT}}", footer_right_js)
+        .replace("{{LEFT}}", left_js)
+        .replace("{{RIGHT}}", right_js)
         .replace("{{YELLOW}}", yellow_js)
-        .replace("{{FONTDATA}}", font_b64)
-        .replace("{{BGDATA}}", bg_b64_safe)
+        .replace("{{FONT}}", font_b64)
+        .replace("{{BG}}", bg_safe)
         .replace("{{MODE}}", mode_js)
 )
 
-st_html(html_final, height=1050, scrolling=True)
+st_html(html_final, height=1100, scrolling=True)
