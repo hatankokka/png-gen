@@ -311,13 +311,11 @@ function drawPoster() {
     const lineCount = lines.length;
     const maxLen = Math.max(...lines.map(line => line.length), 0);
 
-    // ① 行数補正（行が多いほど少しずつ縮小、上限なし）
-    //    1〜3行 → ≒1.0、それ以降は 1 / (1 + 0.06*(行数−3)) で緩やかに低下
-    const K_line = 1.0 / (1.0 + 0.06 * Math.max(lineCount - 3, 0));
+    // ① 行数補正
+    const K_line = 1.0 / (1.0 + 0.015 * Math.max(lineCount - 3, 0));
 
-    // ② 最大文字数補正（最も長い行の文字数が大きいほど縮小）
-    //    10文字までは1.0、それ以降は 1 / (1 + 0.04*(maxLen−10))
-    const K_len = 1.0 / (1.0 + 0.04 * Math.max(maxLen - 10, 0));
+    // ② 最大文字数補正
+    const K_len = 1.0 / (1.0 + 0.015 * Math.max(maxLen - 10, 0));
 
     let fontSize = best * K_line * K_len;
 
@@ -434,3 +432,4 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
