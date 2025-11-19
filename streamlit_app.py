@@ -54,23 +54,23 @@ BACKGROUND_CHOICES = {
 }
 
 # =========================================================
-# フォント
+# フォント設定（←ここを書き換えた）
 # =========================================================
 FONT_DIR = "fonts"
 
 FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
-    "Pwksbubo.ttf": "02. KOREA FONT",
+    "UnGungseo.ttf": "02. KOREA FONT（UnGungseo）",
 }
 
 # ラベル → ファイル名マップ
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 
-# フォント選択 UI（1つだけ）
+# UI 表示
 selected_label = st.selectbox("フォントを選択", list(FONT_LABELS.values()))
 font_filename = FONT_MAP[selected_label]
 
-# フォント Base64 化
+# フォント Base64
 with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
     font_b64 = base64.b64encode(f.read()).decode()
 
@@ -89,7 +89,7 @@ DEFAULT_RIGHT = "2015年11月15日"
 DEFAULT_YELLOW = "火遊び"
 
 # =========================================================
-# session_state 初期化
+# session_state
 # =========================================================
 ss = st.session_state
 if "main_text" not in ss: ss.main_text = DEFAULT_MAIN
@@ -99,7 +99,7 @@ if "yellow_words" not in ss: ss.yellow_words = DEFAULT_YELLOW
 if "bg_choice" not in ss: ss.bg_choice = "背景 01"
 
 # =========================================================
-# 背景選択 UI
+# 背景選択
 # =========================================================
 bg_choice = st.selectbox(
     "背景画像を選択",
@@ -120,7 +120,7 @@ ss.footer_right = st.text_input("下部（右）", ss.footer_right)
 ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
 
 # =========================================================
-# 反映ボタン（Apply）と初期化ボタン
+# Apply / Reset
 # =========================================================
 if st.button("反映する"):
     st.rerun()
@@ -142,15 +142,15 @@ if found:
     st.stop()
 
 # =========================================================
-# JS へ渡す値作成
+# JS 化
 # =========================================================
-main_js        = html.escape(ss.main_text).replace("\n", "\\n")
+main_js = html.escape(ss.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(ss.footer_left)
 footer_right_js = html.escape(ss.footer_right)
-yellow_js      = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
+yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML + JavaScript（Canvas）
+# HTML + JS（Canvas）
 # =========================================================
 html_template = """
 <style>
@@ -303,7 +303,7 @@ document.getElementById("saveBtn").onclick = function(){
 """
 
 # =========================================================
-# HTML 出力
+# 出力
 # =========================================================
 html_final = (
     html_template
@@ -316,4 +316,3 @@ html_final = (
 )
 
 st_html(html_final, height=980, scrolling=True)
-
