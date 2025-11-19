@@ -4,12 +4,12 @@ import html
 import os
 from streamlit.components.v1 import html as st_html
 
-st.set_page_config(page_title="大判焼外交部ジェネレーター ver.2.0", layout="centered")
+st.set_page_config(page_title="大判焼外交部ジェネレーター ver.3.1", layout="centered")
 
 # =========================================================
 # タイトル
 # =========================================================
-st.title("大判焼外交部ジェネレーター ver.2.0")
+st.title("大判焼外交部ジェネレーター ver.3.1（スマホ最適化版）")
 
 # =========================================================
 # 注意事項
@@ -28,7 +28,7 @@ st.markdown("""
 
 #### 【免責事項】
 - 生成物によるトラブルに **当方は一切責任を負いません。**
-- 投稿・転載等は **利用者の自己責任** でお願いします。
+- SNS等への投稿・転載は **利用者の自己責任** でお願いします。
 
 ---
 """)
@@ -62,8 +62,18 @@ FONT_LABELS = {
     "UnGungseo.ttf": "02. KOREA FONT",
 }
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
+FONT_LABEL_LIST = list(FONT_LABELS.values())
 
-selected_label = st.selectbox("フォントを選択", list(FONT_LABELS.values()))
+ss = st.session_state
+
+# フォント選択のデフォルトインデックス
+if "font_choice" in ss and ss.font_choice in FONT_LABEL_LIST:
+    default_font_idx = FONT_LABEL_LIST.index(ss.font_choice)
+else:
+    default_font_idx = 0
+
+selected_label = st.selectbox("フォントを選択", FONT_LABEL_LIST, index=default_font_idx)
+ss.font_choice = selected_label  # 状態保存
 font_filename = FONT_MAP[selected_label]
 
 with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
@@ -84,9 +94,8 @@ DEFAULT_RIGHT = "2015年11月15日"
 DEFAULT_YELLOW = "火遊び"
 
 # =========================================================
-# session_state
+# session_state 初期化
 # =========================================================
-ss = st.session_state
 if "main_text" not in ss:
     ss.main_text = DEFAULT_MAIN
 if "footer_left" not in ss:
@@ -112,7 +121,7 @@ with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
     bg_b64_raw = f.read()
     bg_b64 = base64.b64encode(bg_b64_raw).decode()
 
-# HTML embed は JS 文字列で壊れるため HTML エスケープする（重要）
+# JS 文字列で壊れないようエスケープ
 bg_b64_safe = html.escape(bg_b64)
 
 # =========================================================
@@ -134,7 +143,7 @@ with col_apply:
 with col_reset:
     if st.button("初期テキストに戻す"):
         keep_bg = ss.bg_choice
-        keep_font = selected_label
+        keep_font = ss.font_choice
         st.session_state.clear()
         st.session_state.bg_choice = keep_bg
         st.session_state.font_choice = keep_font
@@ -143,18 +152,19 @@ with col_reset:
 # =========================================================
 # NGワードチェック
 # =========================================================
-found = [ng for ng in NG_WORDS if ng in ss.main_text]
+found = [ng for ng in NG_WORDS if ng and ng in ss.main_text]
 if found:
-    st.error("⚠ NGワード → " + ", ".join(found))
+    st.error("⚠ NGワードが含まれています → " + ", ".join(found))
     st.stop()
 
 # =========================================================
-# JS 用データ
+# JS 用データ整形
 # =========================================================
 main_js = html.escape(ss.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(ss.footer_left)
 footer_right_js = html.escape(ss.footer_right)
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
+bg_name_js = html.escape(ss.bg_choice)
 
 # =========================================================
 # HTML + JS（スマホ最適化版）
@@ -164,6 +174,10 @@ html_template = """
 @font-face {
     font-family: "customFont";
     src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
+}
+body {
+    margin: 0;
+    padding: 0;
 }
 </style>
 
@@ -176,7 +190,8 @@ html_template = """
       background:#4CAF50;
       color:white;
       font-weight:700;
-      cursor:pointer;">
+      cursor:pointer;
+      font-size:14px;">
     画像を保存（JPEG）
   </button>
 
@@ -187,8 +202,9 @@ html_template = """
       background:#1DA1F2;
       color:white;
       font-weight:700;
-      cursor:pointer;">
-    𝕏に投稿する（画像は貼ってね）
+      cursor:pointer;
+      font-size:14px;">
+    𝕏に投稿する（画像は自分で貼ってね）
   </button>
 
   <canvas id="posterCanvas" style="
@@ -199,19 +215,19 @@ html_template = """
 
 <script>
 // ===== Python → JS で安全受け取り =====
-const bgData = "{{BGDATA}}";  // Base64 PNG
-// ======================================
-
-const textRaw    = "{{MAIN}}".replace(/\\\\n/g,"\\n");
-const footerLeft = "{{LEFT}}";
+const bgData      = "{{BGDATA}}";   // Base64 PNG
+const textRaw     = "{{MAIN}}".replace(/\\\\n/g,"\\n");
+const footerLeft  = "{{LEFT}}";
 const footerRight = "{{RIGHT}}";
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
+const bgName      = "{{BGNAME}}";   // 今は補正には使わないが将来用に保持
+// ======================================
 
 // スマホ優先：最大横幅 1300px
 const MAX_WIDTH = 1300;
-const FONT_MAX = 400;  // 最大フォントサイズ
-const FONT_MIN = 60;   // 最小フォントサイズ
-const LINE_GAP = 1.3;
+const FONT_MAX = 420;   // バイナリサーチの上限
+const FONT_MIN = 40;    // 下限（AA用にかなり小さい文字も許容）
+const LINE_GAP = 1.3;   // 行間倍率
 
 const img = new Image();
 img.src = "data:image/png;base64," + bgData;
@@ -219,6 +235,7 @@ img.src = "data:image/png;base64," + bgData;
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
+// フォントロード後に描画
 img.onload = async function() {
     try {
         await document.fonts.load("30px customFont");
@@ -229,11 +246,14 @@ img.onload = async function() {
 };
 
 function drawPoster() {
-    // 元画像のサイズ
+    // 行配列
+    const lines = textRaw.split("\\n");
+
+    // 元画像サイズ
     const origW = img.naturalWidth;
     const origH = img.naturalHeight;
 
-    // 縦横比維持したまま MAX_WIDTH 以下に縮小
+    // 縦横比を維持したまま MAX_WIDTH に合わせて縮小
     let scale = 1.0;
     if (origW > MAX_WIDTH) {
         scale = MAX_WIDTH / origW;
@@ -244,10 +264,10 @@ function drawPoster() {
     canvas.width = W;
     canvas.height = H;
 
-    // 背景描画（縮小後）
+    // 背景描画
     ctx.drawImage(img, 0, 0, W, H);
 
-    // テキスト描画エリア（上下10%ずつ余白、本文エリアは中央あたり）
+    // テキスト描画エリア
     const marginX = W * 0.08;
     const marginTop = H * 0.18;
     const marginBottom = H * 0.20;
@@ -257,9 +277,7 @@ function drawPoster() {
     const areaY = marginTop;
     const areaH = H - marginTop - marginBottom;
 
-    const lines = textRaw.split("\\n");
-
-    // バイナリサーチでフォントサイズ決定
+    // バイナリサーチで「物理的に収まる最大フォントサイズ」を探索
     function canFit(fontSize) {
         ctx.font = fontSize + "px customFont";
 
@@ -289,17 +307,35 @@ function drawPoster() {
         }
     }
 
-    const fontSize = best;
+    // ======== スマホ最適化ロジック（行数 & 最大文字数の連続補正） ========
+    const lineCount = lines.length;
+    const maxLen = Math.max(...lines.map(line => line.length), 0);
+
+    // ① 行数補正（行が多いほど少しずつ縮小、上限なし）
+    //    1〜3行 → ≒1.0、それ以降は 1 / (1 + 0.06*(行数−3)) で緩やかに低下
+    const K_line = 1.0 / (1.0 + 0.06 * Math.max(lineCount - 3, 0));
+
+    // ② 最大文字数補正（最も長い行の文字数が大きいほど縮小）
+    //    10文字までは1.0、それ以降は 1 / (1 + 0.04*(maxLen−10))
+    const K_len = 1.0 / (1.0 + 0.04 * Math.max(maxLen - 10, 0));
+
+    let fontSize = best * K_line * K_len;
+
+    // さすがに小さすぎる場合の下限（AAも想定して極端な制限はしないが、10pxは切らない）
+    if (fontSize < 10) fontSize = 10;
+
     ctx.font = fontSize + "px customFont";
     ctx.textBaseline = "middle";
 
+    // 全体のテキスト高さを計算して縦中央寄せ
     const totalTextHeight = lines.length * fontSize * LINE_GAP;
     let currentY = areaY + (areaH - totalTextHeight) / 2 + fontSize * 0.5;
 
+    // 黄色強調単語に応じて色分け描画する関数
     function drawColoredLine(line, centerX, y) {
         ctx.font = fontSize + "px customFont";
 
-        // 黄色単語分割
+        // 黄色単語で分割
         let segs = [];
         let pos = 0;
         while (pos < line.length) {
@@ -318,7 +354,7 @@ function drawPoster() {
             }
         }
 
-        // 全体幅を測定
+        // 全体幅を測る
         let totalW = 0;
         for (const seg of segs) {
             totalW += ctx.measureText(seg.text).width;
@@ -332,6 +368,7 @@ function drawPoster() {
         }
     }
 
+    // 本文描画
     for (const line of lines) {
         drawColoredLine(line, W * 0.5, currentY);
         currentY += fontSize * LINE_GAP;
@@ -343,7 +380,7 @@ function drawPoster() {
     ctx.fillStyle = "white";
 
     // フッターのフォントサイズは画像高さに応じて決定
-    const footerFontSize = Math.max(24, Math.floor(H * 0.035));
+    const footerFontSize = Math.max(22, Math.floor(H * 0.035));
     ctx.font = footerFontSize + "px customFont";
 
     // 左下
@@ -369,13 +406,15 @@ document.getElementById("saveBtn").onclick = function() {
             URL.revokeObjectURL(url);
             a.remove();
         }, 400);
-    }, "image/jpeg", 0.88);
+    }, "image/jpeg", 0.90);
 };
 
 // X 投稿ボタン
 document.getElementById("tweetBtn").onclick = function() {
     const text = encodeURIComponent(
-        "この画像は『大判焼外交部ジェネレーター』で作りました。\\nhttps://ikan-no-i-gen.streamlit.app/\\n※画像は自動投稿されません。自分で貼ってください。"
+        "この画像は『大判焼外交部ジェネレーター』で作りました。\\n" +
+        "https://ikan-no-i-gen.streamlit.app/\\n" +
+        "※画像は自動投稿されません。画像は自分で貼ってください。"
     );
     window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
 };
@@ -391,7 +430,7 @@ html_final = (
     .replace("{{YELLOW}}", yellow_js)
     .replace("{{FONTDATA}}", font_b64)
     .replace("{{BGDATA}}", bg_b64_safe)
+    .replace("{{BGNAME}}", bg_name_js)
 )
 
 st_html(html_final, height=1050, scrolling=True)
-
