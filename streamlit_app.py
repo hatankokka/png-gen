@@ -54,23 +54,18 @@ BACKGROUND_CHOICES = {
 }
 
 # =========================================================
-# フォント設定（←ここを書き換えた）
+# フォント
 # =========================================================
 FONT_DIR = "fonts"
-
 FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
-    "UnGungseo.ttf": "02. KOREA FONT（UnGungseo）",
+    "UnGungseo.ttf": "02. KOREA FONT",
 }
-
-# ラベル → ファイル名マップ
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 
-# UI 表示
 selected_label = st.selectbox("フォントを選択", list(FONT_LABELS.values()))
 font_filename = FONT_MAP[selected_label]
 
-# フォント Base64
 with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
     font_b64 = base64.b64encode(f.read()).decode()
 
@@ -150,7 +145,7 @@ footer_right_js = html.escape(ss.footer_right)
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
 # =========================================================
-# HTML + JS（Canvas）
+# HTML / JS（Canvas + Tweet ボタン付き）
 # =========================================================
 html_template = """
 <style>
@@ -161,6 +156,8 @@ html_template = """
 </style>
 
 <div style="display:flex;flex-direction:column;align-items:center;gap:16px;">
+
+  <!-- 保存ボタン -->
   <button id="saveBtn" style="
       padding:12px 24px;
       border-radius:999px;
@@ -170,6 +167,18 @@ html_template = """
       font-weight:700;
       cursor:pointer;">
     画像を保存（JPEG）
+  </button>
+
+  <!-- Tweetボタン（復活版） -->
+  <button id="tweetBtn" style="
+      padding:12px 24px;
+      border-radius:999px;
+      border:none;
+      background:#1DA1F2;
+      color:white;
+      font-weight:700;
+      cursor:pointer;">
+    𝕏に投稿する（画像は貼ってね）
   </button>
 
   <canvas id="posterCanvas" style="
@@ -197,7 +206,6 @@ img.onload = async function() {
 };
 
 function drawPoster() {
-
     const W = img.naturalWidth;
     const H = img.naturalHeight;
     canvas.width = W;
@@ -205,7 +213,7 @@ function drawPoster() {
     ctx.drawImage(img,0,0,W,H);
 
     const VW = 7000, VH = 9000;
-    const S = Math.min(W/VW, H/VH);
+    const S  = Math.min(W/VW, H/VH);
 
     const virtualTop = 2500;
     const virtualBottom = 6500;
@@ -216,7 +224,7 @@ function drawPoster() {
     const lineGap = 1.3;
     let fontSize = 400;
 
-    function maxWidth(fs) {
+    function maxWidth(fs){
         ctx.font = `${fs*S}px customFont`;
         let m=0;
         for(const l of lines){
@@ -236,14 +244,14 @@ function drawPoster() {
 
     function drawColoredLine(line, vx, vy){
         ctx.font = `${fontSize*S}px customFont`;
-        const x = vx*S, y = vy*S;
+        const xCenter = vx*S;
+        const y = vy*S;
 
         let segs=[], pos=0;
-
         while(pos < line.length){
             let matched=false;
             for(const w of yellowWords){
-                if(line.startsWith(w,pos)){
+                if(w && line.startsWith(w,pos)){
                     segs.push({text:w,yellow:true});
                     pos+=w.length;
                     matched=true;
@@ -256,55 +264,64 @@ function drawPoster() {
             }
         }
 
-        let totalW = segs.reduce((s,a)=>s+ctx.measureText(a.text).width,0);
-        let cursor = x - totalW/2;
-
+        let totalW=0;
         for(const seg of segs){
-            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+            totalW+=ctx.measureText(seg.text).width;
+        }
+
+        let cursor=xCenter-totalW/2;
+        for(const seg of segs){
+            ctx.fillStyle=seg.yellow?"#FFD700":"white";
             ctx.textBaseline="middle";
-            ctx.fillText(seg.text, cursor, y);
-            cursor += ctx.measureText(seg.text).width;
+            ctx.fillText(seg.text,cursor,y);
+            cursor+=ctx.measureText(seg.text).width;
         }
     }
 
-    let tH = totalHeight(fontSize);
-    let yStart = virtualTop + (areaH - tH)/2;
+    let tH=totalHeight(fontSize);
+    let yStart=virtualTop+(areaH-tH)/2;
 
     for(const line of lines){
         drawColoredLine(line,VW*0.5,yStart);
-        yStart += fontSize*lineGap;
+        yStart+=fontSize*lineGap;
     }
 
-    const footerY = 8200;
+    const footerY=8200;
     ctx.fillStyle="white";
     ctx.textBaseline="middle";
-    ctx.font = `${280*S}px customFont`;
+    ctx.font=`${280*S}px customFont`;
 
     ctx.textAlign="left";
-    ctx.fillText(footerLeft, (VW*0.05)*S, footerY*S);
+    ctx.fillText(footerLeft,(VW*0.05)*S,footerY*S);
 
     ctx.textAlign="right";
-    ctx.fillText(footerRight, (VW*0.95)*S, footerY*S);
+    ctx.fillText(footerRight,(VW*0.95)*S,footerY*S);
 }
 
 // 保存
-document.getElementById("saveBtn").onclick = function(){
+document.getElementById("saveBtn").onclick=function(){
     canvas.toBlob(function(blob){
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "generated.jpg";
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement("a");
+        a.href=url;
+        a.download="generated.jpg";
         document.body.appendChild(a);
         a.click();
-        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
-    }, "image/jpeg", 0.88);
+        setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},400);
+    },"image/jpeg",0.88);
+};
+
+// Tweetボタン（復活）
+document.getElementById("tweetBtn").onclick=function(){
+    const text=encodeURIComponent(
+        "この画像は『大判焼外交部ジェネレーター』で作りました。\n※画像は自動投稿されません。自分で貼ってください。\nhttps://ikan-no-i-gen.streamlit.app/"
+    );
+    window.open("https://twitter.com/intent/tweet?text="+text,"_blank");
 };
 </script>
 """
 
-# =========================================================
 # 出力
-# =========================================================
 html_final = (
     html_template
     .replace("{{MAIN}}", main_js)
@@ -315,4 +332,4 @@ html_final = (
     .replace("{{FONTDATA}}", font_b64)
 )
 
-st_html(html_final, height=980, scrolling=True)
+st_html(html_final, height=1050, scrolling=True)
