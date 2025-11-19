@@ -347,7 +347,7 @@ function drawPoster() {
                 if (w && line.startsWith(w, pos)) {
                     segs.push({text:w, yellow:true});
                     pos += w.length;
-                    matched = True;
+                    matched = true;
                     break;
                 }
             }
@@ -423,3 +423,4 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
