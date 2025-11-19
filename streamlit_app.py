@@ -57,22 +57,22 @@ BACKGROUND_CHOICES = {
 # フォント
 # =========================================================
 FONT_DIR = "fonts"
+
 FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. 明朝",
-    "Pwksbubo.ttf": "02.KOREA FONT",
+    "Pwksbubo.ttf": "02. KOREA FONT",
 }
 
-# ラベル → ファイル名 の安定マップ
+# ラベル → ファイル名マップ
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 
-# フォント選択（1つだけ、正しいロジック）
+# フォント選択 UI（1つだけ）
 selected_label = st.selectbox("フォントを選択", list(FONT_LABELS.values()))
 font_filename = FONT_MAP[selected_label]
 
-# フォント Base64 読み込み
+# フォント Base64 化
 with open(os.path.join(FONT_DIR, font_filename), "rb") as f:
     font_b64 = base64.b64encode(f.read()).decode()
-
 
 # =========================================================
 # 初期値
@@ -89,7 +89,7 @@ DEFAULT_RIGHT = "2015年11月15日"
 DEFAULT_YELLOW = "火遊び"
 
 # =========================================================
-# session_state
+# session_state 初期化
 # =========================================================
 ss = st.session_state
 if "main_text" not in ss: ss.main_text = DEFAULT_MAIN
@@ -99,7 +99,7 @@ if "yellow_words" not in ss: ss.yellow_words = DEFAULT_YELLOW
 if "bg_choice" not in ss: ss.bg_choice = "背景 01"
 
 # =========================================================
-# 背景 UI
+# 背景選択 UI
 # =========================================================
 bg_choice = st.selectbox(
     "背景画像を選択",
@@ -111,7 +111,6 @@ ss.bg_choice = bg_choice
 with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
     bg_b64 = base64.b64encode(f.read()).decode()
 
-
 # =========================================================
 # 入力欄
 # =========================================================
@@ -120,24 +119,38 @@ ss.footer_left  = st.text_input("下部（左）", ss.footer_left)
 ss.footer_right = st.text_input("下部（右）", ss.footer_right)
 ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
 
-# NG チェック
+# =========================================================
+# 反映ボタン（Apply）と初期化ボタン
+# =========================================================
+if st.button("反映する"):
+    st.rerun()
+
+if st.button("初期テキストに戻す"):
+    keep_bg = ss.bg_choice
+    keep_font = selected_label
+    st.session_state.clear()
+    st.session_state.bg_choice = keep_bg
+    st.session_state.font_choice = keep_font
+    st.rerun()
+
+# =========================================================
+# NGワードチェック
+# =========================================================
 found = [ng for ng in NG_WORDS if ng in ss.main_text]
 if found:
     st.error("⚠ NGワード → " + ", ".join(found))
     st.stop()
 
-
 # =========================================================
-# JS へ渡す値
+# JS へ渡す値作成
 # =========================================================
 main_js        = html.escape(ss.main_text).replace("\n", "\\n")
 footer_left_js = html.escape(ss.footer_left)
 footer_right_js = html.escape(ss.footer_right)
 yellow_js      = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
-
 # =========================================================
-# HTML + JavaScript（Canvas 描画）
+# HTML + JavaScript（Canvas）
 # =========================================================
 html_template = """
 <style>
@@ -177,7 +190,7 @@ img.src = "data:image/png;base64,{{BG}}";
 const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
-// フォントロード待ち
+// フォントロード
 img.onload = async function() {
     await document.fonts.load("30px customFont");
     drawPoster();
@@ -225,21 +238,20 @@ function drawPoster() {
         ctx.font = `${fontSize*S}px customFont`;
         const x = vx*S, y = vy*S;
 
-        let segs = [];
-        let pos = 0;
+        let segs=[], pos=0;
 
         while(pos < line.length){
             let matched=false;
             for(const w of yellowWords){
                 if(line.startsWith(w,pos)){
-                    segs.push({text:w, yellow:true});
+                    segs.push({text:w,yellow:true});
                     pos+=w.length;
                     matched=true;
                     break;
                 }
             }
             if(!matched){
-                segs.push({text:line[pos], yellow:false});
+                segs.push({text:line[pos],yellow:false});
                 pos++;
             }
         }
@@ -259,7 +271,7 @@ function drawPoster() {
     let yStart = virtualTop + (areaH - tH)/2;
 
     for(const line of lines){
-        drawColoredLine(line, VW*0.5, yStart);
+        drawColoredLine(line,VW*0.5,yStart);
         yStart += fontSize*lineGap;
     }
 
@@ -295,12 +307,12 @@ document.getElementById("saveBtn").onclick = function(){
 # =========================================================
 html_final = (
     html_template
-        .replace("{{MAIN}}", main_js)
-        .replace("{{LEFT}}", footer_left_js)
-        .replace("{{RIGHT}}", footer_right_js)
-        .replace("{{YELLOW}}", yellow_js)
-        .replace("{{BG}}", bg_b64)
-        .replace("{{FONTDATA}}", font_b64)
+    .replace("{{MAIN}}", main_js)
+    .replace("{{LEFT}}", footer_left_js)
+    .replace("{{RIGHT}}", footer_right_js)
+    .replace("{{YELLOW}}", yellow_js)
+    .replace("{{BG}}", bg_b64)
+    .replace("{{FONTDATA}}", font_b64)
 )
 
 st_html(html_final, height=980, scrolling=True)
