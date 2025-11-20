@@ -384,7 +384,6 @@ function drawPoster() {
         currentY += fontSize * LINE_GAP;
     }
 
-    // === フッター ===
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
 
@@ -396,7 +395,7 @@ function drawPoster() {
 
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
-}
+};   <!-- ★ここだけ修正：drawPoster を明示的に終了 -->
 
 document.getElementById("saveBtn").onclick = function() {
     canvas.toBlob(function(blob){
@@ -417,8 +416,8 @@ document.getElementById("tweetBtn").onclick = function() {
     );
     window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
 };
+
 </script>
-"""
 
 """
 
@@ -434,6 +433,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
