@@ -397,7 +397,6 @@ function drawPoster() {
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
 }
-</script>
 
 document.getElementById("saveBtn").onclick = function() {
     canvas.toBlob(function(blob){
@@ -421,6 +420,8 @@ document.getElementById("tweetBtn").onclick = function() {
 </script>
 """
 
+"""
+
 html_final = (
     html_template
         .replace("{{MAIN}}", main_js)
@@ -433,6 +434,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
