@@ -293,19 +293,32 @@ function drawPoster() {
 
     let low = FONT_MIN, high = FONT_MAX, best = FONT_MIN;
     while (low <= high) {
-        const mid = Math.floor((low + high)/2);
-        if (canFit(mid)) { best = mid; low = mid + 1; }
-        else { high = mid - 1; }
+        const mid = Math.floor((low + high) / 2);
+        if (canFit(mid)) {
+            best = mid;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
     }
 
     let fontSize = best;
 
-    // === モード別 補正 ===
+    // === モード別 補正（ver2.3.1：ASCIIアートをより確実に縮小） ===
     if (mode === "AA") {
-        fontSize *= 0.96;
-    } else {
+
         const lineCount = lines.length;
-        const maxLen = Math.max(...lines.map(x=>x.length), 0);
+        const maxLen = Math.max(...lines.map(x => x.length), 0);
+
+        const K_line = 1 / (1 + 0.015 * Math.max(lineCount - 3, 0));
+        const K_len  = 1 / (1 + 0.015 * Math.max(maxLen - 20, 0));
+
+        fontSize = best * K_line * K_len * 1.50;
+
+    } else {
+
+        const lineCount = lines.length;
+        const maxLen = Math.max(...lines.map(x => x.length), 0);
 
         const K_line = 1 / (1 + 0.010 * Math.max(lineCount - 3, 0));
         const K_len  = 1 / (1 + 0.010 * Math.max(maxLen - 10, 0));
@@ -319,7 +332,7 @@ function drawPoster() {
     ctx.textBaseline = "middle";
 
     const totalTextHeight = lines.length * fontSize * LINE_GAP;
-    let currentY = marginTop + (areaH - totalTextHeight) / 2 + fontSize*0.5;
+    let currentY = marginTop + (areaH - totalTextHeight) / 2 + fontSize * 0.5;
 
     function drawColoredLine(line, centerX, y) {
         ctx.font = fontSize + "px customFont";
@@ -333,18 +346,21 @@ function drawPoster() {
 
         let segs = [];
         let pos = 0;
+
         while (pos < line.length) {
             let matched = false;
+
             for (const w of yellowWords) {
                 if (w && line.startsWith(w, pos)) {
-                    segs.push({text:w, yellow:true});
+                    segs.push({ text: w, yellow: true });
                     pos += w.length;
                     matched = true;
                     break;
                 }
             }
+
             if (!matched) {
-                segs.push({text:line[pos], yellow:false});
+                segs.push({ text: line[pos], yellow: false });
                 pos++;
             }
         }
@@ -355,6 +371,7 @@ function drawPoster() {
         }
 
         let cursorX = centerX - totalW / 2;
+
         for (const seg of segs) {
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.fillText(seg.text, cursorX, y);
@@ -363,22 +380,24 @@ function drawPoster() {
     }
 
     for (const line of lines) {
-        drawColoredLine(line, W*0.5, currentY);
+        drawColoredLine(line, W * 0.5, currentY);
         currentY += fontSize * LINE_GAP;
     }
 
     // === フッター ===
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
-    ctx.font = footerFont + "px customFont";
 
+    ctx.font = footerFont + "px customFont";
     ctx.fillStyle = "white";
+
     ctx.textAlign = "left";
     ctx.fillText(footerLeft, W * 0.06, footerY);
 
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
 }
+</script>
 
 document.getElementById("saveBtn").onclick = function() {
     canvas.toBlob(function(blob){
@@ -414,5 +433,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
+
 
 
