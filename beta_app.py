@@ -397,28 +397,36 @@ function drawPoster() {
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
 }
-</script>
 
 document.getElementById("saveBtn").onclick = function() {
     canvas.toBlob(function(blob){
         if (!blob) return;
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = url; a.download = "generated.jpg";
-        document.body.appendChild(a); a.click();
-        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
+        a.href = url; 
+        a.download = "generated.jpg";
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(()=>{
+            URL.revokeObjectURL(url);
+            a.remove();
+        }, 400);
     }, "image/jpeg", 0.90);
 };
 
 document.getElementById("tweetBtn").onclick = function() {
     const text = encodeURIComponent(
-        "この画像は『大判焼外交部ジェネレーター』で作りました。\\n" +
-        "https://ikan-no-i-gen.streamlit.app/\\n" +
+        "この画像は『大判焼外交部ジェネレーター』で作りました。\n" +
+        "https://ikan-no-i-gen.streamlit.app/\n" +
         "※画像は自動投稿されません。画像は自分で貼ってください。"
     );
-    window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
+    window.open(
+        "https://twitter.com/intent/tweet?text=" + text,
+        "_blank"
+    );
 };
 </script>
+
 """
 
 html_final = (
@@ -433,6 +441,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
