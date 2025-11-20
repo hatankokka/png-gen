@@ -233,7 +233,7 @@ body { margin: 0; padding: 0; }
 
 <script>
 const bgData      = "{{BGDATA}}";
-const textRaw     = {{MAIN}};        // JSON 文字列 → JS 文字列
+const textRaw     = {{MAIN}};
 const footerLeft  = {{LEFT}};
 const footerRight = {{RIGHT}};
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
@@ -278,10 +278,8 @@ function drawPoster() {
     const areaW = W - marginX * 2;
     const areaH = H - marginTop - marginBottom;
 
-    // === バイナリサーチ: 物理的に収まる最大フォント ===
     function canFit(fontSize) {
         ctx.font = fontSize + "px customFont";
-
         let maxLineWidth = 0;
         for (const line of lines) {
             const w = ctx.measureText(line).width;
@@ -304,25 +302,17 @@ function drawPoster() {
 
     let fontSize = best;
 
-    // === モード別 補正（ver2.3.1：ASCIIアートをより確実に縮小） ===
     if (mode === "AA") {
-
         const lineCount = lines.length;
         const maxLen = Math.max(...lines.map(x => x.length), 0);
-
         const K_line = 1 / (1 + 0.015 * Math.max(lineCount - 3, 0));
         const K_len  = 1 / (1 + 0.015 * Math.max(maxLen - 20, 0));
-
         fontSize = best * K_line * K_len * 1.50;
-
     } else {
-
         const lineCount = lines.length;
         const maxLen = Math.max(...lines.map(x => x.length), 0);
-
         const K_line = 1 / (1 + 0.010 * Math.max(lineCount - 3, 0));
         const K_len  = 1 / (1 + 0.010 * Math.max(maxLen - 10, 0));
-
         fontSize = best * K_line * K_len;
     }
 
@@ -349,7 +339,6 @@ function drawPoster() {
 
         while (pos < line.length) {
             let matched = false;
-
             for (const w of yellowWords) {
                 if (w && line.startsWith(w, pos)) {
                     segs.push({ text: w, yellow: true });
@@ -358,7 +347,6 @@ function drawPoster() {
                     break;
                 }
             }
-
             if (!matched) {
                 segs.push({ text: line[pos], yellow: false });
                 pos++;
@@ -371,7 +359,6 @@ function drawPoster() {
         }
 
         let cursorX = centerX - totalW / 2;
-
         for (const seg of segs) {
             ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
             ctx.fillText(seg.text, cursorX, y);
@@ -384,7 +371,6 @@ function drawPoster() {
         currentY += fontSize * LINE_GAP;
     }
 
-    // === フッター ===
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
 
@@ -425,8 +411,8 @@ document.getElementById("tweetBtn").onclick = function() {
         "_blank"
     );
 };
-</script>
 
+</script>
 """
 
 html_final = (
@@ -441,6 +427,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
