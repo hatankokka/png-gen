@@ -313,7 +313,7 @@ function drawPoster() {
         const K_line = 1 / (1 + 0.015 * Math.max(lineCount - 3, 0));
         const K_len  = 1 / (1 + 0.015 * Math.max(maxLen - 20, 0));
 
-        fontSize = best * K_line * K_len * 0.90;
+        fontSize = best * K_line * K_len * 1.20;
 
     } else {
 
@@ -433,5 +433,6 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
