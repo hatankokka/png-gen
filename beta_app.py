@@ -382,7 +382,7 @@ function drawPoster() {
 
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
-}
+};
 
 document.getElementById("saveBtn").onclick = function() {
     canvas.toBlob(function(blob){
@@ -427,6 +427,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
