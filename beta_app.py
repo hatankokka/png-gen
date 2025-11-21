@@ -270,41 +270,184 @@ body { margin: 0; padding: 0; }
 
 <script>
 const bgData      = "{{BGDATA}}";
-const textRaw     = {{MAIN}};
+const textRaw     = {{MAIN}};        // JSON 文字列 → JS 文字列
 const footerLeft  = {{LEFT}};
 const footerRight = {{RIGHT}};
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
 const mode        = {{MODE}};
+
+const MAX_WIDTH = 1300;
+const FONT_MAX = 420;
+const FONT_MIN = 40;
+
+let LINE_GAP = (mode === "AA") ? 1.05 : 1.30;
+
+const img = new Image();
+img.src = "data:image/png;base64," + bgData;
+
+const canvas = document.getElementById("posterCanvas");
+const ctx = canvas.getContext("2d");
+
+img.onload = async function() {
+    try { await document.fonts.load("30px customFont"); } catch(e){}
+    drawPoster();
+};
+
+function drawPoster() {
+
+    const lines = textRaw.split("\\n");
+
+    const origW = img.naturalWidth;
+    const origH = img.naturalHeight;
+
+    let scale = (origW > MAX_WIDTH) ? (MAX_WIDTH / origW) : 1.0;
+    const W = Math.floor(origW * scale);
+    const H = Math.floor(origH * scale);
+
+    canvas.width = W;
+    canvas.height = H;
+
+    ctx.drawImage(img, 0, 0, W, H);
+
+    const marginX = W * 0.08;
+    const marginTop = H * 0.18;
+    const marginBottom = H * 0.20;
+
+    const areaW = W - marginX * 2;
+    const areaH = H - marginTop - marginBottom;
+
+    // === バイナリサーチ: 物理的に収まる最大フォント ===
+    function canFit(fontSize) {
+        ctx.font = fontSize + "px customFont";
+
+        let maxLineWidth = 0;
+        for (const line of lines) {
+            const w = ctx.measureText(line).width;
+            if (w > maxLineWidth) maxLineWidth = w;
+        }
+        const totalHeight = lines.length * fontSize * LINE_GAP;
+        return (maxLineWidth <= areaW) && (totalHeight <= areaH);
+    }
+
+    let low = FONT_MIN, high = FONT_MAX, best = FONT_MIN;
+    while (low <= high) {
+        const mid = Math.floor((low + high) / 2);
+        if (canFit(mid)) {
+            best = mid;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
+        }
+    }
+
+    let fontSize = best;
+
+    // === モード別補正 ===
+    if (mode === "AA") {
+
+        const lineCount = lines.length;
+        const maxLen = Math.max(...lines.map(x => x.length), 0);
+
+        const K_line = 1 / (1 + 0.015 * Math.max(lineCount - 3, 0));
+        const K_len  = 1 / (1 + 0.015 * Math.max(maxLen - 20, 0));
+
+        fontSize = best * K_line * K_len * 1.50;
+
+    } else {
+
+        const lineCount = lines.length;
+        const maxLen = Math.max(...lines.map(x => x.length), 0);
+
+        const K_line = 1 / (1 + 0.010 * Math.max(lineCount - 3, 0));
+        const K_len  = 1 / (1 + 0.010 * Math.max(maxLen - 10, 0));
+
+        fontSize = best * K_line * K_len;
+    }
+
+    if (fontSize < 10) fontSize = 10;
+
+    ctx.font = fontSize + "px customFont";
+    ctx.textBaseline = "middle";
+
+    const totalTextHeight = lines.length * fontSize * LINE_GAP;
+    let currentY = marginTop + (areaH - totalTextHeight) / 2 + fontSize * 0.5;
+
+    function drawColoredLine(line, centerX, y) {
+        ctx.font = fontSize + "px customFont";
+
+        if (mode === "AA") {
+            ctx.fillStyle = "white";
+            ctx.textAlign = "left";
+            ctx.fillText(line, marginX, y);
+            return;
+        }
+
+        let segs = [];
+        let pos = 0;
+
+        while (pos < line.length) {
+            let matched = false;
+
+            for (const w of yellowWords) {
+                if (w && line.startsWith(w, pos)) {
+                    segs.push({ text: w, yellow: true });
+                    pos += w.length;
+                    matched = true;
+                    break;
+                }
+            }
+
+            if (!matched) {
+                segs.push({ text: line[pos], yellow: false });
+                pos++;
+            }
+        }
+
+        let totalW = 0;
+        for (const seg of segs) totalW += ctx.measureText(seg.text).width;
+
+        let cursorX = centerX - totalW / 2;
+
+        for (const seg of segs) {
+            ctx.fillStyle = seg.yellow ? "#FFD700" : "white";
+            ctx.fillText(seg.text, cursorX, y);
+            cursorX += ctx.measureText(seg.text).width;
+        }
+    }
+
+    for (const line of lines) {
+        drawColoredLine(line, W * 0.5, currentY);
+        currentY += fontSize * LINE_GAP;
+    }
+
+    // === Footer ===
+    const footerY = H * 0.90;
+    const footerFont = Math.max(22, Math.floor(H * 0.035));
+
+    ctx.font = footerFont + "px customFont";
+    ctx.fillStyle = "white";
+
+    ctx.textAlign = "left";
+    ctx.fillText(footerLeft, W * 0.06, footerY);
+
+    ctx.textAlign = "right";
+    ctx.fillText(footerRight, W * 0.94, footerY);
+}
+
+document.getElementById("saveBtn").onclick = function() {
+    canvas.toBlob(function(blob){
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "generated.jpg";
+        document.body.appendChild(a); a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 400);
+    }, "image/jpeg", 0.90);
+};
+
+document.getElementById("tweetBtn").onclick = function() {
+    const text = encodeURIComponent({{TWEET_TEXT}});
+    window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
+};
 </script>
 """
-
-    # =========================================================
-    # SAVE / TWEET / TWEET_TEXT の多言語置換
-    # =========================================================
-    html_template = html_template.replace("{{SAVE}}", T["save"])
-    html_template = html_template.replace("{{TWEET}}", T["tweet"])
-    tweet_template_js = json.dumps(T["tweet_template"])
-    html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
-
-    # =========================================================
-    # ★最終 HTML 生成
-    # =========================================================
-    html_final = (
-        html_template
-            .replace("{{MAIN}}", main_js)
-            .replace("{{LEFT}}", footer_left_js)
-            .replace("{{RIGHT}}", footer_right_js)
-            .replace("{{YELLOW}}", yellow_js)
-            .replace("{{FONTDATA}}", font_b64)
-            .replace("{{BGDATA}}", bg_b64_safe)
-            .replace("{{MODE}}", mode_js)
-    )
-
-    st_html(html_final, height=1050, scrolling=True)
-
-
-
-
-
-
-
