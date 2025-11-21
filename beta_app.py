@@ -8,31 +8,27 @@ from streamlit.components.v1 import html as st_html
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # -----------------------------------------------------------
-# ★ 一時的に session_state を全クリアして古い値を削除する ★
+# ★ 一時的に session_state を全クリア（初回のみ）
 # -----------------------------------------------------------
 if "initialized" not in st.session_state:
     st.session_state.clear()
     st.session_state.initialized = True
 
+
 # -----------------------------------------------------------
-# 翻訳JSONを読み込む
+# 翻訳JSONを読み込む関数（上に置く）
 # -----------------------------------------------------------
 def load_lang(lang_code):
     with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
-T = load_lang(st.session_state.lang)   # ← 翻訳辞書
 
 # -----------------------------------------------------------
-# 言語選択（セレクトボックス版 / 完全安定化）
+# 言語選択（セレクトボックス版 / 完全安定型）
 # -----------------------------------------------------------
-
 LANG_OPTIONS = {
     "ja": "日本語",
-    "en": "English",
-    # "zh-Hant": "繁體中文",
-    # "zh-Hans": "简体中文",
-    # "ko": "한국어",
+    "en": "English"
 }
 
 # 初期言語
@@ -41,27 +37,32 @@ if "lang" not in st.session_state:
 
 current_code = st.session_state.lang
 
-# セレクトボックス（内部値=ja/en を選びつつ、表示は人間用）
+# セレクトボックス（表示は日本語/English、中身はja/en）
 selected_code = st.selectbox(
     "言語 / Language",
-    options=list(LANG_OPTIONS.keys()),      # 内部用の言語コード
+    options=list(LANG_OPTIONS.keys()),
     index=list(LANG_OPTIONS.keys()).index(current_code),
-    format_func=lambda code: LANG_OPTIONS[code]   # 表示用文字列
+    format_func=lambda code: LANG_OPTIONS[code]
 )
 
-# ★ 言語が変わったら初期値も切り替えて反映（方法2）
+# ★ 言語が変わったら初期値も切り替え（方法2）
 if selected_code != st.session_state.lang:
     st.session_state.lang = selected_code
 
-    # 言語別の初期値ロード
     lang_data = load_lang(selected_code)
-
     st.session_state.main_text = lang_data["default_main"]
     st.session_state.footer_left = lang_data["default_footer_left"]
     st.session_state.footer_right = lang_data["default_footer_right"]
     st.session_state.yellow_words = lang_data["default_yellow"]
 
     st.rerun()
+
+
+# -----------------------------------------------------------
+# ★★★ 言語が確定した「あと」で翻訳辞書を読み込む ★★★
+# -----------------------------------------------------------
+T = load_lang(st.session_state.lang)
+
 
 # =========================================================
 # タイトル
@@ -504,6 +505,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
