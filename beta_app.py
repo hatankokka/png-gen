@@ -433,3 +433,32 @@ document.getElementById("tweetBtn").onclick = function() {
 };
 </script>
 """
+
+# =========================================================
+# SAVE / TWEET / TWEET_TEXT の多言語置換
+# =========================================================
+html_template = html_template.replace("{{SAVE}}", T["save"])
+html_template = html_template.replace("{{TWEET}}", T["tweet"])
+tweet_template_js = json.dumps(T["tweet_template"])
+html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
+
+# =========================================================
+# ★最終 HTML 生成（キャンバス描画に必要なデータを反映）
+# =========================================================
+html_final = (
+    html_template
+        .replace("{{MAIN}}", main_js)
+        .replace("{{LEFT}}", footer_left_js)
+        .replace("{{RIGHT}}", footer_right_js)
+        .replace("{{YELLOW}}", yellow_js)
+        .replace("{{FONTDATA}}", font_b64)
+        .replace("{{BGDATA}}", bg_b64_safe)
+        .replace("{{MODE}}", mode_js)
+)
+
+# =========================================================
+# HTML表示（キャンバスを描画）
+# =========================================================
+st_html(html_final, height=1050, scrolling=True)
+
+
