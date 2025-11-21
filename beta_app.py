@@ -5,6 +5,7 @@ import os
 import json
 from streamlit.components.v1 import html as st_html
 
+ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # -----------------------------------------------------------
@@ -245,5 +246,6 @@ const mode        = {{MODE}};
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
