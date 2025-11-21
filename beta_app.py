@@ -120,7 +120,7 @@ else:
 # NGワード読み込み ~ 画像生成全て
 # =========================================================
 if agreed:
-    
+
     # =========================================================
     # モード別フォント選択
     # =========================================================
@@ -137,15 +137,6 @@ if agreed:
     with open(font_path, "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
 
-
-    # =========================================================
-    # Base64変換
-    # =========================================================
-    font_path = os.path.join(FONT_DIR, ss.font_choice)
-    with open(font_path, "rb") as f:
-        font_b64 = base64.b64encode(f.read()).decode()
-
-    
     # =========================================================
     # NGワード読み込み
     # =========================================================
@@ -434,31 +425,29 @@ document.getElementById("tweetBtn").onclick = function() {
 </script>
 """
 
-# =========================================================
-# SAVE / TWEET / TWEET_TEXT の多言語置換
-# =========================================================
-html_template = html_template.replace("{{SAVE}}", T["save"])
-html_template = html_template.replace("{{TWEET}}", T["tweet"])
-tweet_template_js = json.dumps(T["tweet_template"])
-html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
 
-# =========================================================
-# ★最終 HTML 生成（キャンバス描画に必要なデータを反映）
-# =========================================================
-html_final = (
-    html_template
-        .replace("{{MAIN}}", main_js)
-        .replace("{{LEFT}}", footer_left_js)
-        .replace("{{RIGHT}}", footer_right_js)
-        .replace("{{YELLOW}}", yellow_js)
-        .replace("{{FONTDATA}}", font_b64)
-        .replace("{{BGDATA}}", bg_b64_safe)
-        .replace("{{MODE}}", mode_js)
-)
+    # =========================================================
+    # SAVE / TWEET / TWEET_TEXT の置換 ※ここが if agreed の中に必要！
+    # =========================================================
+    html_template = html_template.replace("{{SAVE}}", T["save"])
+    html_template = html_template.replace("{{TWEET}}", T["tweet"])
+    tweet_template_js = json.dumps(T["tweet_template"])
+    html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
 
-# =========================================================
-# HTML表示（キャンバスを描画）
-# =========================================================
-st_html(html_final, height=1050, scrolling=True)
+    # =========================================================
+    # ★最終 HTML生成 ※これも if agreed の中！
+    # =========================================================
+    html_final = (
+        html_template
+            .replace("{{MAIN}}", main_js)
+            .replace("{{LEFT}}", footer_left_js)
+            .replace("{{RIGHT}}", footer_right_js)
+            .replace("{{YELLOW}}", yellow_js)
+            .replace("{{FONTDATA}}", font_b64)
+            .replace("{{BGDATA}}", bg_b64_safe)
+            .replace("{{MODE}}", mode_js)
+    )
+
+    st_html(html_final, height=1050, scrolling=True)
 
 
