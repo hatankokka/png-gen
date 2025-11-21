@@ -225,11 +225,11 @@ ss.footer_left = st.text_input(T["footer_left"], ss.footer_left)
 ss.footer_right = st.text_input(T["footer_right"], ss.footer_right)
 
 
-if mode == "NORMAL":
+if mode_internal == "NORMAL":
     ss.yellow_words = st.text_area(T["yellow_words"], ss.yellow_words)
-
 else:
-    ss.yellow_words = ""   # AAモードでは無効（ハイライト無し）
+    ss.yellow_words = ""
+
 
 # =========================================================
 # Apply / Reset
@@ -252,11 +252,12 @@ with col_reset:
 # =========================================================
 # NGワードチェック（NORMALのみ）
 # =========================================================
-if mode == "NORMAL":
+if mode_internal == "NORMAL":
     found = [ng for ng in NG_WORDS if ng and ng in ss.main_text]
     if found:
-        st.error("⚠ NGワードが含まれています → " + ", ".join(found))
+        st.error("⚠ NG word → " + ", ".join(found))
         st.stop()
+
 
 # =========================================================
 # JS用データ生成（JSON経由で安全に渡す）
@@ -265,7 +266,8 @@ if mode == "NORMAL":
 main_js = json.dumps(ss.main_text)
 footer_left_js = json.dumps(ss.footer_left)
 footer_right_js = json.dumps(ss.footer_right)
-mode_js = json.dumps("AA" if mode == "ASCIIアートモード" else "NORMAL")
+mode_js = json.dumps(mode_internal)
+
 
 yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
@@ -505,6 +507,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
