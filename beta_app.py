@@ -227,6 +227,7 @@ if agreed:
     footer_right_js = json.dumps(ss.footer_right)
     yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
     mode_js = json.dumps(mode_internal)
+    watermark_js = json.dumps(T["watermark"]) 
 
     # =========================================================
     # ★巨大 JSテンプレート（キャンバス本体）
@@ -407,6 +408,22 @@ function drawPoster() {
     ctx.fillText(footerLeft, W * 0.06, footerY);
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
+    
+    ctx.font = footerFont + "px customFont";
+    ctx.fillStyle = "white";
+
+    ctx.textAlign = "left";
+    ctx.fillText(footerLeft, W * 0.06, footerY);
+
+    ctx.textAlign = "right";
+    ctx.fillText(footerRight, W * 0.94, footerY);
+
+    // === Watermark（右上 / footer の半分サイズ） ===
+    const watermarkFont = Math.floor(footerFont * 0.5);
+    ctx.font = watermarkFont + "px customFont";
+    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.textAlign = "right";
+    ctx.fillText(watermark, W * 0.97, H * 0.07);
 }
 
 document.getElementById("saveBtn").onclick = function() {
@@ -451,6 +468,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
