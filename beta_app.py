@@ -147,7 +147,7 @@ mode_internal = MODE_OPTIONS[mode_display]
 st.markdown(T["ascii_links"])
 
 # =========================================================
-# フォント選択（通常モードのみ）
+# フォント選択（NORMALのみ）
 # =========================================================
 if mode_internal == "NORMAL":
     if "font_choice" in ss and ss.font_choice in FONT_LABEL_LIST:
@@ -225,7 +225,7 @@ ss.footer_left = st.text_input(T["footer_left"], ss.footer_left)
 ss.footer_right = st.text_input(T["footer_right"], ss.footer_right)
 
 
-if mode == "通常モード":
+if mode == "NORMAL":
     ss.yellow_words = st.text_area(T["yellow_words"], ss.yellow_words)
 
 else:
@@ -250,9 +250,9 @@ with col_reset:
         st.rerun()
 
 # =========================================================
-# NGワードチェック（通常モードのみ）
+# NGワードチェック（NORMALのみ）
 # =========================================================
-if mode == "通常モード":
+if mode == "NORMAL":
     found = [ng for ng in NG_WORDS if ng and ng in ss.main_text]
     if found:
         st.error("⚠ NGワードが含まれています → " + ", ".join(found))
@@ -505,6 +505,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
