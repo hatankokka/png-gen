@@ -15,6 +15,15 @@ if "initialized" not in st.session_state:
     st.session_state.initialized = True
 
 # -----------------------------------------------------------
+# 翻訳JSONを読み込む
+# -----------------------------------------------------------
+def load_lang(lang_code):
+    with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+T = load_lang(st.session_state.lang)   # ← 翻訳辞書
+
+# -----------------------------------------------------------
 # 言語選択（セレクトボックス版 / 完全安定化）
 # -----------------------------------------------------------
 
@@ -53,16 +62,6 @@ if selected_code != st.session_state.lang:
     st.session_state.yellow_words = lang_data["default_yellow"]
 
     st.rerun()
-
-# -----------------------------------------------------------
-# 翻訳JSONを読み込む
-# -----------------------------------------------------------
-def load_lang(lang_code):
-    with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
-        return json.load(f)
-
-T = load_lang(st.session_state.lang)   # ← 翻訳辞書
-
 
 # =========================================================
 # タイトル
@@ -505,6 +504,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
