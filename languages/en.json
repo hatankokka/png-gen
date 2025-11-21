@@ -21,6 +21,8 @@
   "save": "Save Image (JPEG)",
   "tweet": "Post to X (image not auto-uploaded)",
 
+  "tweet_template": "This image was generated using the Obanyaki MFA Generator.\nhttps://ikan-no-i-gen.streamlit.app/\nCreator @InsHatanCountry\n*Note: The image is not auto-uploaded. Please attach it manually.*",
+
   "default_main": "\"We hereby warn the Koriyaki faction:\nDo not play with fire\nover the Obanyaki dispute.\nIf you continue,\nwe will ally with Imagawayaki.\"",
   "default_footer_left": "Obanyaki MFA Spokesperson",
   "default_footer_right": "November 15, 2015",
