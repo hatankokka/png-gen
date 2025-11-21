@@ -1,0 +1,37 @@
+{
+  "title": "Penjana MOFA Obanyaki ver3.0",
+  "author": "Pencipta: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ Notis & Sekatan",
+  "notice_body": "Aplikasi ini ialah **penjana imej parodi untuk tujuan hiburan sahaja**.\n\n【Dilarang】\n- Kandungan yang mempromosikan diskriminasi, penghinaan atau kebencian etnik\n- Fitnah terhadap individu atau kumpulan\n- Pencerobohan privasi\n- Kandungan lucah atau tidak bermoral\n- Sebarang penggunaan yang mungkin melanggar undang-undang\n\n【Penafian】\n- Pencipta **tidak bertanggungjawab** atas sebarang masalah daripada imej yang dijana.\n- Memuat naik atau menggunakan semula imej di media sosial adalah **tanggungjawab pengguna sepenuhnya**.\n- Aplikasi ini **tidak berkaitan** dengan mana-mana individu, organisasi atau kerajaan sebenar.\n- Walaupun imej menyerupai institusi awam boleh dijana, **itu hanyalah parodi dan bukan kenyataan rasmi.**",
+
+  "agree_label": "📘 Saya bersetuju dan akan menggunakan aplikasi ini dengan bertanggungjawab.",
+  "agree_warning": "*Anda mesti bersetuju untuk meneruskan.*",
+
+  "ascii_links": "### 🔗 Sumber Seni ASCII\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB dioperasikan oleh @aahub_dev. Sila sokong pencipta jika menggunakan karya mereka.*",
+
+  "mode_select": "Pemilihan mod",
+  "normal_mode": "Mod biasa",
+  "aa_mode": "Mod ASCII Art",
+
+  "font_select": "Pilih fon (Mod biasa sahaja)",
+  "yellow_words": "Perkataan sorotan (satu baris satu)",
+  "main_text": "Teks utama",
+  "footer_left": "Pengaki (kiri)",
+  "footer_right": "Pengaki (kanan)",
+  "background_select": "Pilih latar belakang",
+
+  "apply": "Laksana",
+  "reset": "Tetap semula",
+  "watermark": "Imej ini ialah parodi.",
+
+  "save": "Simpan imej (JPEG)",
+  "tweet": "Siarkan di X (lampirkan imej secara manual)",
+
+  "tweet_template": "Imej ini dijana dengan Penjana MOFA Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nPencipta: @InsHatanCountry\n*Imej tidak dilampirkan secara automatik — sila lampirkan secara manual.*",
+
+  "default_main": "\"Kami memberi amaran kepada puak Imagawayaki:\nJangan bermain api dalam isu Obanyaki.\nJika anda teruskan, kami akan membentuk pakatan.\"",
+  "default_footer_left": "Jurucakap MOFA Obanyaki",
+  "default_footer_right": "15 November 2015",
+  "default_yellow": "api"
+}
