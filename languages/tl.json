@@ -3,23 +3,35 @@
   "author": "May-akda: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
 
   "notice_title": "⚠️ Paalala at Mga Pagbabawal",
-  "notice_body": "Ang app na ito ay isang **parody image generator para lamang sa libangan**.\n\n【Mga Ipinagbabawal】\n- Mga pahayag na nagtataguyod ng diskriminasyon, pang-iinsulto, o pagkapoot\n- Paninirang-puri laban sa indibidwal o grupo\n- Paglabag sa pribasiya\n- Malaswang nilalaman o labag sa kabutihang-asal\n- Anumang posibleng labag sa batas\n\n【Paunawa】\n- Ang may-akda ay **hindi mananagot** sa anumang gulong dulot ng mga larawang nalikha.\n- Ang pag-post o paggamit muli ng larawan sa social media ay **responsibilidad ng gumagamit**.\n- Ang app na ito ay walang kaugnayan sa anumang tunay na tao, organisasyon, o pamahalaan.\n- Maaaring lumikha ng larawang ginagaya ang mga ahensya o grupo sa politika, ngunit **ito ay parody lamang at hindi opisyal na pahayag**.",
+  "notice_body": "Ang app na ito ay isang **parody image generator para lamang sa libangan**.\n\n【Mga Ipinagbabawal】\n- Mga pahayag na nagtataguyod ng diskriminasyon, pang-iinsulto, o pagkapoot\n- Paninirang-puri laban sa indibidwal o grupo\n- Paglabag sa pribasiya\n- Malaswang nilalaman o labag sa kabutihang-asal\n- Anumang posibleng labag sa batas\n\n【Paunawa】\n- Ang may-akda ay **hindi mananagot** sa anumang gulong dulot ng mga larawang nalikha.\n- Ang pag-post o paggamit muli sa social media ay **responsibilidad ng gumagamit**.\n- Walang kaugnayan ang app na ito sa anumang tunay na tao, organisasyon, o pamahalaan.\n- Bagaman maaaring makabuo ng mga larawang kahawig ng mga institusyon ng gobyerno o politika, **ito ay parody lamang at hindi opisyal na pahayag.**",
 
-  "agree_label": "📘 Sumasang-ayon ako sa mga paalala at gagamitin ang app nang may pananagutan.",
+  "agree_label": "📘 Sumasang-ayon ako sa mga paalala at gagamitin ko ang app nang responsable.",
   "agree_warning": "*Kailangan mong sumang-ayon upang magpatuloy.*",
 
-  "ascii_links": "### 🔗 Mga Sanggunian ng ASCII Art\n\n- [Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*Ang AAHUB ay pinapatakbo ni @aahub_dev. Kung gagamit ka ng AA mula sa site, pakisuportahan ang may-akda.*",
+  "ascii_links": "### 🔗 Mga Sanggunian ng ASCII Art\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*Ang AAHUB ay pinapatakbo ni @aahub_dev. Kung gagamit ka ng AA mula sa site, pakisuportahan ang may-akda.*",
 
   "mode_select": "Piliin ang Mode",
   "normal_mode": "Normal Mode",
   "aa_mode": "ASCII Art Mode",
 
-  "font_select": "Piliin ang Font (Normal Mode lang)",
-  "yellow_words": "Mga salitang iha-highlight (isang linya bawat isa)",
+  "font_select": "Piliin ang Font (Normal Mode lamang)",
+  "yellow_words": "Mga Highlight na Salita (isang salita bawat linya)",
   "main_text": "Pangunahing Teksto",
   "footer_left": "Footer (Kaliwa)",
   "footer_right": "Footer (Kanan)",
   "background_select": "Piliin ang Background",
 
   "apply": "Ilapat",
-  "reset": "
+  "reset": "Ibalik sa Default",
+  "watermark": "Ang larawang ito ay isang parody.",
+
+  "save": "I-save ang Imahe (JPEG)",
+  "tweet": "I-post sa X (manual na pag-attach ng imahe)",
+
+  "tweet_template": "Ang larawang ito ay nalikha gamit ang Obanyaki MOFA Generator ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nMay-akda: @InsHatanCountry\n*Ang imahe ay hindi awtomatikong ina-attach — pakilagay nang manu-mano.*",
+
+  "default_main": "\"Nagbibigay-babala kami sa pangkat ng Imagawayaki:\nHuwag maglaro ng apoy tungkol sa isyung Obanyaki.\nKung ipagpapatuloy ninyo ito, makikipag-alyansa kami sa kanila.\"",
+  "default_footer_left": "Tagapagsalita ng Obanyaki MOFA",
+  "default_footer_right": "Nobyembre 15, 2015",
+  "default_yellow": "apoy"
+}
