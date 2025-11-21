@@ -87,6 +87,11 @@ T = load_lang(st.session_state.lang)
 st.title(T["title"])
 st.markdown(T["author"])   # ← これを追加（JSONから読む）
 
+# =========================================================
+# アスキーアート参考リンク（多言語）
+# =========================================================
+st.markdown(T["ascii_links"])
+
 
 # =========================================================
 # 注意事項（タイトル & 本文）
@@ -471,6 +476,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
