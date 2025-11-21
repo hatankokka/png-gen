@@ -269,6 +269,8 @@ const footerLeft  = {{LEFT}};
 const footerRight = {{RIGHT}};
 const yellowWords = "{{YELLOW}}".split("|").filter(x=>x.length>0);
 const mode        = {{MODE}};
+const watermark  = {{WATERMARK}};
+
 
 const MAX_WIDTH = 1300;
 const FONT_MAX = 420;
@@ -465,9 +467,11 @@ document.getElementById("tweetBtn").onclick = function() {
             .replace("{{FONTDATA}}", font_b64)
             .replace("{{BGDATA}}", bg_b64_safe)
             .replace("{{MODE}}", mode_js)
+            .replace("{{WATERMARK}}", watermark_js)
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
