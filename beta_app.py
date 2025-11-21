@@ -7,42 +7,43 @@ from streamlit.components.v1 import html as st_html
 
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
+# -----------------------------------------------------------
+# 言語選択（日本語 / English）
+# -----------------------------------------------------------
+if "lang" not in st.session_state:
+    st.session_state.lang = "ja"   # 初期値：日本語
+
+lang = st.radio(
+    "Language / 言語",
+    ["ja", "en"],
+    index=["ja", "en"].index(st.session_state.lang),
+    horizontal=True
+)
+st.session_state.lang = lang
+
+# -----------------------------------------------------------
+# 翻訳JSONを読み込む
+# -----------------------------------------------------------
+def load_lang(lang_code):
+    with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+
+T = load_lang(st.session_state.lang)   # ← 翻訳辞書
+
+
 # =========================================================
 # タイトル
 # =========================================================
-st.title("大判焼外交部ジェネレーター ver2.4 (軽量版)")
+#st.title("大判焼外交部ジェネレーター ver2.4 (軽量版)")
+st.title(T["title"])
+
 
 # =========================================================
 # 注意事項
 # =========================================================
-st.markdown("""
-### ⚠️ 注意事項・禁止事項
+st.markdown("### " + T["notice_title"])
+st.markdown(T["notice_body"])
 
-当アプリは **娯楽目的のパロディ画像生成ツール** です。
-
-#### 【禁止事項】
-- 差別・侮辱・民族憎悪を助長する表現  
-- 特定個人・団体の誹謗中傷  
-- 名誉毀損・プライバシー侵害  
-- 猥褻物をはじめとする公序良俗に反する内容  
-- 法令違反につながる利用  
-
-#### 【免責事項】
-- 本ツールをご利用にあたり、 **注意事項・禁止事項一式に同意したとみなします。**
-- 生成物によるトラブルに **当方は一切責任を負いません。**
-- SNS等への投稿・転載は **利用者の自己責任** でお願いします。
-
-# ⚠️ アスキーアート(AA)使用時の注意
-
-##### 【禁止事項】
-- 猥褻物を貼ること
-- 法令違反につながる利用
-
-#### 【大きさ調整】
-- アスキーアートが大きいときは、 . (ピリオド)を打って何個か改行してみてください。AAが小さくなります。
-
----
-""")
 
 # =========================================================
 # NGワード読み込み
@@ -86,7 +87,8 @@ ss = st.session_state
 # =========================================================
 # モード選択（通常 / ASCIIアート）
 # =========================================================
-mode = st.radio("モード選択", ["通常モード", "ASCIIアートモード"])
+# mode = st.radio("モード選択", ["通常モード", "ASCIIアートモード"])
+mode = st.radio(T["mode_select"], [T["normal_mode"], T["aa_mode"]])
 
 # =========================================================
 # フォント選択（通常モードのみ）
@@ -98,7 +100,7 @@ if mode == "通常モード":
         default_font_idx = 0
 
     selected_label = st.selectbox(
-        "フォントを選択（通常モードのみ）",
+        T["font_select"],
         FONT_LABEL_LIST,
         index=default_font_idx
     )
@@ -149,7 +151,7 @@ if "bg_choice" not in ss:
 # 背景選択
 # =========================================================
 bg_choice = st.selectbox(
-    "背景画像を選択",
+    T["background_select"],
     list(BACKGROUND_CHOICES.keys()),
     index=list(BACKGROUND_CHOICES.keys()).index(ss.bg_choice),
 )
@@ -164,12 +166,18 @@ bg_b64_safe = html.escape(bg_b64)
 # =========================================================
 # 入力欄
 # =========================================================
-ss.main_text = st.text_area("本文", ss.main_text, height=250)
-ss.footer_left = st.text_input("下部（左）", ss.footer_left)
-ss.footer_right = st.text_input("下部（右）", ss.footer_right)
+#ss.main_text = st.text_area("本文", ss.main_text, height=250)
+ss.main_text = st.text_area(T["main_text"], ss.main_text, height=250)
+
+#ss.footer_left = st.text_input("下部（左）", ss.footer_left)
+#ss.footer_right = st.text_input("下部（右）", ss.footer_right)
+ss.footer_left = st.text_input(T["footer_left"], ss.footer_left)
+ss.footer_right = st.text_input(T["footer_right"], ss.footer_right)
+
 
 if mode == "通常モード":
-    ss.yellow_words = st.text_area("黄色単語（改行区切り）", ss.yellow_words)
+    ss.yellow_words = st.text_area(T["yellow_words"], ss.yellow_words)
+
 else:
     ss.yellow_words = ""   # AAモードでは無効（ハイライト無し）
 
@@ -178,11 +186,11 @@ else:
 # =========================================================
 col_apply, col_reset = st.columns(2)
 with col_apply:
-    if st.button("反映する"):
+    if st.button(T["apply"]):
         st.rerun()
 
 with col_reset:
-    if st.button("初期テキストに戻す"):
+    if st.button(T["reset"]):
         keep_bg = ss.bg_choice
         keep_font = ss.font_choice if "font_choice" in ss else None
         st.session_state.clear()
@@ -229,14 +237,14 @@ body { margin: 0; padding: 0; }
       padding:12px 24px;border-radius:999px;border:none;
       background:#4CAF50;color:white;font-weight:700;
       cursor:pointer;font-size:14px;">
-    画像を保存（JPEG）
+    {{SAVE}}
   </button>
 
   <button id="tweetBtn" style="
       padding:12px 24px;border-radius:999px;border:none;
       background:#1DA1F2;color:white;font-weight:700;
       cursor:pointer;font-size:14px;">
-    𝕏に投稿する（画像は自分で貼ってね）
+    {{TWEET}}
   </button>
 
   <canvas id="posterCanvas" style="
@@ -446,6 +454,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
