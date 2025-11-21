@@ -1,0 +1,37 @@
+{
+  "title": "Générateur du Ministère Obanyaki ver3.0",
+  "author": "Créateur : Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ Avis & Restrictions",
+  "notice_body": "Cette application est un **générateur d’images parodiques à but exclusivement ludique**.\n\n【Interdit】\n- Contenus promouvant la discrimination, l’insulte ou la haine ethnique\n- Diffamation envers des individus ou des groupes\n- Atteinte à la vie privée\n- Contenu obscène ou contraire aux bonnes mœurs\n- Toute utilisation pouvant enfreindre la loi\n\n【Avertissement】\n- Le créateur n’assume **aucune responsabilité** pour tout problème lié aux images générées.\n- La publication ou la réutilisation sur les réseaux sociaux est **entièrement sous votre responsabilité**.\n- Cette application n’a **aucun lien** avec des individus, organisations ou gouvernements réels.\n- Bien que des images imitant des institutions publiques puissent être générées, **il s’agit de parodies et non de déclarations officielles.**",
+
+  "agree_label": "📘 J’accepte les conditions et j’utiliserai l’application de manière responsable.",
+  "agree_warning": "*Vous devez accepter pour continuer.*",
+
+  "ascii_links": "### 🔗 Références pour l’art ASCII\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB est géré par @aahub_dev. Merci de soutenir le créateur si vous utilisez son contenu.*",
+
+  "mode_select": "Sélection du mode",
+  "normal_mode": "Mode normal",
+  "aa_mode": "Mode ASCII Art",
+
+  "font_select": "Choisir la police (mode normal uniquement)",
+  "yellow_words": "Mots à surligner (un par ligne)",
+  "main_text": "Texte principal",
+  "footer_left": "Pied de page (gauche)",
+  "footer_right": "Pied de page (droite)",
+  "background_select": "Choisir l’arrière-plan",
+
+  "apply": "Appliquer",
+  "reset": "Réinitialiser",
+  "watermark": "Cette image est une parodie.",
+
+  "save": "Enregistrer l’image (JPEG)",
+  "tweet": "Publier sur X (ajout manuel de l’image)",
+
+  "tweet_template": "Cette image a été créée avec le Générateur du Ministère Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCréateur : @InsHatanCountry\n*L’image n’est pas téléversée automatiquement. Merci de l’ajouter manuellement.*",
+
+  "default_main": "\"Nous avertissons la faction Imagawayaki :\nNe jouez pas avec le feu au sujet de l’Obanyaki.\nSi vous continuez, nous formerons une alliance avec la faction Imagawayaki.\"",
+  "default_footer_left": "Porte-parole du Ministère Obanyaki",
+  "default_footer_right": "15 novembre 2015",
+  "default_yellow": "feu"
+}
