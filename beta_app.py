@@ -10,16 +10,44 @@ st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", 
 # -----------------------------------------------------------
 # 言語選択（日本語 / English）
 # -----------------------------------------------------------
-if "lang" not in st.session_state:
-    st.session_state.lang = "ja"   # 初期値：日本語
 
-lang = st.radio(
-    "Language / 言語",
-    ["ja", "en"],
-    index=["ja", "en"].index(st.session_state.lang),
+# 表示名 → 内部言語コード のマッピング
+LANG_OPTIONS = {
+    "日本語": "ja",
+    "English": "en",
+    # 今後追加したい場合はここに書くだけ：
+    # "繁體中文": "zh-Hant",
+    # "简体中文": "zh-Hans",
+    # "한국어": "ko",
+}
+
+# 初回起動時のデフォルト言語
+if "lang" not in st.session_state:
+    st.session_state.lang = "ja"
+
+# 現在の内部コードに対応する “表示名” を取得
+def get_display_name_from_code(code):
+    for display, internal in LANG_OPTIONS.items():
+        if internal == code:
+            return display
+    return "日本語"  # fallback
+
+current_display = get_display_name_from_code(st.session_state.lang)
+
+# UI に表示する文字列（日本語 / English など）
+display_names = list(LANG_OPTIONS.keys())
+
+# ラジオボタン（表示名だけ見せる）
+selected_display = st.radio(
+    "言語 / Language",
+    options=display_names,
+    index=display_names.index(current_display),
     horizontal=True
 )
-st.session_state.lang = lang
+
+# 選ばれた表示名 → 内部コードに変換
+st.session_state.lang = LANG_OPTIONS[selected_display]
+
 
 # -----------------------------------------------------------
 # 翻訳JSONを読み込む
@@ -452,6 +480,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
