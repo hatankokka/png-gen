@@ -1,21 +1,28 @@
 {
   "title": "Obanyaki MFA Generator ver2.4 (Lite)",
-  "notice_title": "⚠️ Notices & Prohibited Content",
-  "notice_body": "This app is a **parody image generator for entertainment**.\n\n【Prohibited】\n- Discriminatory or hateful content\n- Defamation or harassment\n- Privacy violations\n- Obscene / inappropriate material\n- Illegal usage",
+
+  "notice_title": "⚠️ Notices & Restrictions",
+  "notice_body": "This application is an **entertainment-only parody image generator**.\n\n【Prohibited Content】\n- Discriminatory or hateful expressions\n- Defamation or slander\n- Privacy violations\n- Obscene or inappropriate content\n- Any usage that violates laws or regulations",
+
   "mode_select": "Mode Selection",
   "normal_mode": "Normal Mode",
   "aa_mode": "ASCII Art Mode",
 
-  "font_select": "Font Selection (Normal Mode only)",
-  "yellow_words": "Yellow Highlight Words (line separated)",
+  "font_select": "Font Selection (Normal Mode Only)",
+  "yellow_words": "Highlight Words (one per line)",
   "main_text": "Main Text",
   "footer_left": "Footer (Left)",
   "footer_right": "Footer (Right)",
   "background_select": "Select Background Image",
 
   "apply": "Apply",
-  "reset": "Reset to Default",
+  "reset": "Reset to Defaults",
 
   "save": "Save Image (JPEG)",
-  "tweet": "Post to X (image not auto-uploaded)"
+  "tweet": "Post to X (image not auto-uploaded)",
+
+  "default_main": "\"We hereby warn the Koriyaki faction:\nDo not play with fire\nover the Obanyaki dispute.\nIf you continue,\nwe will ally with Imagawayaki.\"",
+  "default_footer_left": "Obanyaki MFA Spokesperson",
+  "default_footer_right": "November 15, 2015",
+  "default_yellow": "fire"
 }
