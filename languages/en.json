@@ -1,20 +1,21 @@
 {
-  "title": "Obanyaki MOFA Generator ver2.4 (Lite)",
-  
+  "title": "Obanyaki MOFA Generator ver3.0",
+  "author": "Creator: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
   "notice_title": "⚠️ Notes & Restrictions",
-  "notice_body": "This app is a **parody image generator for entertainment purposes only**.\n\n【Prohibited】\n- Expressions promoting discrimination, insults, or ethnic hatred\n- Defamation of specific individuals or groups\n- Privacy infringement\n- Obscene or socially inappropriate content\n- Any use that may violate the law",
+  "notice_body": "This app is a **parody image generator for entertainment purposes only**.\n\n【Prohibited】\n- Expressions that promote discrimination, insults, or ethnic hatred\n- Defamation of individuals or groups\n- Invasion of privacy\n- Obscene or socially inappropriate content\n- Any use that may violate laws\n\n【Disclaimer】\n- The creator assumes **no responsibility** for any trouble caused by generated images.\n- Posting or reusing generated images on social media is **entirely at your own risk**.\n- This app has **no affiliation** with any real individuals, organizations, or governments.\n- Although images imitating public institutions or political bodies can be generated, **they are parodies and do not represent real views or official statements.**",
 
   "agree_label": "📘 I agree to the notes & restrictions and will generate parody images responsibly.",
-  "agree_warning": "*You must agree to enable the interface.*",
+  "agree_warning": "*You must agree to proceed.*",
 
-  "ascii_links": "### 🔗 ASCII Art Reference Sites\n\n- [Shin Manga Sogo AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB is operated by @aahub_dev. Please follow the creator if you use AA from the site.*",
-  
+  "ascii_links": "### 🔗 ASCII Art Reference Sites\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB is operated by @aahub_dev. Please follow the creator if you use artwork from the site.*",
+
   "mode_select": "Mode Selection",
   "normal_mode": "Normal Mode",
   "aa_mode": "ASCII Art Mode",
 
   "font_select": "Select Font (Normal Mode Only)",
-  "yellow_words": "Yellow-highlight words (line separated)",
+  "yellow_words": "Yellow-highlight Words (one per line)",
   "main_text": "Main Text",
   "footer_left": "Footer (Left)",
   "footer_right": "Footer (Right)",
@@ -24,11 +25,11 @@
   "reset": "Reset to Default",
 
   "save": "Save Image (JPEG)",
-  "tweet": "Post to X (attach the image manually)",
+  "tweet": "Post to X (attach image manually)",
 
-  "tweet_template": "This image was created with the Obanyaki MOFA Generator.\nhttps://ikan-no-i-gen.streamlit.app/\nCreator: @InsHatanCountry\n*Images are not auto-posted. Please attach manually.*",
+  "tweet_template": "This image was created with the Obanyaki MOFA Generator ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCreator @InsHatanCountry\n*Images are not auto-posted. Please attach them manually.*",
 
-  "default_main": "\"We warn the Imagawayaki faction:\nDo not play with fire\nregarding the Obanyaki issue.\nIf you continue,\nwe will form an alliance\nwith the Imagawayaki forces.\"",
+  "default_main": "\"We hereby warn the Imagawayaki faction:\nDo not play with fire regarding the Obanyaki issue.\nIf you continue, we will form an alliance with the Imagawayaki forces.\"",
   "default_footer_left": "Obanyaki MOFA Spokesperson",
   "default_footer_right": "Nov 15, 2015",
   "default_yellow": "fire"
