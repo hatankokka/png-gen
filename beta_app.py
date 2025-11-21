@@ -87,6 +87,19 @@ if not agreed:
     st.warning(T["agree_warning"])
 
 # =========================================================
+# ★ モード選択
+# =========================================================
+mode_label = st.radio(
+    T["mode_select"],
+    [T["normal_mode"], T["aa_mode"]]
+)
+
+if mode_label == T["normal_mode"]:
+    mode_internal = "NORMAL"
+else:
+    mode_internal = "AA"
+
+# =========================================================
 # NGワード読み込み ~ 画像生成全て
 # =========================================================
 if agreed:
@@ -246,6 +259,7 @@ const mode        = {{MODE}};
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
