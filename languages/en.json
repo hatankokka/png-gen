@@ -1,32 +1,35 @@
 {
-  "title": "Obanyaki MFA Generator ver2.4 (Lite)",
+  "title": "Obanyaki MOFA Generator ver2.4 (Lite)",
+  
+  "notice_title": "⚠️ Notes & Restrictions",
+  "notice_body": "This app is a **parody image generator for entertainment purposes only**.\n\n【Prohibited】\n- Expressions promoting discrimination, insults, or ethnic hatred\n- Defamation of specific individuals or groups\n- Privacy infringement\n- Obscene or socially inappropriate content\n- Any use that may violate the law",
 
-  "notice_title": "⚠️ Notices & Restrictions",
-  "notice_body": "This application is an **entertainment-only parody image generator**.\n\n【Prohibited Content】\n- Discriminatory or hateful expressions\n- Defamation or slander\n- Privacy violations\n- Obscene or inappropriate content\n- Any usage that violates laws or regulations",
+  "agree_label": "📘 I agree to the notes & restrictions and will generate parody images responsibly.",
+  "agree_warning": "*You must agree to enable the interface.*",
 
-  "ascii_links": "### 🔗 ASCII Art Reference Links\n\n- [Shin Manga ASCII Art Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB (Maintained by @aahub_dev)](https://aahub.org/mlt)",
+  "ascii_links": "### 🔗 ASCII Art Reference Sites\n\n- [Shin Manga Sogo AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB is operated by @aahub_dev. Please follow the creator if you use AA from the site.*",
   
   "mode_select": "Mode Selection",
   "normal_mode": "Normal Mode",
   "aa_mode": "ASCII Art Mode",
 
-  "font_select": "Font Selection (Normal Mode Only)",
-  "yellow_words": "Highlight Words (one per line)",
+  "font_select": "Select Font (Normal Mode Only)",
+  "yellow_words": "Yellow-highlight words (line separated)",
   "main_text": "Main Text",
   "footer_left": "Footer (Left)",
   "footer_right": "Footer (Right)",
-  "background_select": "Select Background Image",
+  "background_select": "Select Background",
 
   "apply": "Apply",
-  "reset": "Reset to Defaults",
+  "reset": "Reset to Default",
 
   "save": "Save Image (JPEG)",
-  "tweet": "Post to X (image not auto-uploaded)",
+  "tweet": "Post to X (attach the image manually)",
 
-  "tweet_template": "This image was generated using the Obanyaki MFA Generator.\nhttps://ikan-no-i-gen.streamlit.app/\nCreator @InsHatanCountry\n*Note: The image is not auto-uploaded. Please attach it manually.*",
+  "tweet_template": "This image was created with the Obanyaki MOFA Generator.\nhttps://ikan-no-i-gen.streamlit.app/\nCreator: @InsHatanCountry\n*Images are not auto-posted. Please attach manually.*",
 
-  "default_main": "\"We hereby warn the Koriyaki faction:\nDo not play with fire\nover the Obanyaki dispute.\nIf you continue,\nwe will ally with Imagawayaki.\"",
-  "default_footer_left": "Obanyaki MFA Spokesperson",
-  "default_footer_right": "November 15, 2015",
+  "default_main": "\"We warn the Imagawayaki faction:\nDo not play with fire\nregarding the Obanyaki issue.\nIf you continue,\nwe will form an alliance\nwith the Imagawayaki forces.\"",
+  "default_footer_left": "Obanyaki MOFA Spokesperson",
+  "default_footer_right": "Nov 15, 2015",
   "default_yellow": "fire"
 }
