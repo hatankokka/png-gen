@@ -13,7 +13,10 @@ FONT_DIR = "fonts"
 FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. MINCHO",
     "UnGungseo.ttf": "02. KOREA FONT",
-    "NotoSansJP-Regular.ttf": "03. ALL Country FONT",
+    "NotoSansJP-Regular.ttf": "03. ALMIGHTY FONT",
+    "NotoSansTamil-VariableFont_wdth,wght.ttf": "04. TAMIL FONT",
+    "NotoSansDevanagari-Regular.ttf": "05. HINDI FONT",
+    "NotoSansEgyptianHieroglyphs-Regular.ttf": "06. HIEROGLYPH FONT",
 }
 
 AA_FONT_FILE = "ms-pgothic-regular.ttf"
@@ -498,6 +501,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
