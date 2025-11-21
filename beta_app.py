@@ -40,12 +40,19 @@ selected_code = st.selectbox(
     format_func=lambda code: LANG_OPTIONS[code]   # 表示用文字列
 )
 
-# 変わったら即反映
+# ★ 言語が変わったら初期値も切り替えて反映（方法2）
 if selected_code != st.session_state.lang:
     st.session_state.lang = selected_code
+
+    # 言語別の初期値ロード
+    lang_data = load_lang(selected_code)
+
+    st.session_state.main_text = lang_data["default_main"]
+    st.session_state.footer_left = lang_data["default_footer_left"]
+    st.session_state.footer_right = lang_data["default_footer_right"]
+    st.session_state.yellow_words = lang_data["default_yellow"]
+
     st.rerun()
-
-
 
 # -----------------------------------------------------------
 # 翻訳JSONを読み込む
@@ -498,6 +505,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
