@@ -177,17 +177,16 @@ if agreed:
             st.stop()
 
     # =========================================================
-    # JS用データ生成（JSON）
+    # JS用データ生成（JSON経由で安全に渡す）
     # =========================================================
     main_js = json.dumps(ss.main_text)
     footer_left_js = json.dumps(ss.footer_left)
     footer_right_js = json.dumps(ss.footer_right)
     mode_js = json.dumps(mode_internal)
-
     yellow_js = "|".join([w.strip() for w in ss.yellow_words.split("\n") if w.strip()])
 
     # =========================================================
-    # HTML テンプレート（SAVE/TWEET/TWEET_TEXT 置換）
+    # HTMLテンプレ（SAVE/TWEET/TWEET_TEXT置換）
     # =========================================================
     html_template = html_template.replace("{{SAVE}}", T["save"])
     html_template = html_template.replace("{{TWEET}}", T["tweet"])
@@ -196,7 +195,7 @@ if agreed:
     html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
 
     # =========================================================
-    # HTML 最終生成
+    # HTML 最終生成 ← ★ここがあなたが指定した部分 ★
     # =========================================================
     html_final = (
         html_template
@@ -213,6 +212,7 @@ if agreed:
     # HTML表示（画像生成）
     # =========================================================
     st_html(html_final, height=1050, scrolling=True)
+
 
 html_template = """
 <style>
@@ -447,6 +447,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
