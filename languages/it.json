@@ -1,0 +1,37 @@
+{
+  "title": "Generatore del Ministero Obanyaki ver3.0",
+  "author": "Creatore: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ Avvisi e Restrizioni",
+  "notice_body": "Questa applicazione è un **generatore di immagini parodistiche a scopo puramente ricreativo**.\n\n【Vietato】\n- Contenuti che promuovono discriminazione, insulti o odio etnico\n- Diffamazione di persone o gruppi\n- Violazione della privacy\n- Contenuti osceni o contrari alla morale\n- Qualsiasi uso che possa violare la legge\n\n【Dichiarazione di non responsabilità】\n- Il creatore **non si assume alcuna responsabilità** per problemi derivanti dalle immagini generate.\n- La pubblicazione o il riutilizzo sui social è **interamente a rischio dell’utente**.\n- L’app non è **collegata** ad alcuna persona, organizzazione o governo reale.\n- Anche se possono essere generate immagini che imitano enti pubblici, **rimangono parodie e non dichiarazioni ufficiali.**",
+
+  "agree_label": "📘 Accetto le condizioni e userò l’app responsabilmente.",
+  "agree_warning": "*Devi accettare per continuare.*",
+
+  "ascii_links": "### 🔗 Riferimenti all’arte ASCII\n\n- [Archivio Shin Manga AA](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB è gestito da @aahub_dev. Sostieni il creatore quando usi i suoi contenuti.*",
+
+  "mode_select": "Selezione modalità",
+  "normal_mode": "Modalità normale",
+  "aa_mode": "Modalità ASCII Art",
+
+  "font_select": "Seleziona carattere (solo modalità normale)",
+  "yellow_words": "Parole evidenziate (una per riga)",
+  "main_text": "Testo principale",
+  "footer_left": "Piè di pagina (sinistra)",
+  "footer_right": "Piè di pagina (destra)",
+  "background_select": "Seleziona sfondo",
+
+  "apply": "Applica",
+  "reset": "Reimposta",
+  "watermark": "Questa immagine è una parodia.",
+
+  "save": "Salva immagine (JPEG)",
+  "tweet": "Pubblica su X (allega immagine manualmente)",
+
+  "tweet_template": "Questa immagine è stata creata con il Generatore del Ministero Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCreatore: @InsHatanCountry\n*L’immagine non è allegata automaticamente. Aggiungila manualmente.*",
+
+  "default_main": "\"Avvertiamo la fazione Imagawayaki:\nNon scherzate col fuoco riguardo alla questione Obanyaki.\nSe continuate, formeremo un’alleanza.\"",
+  "default_footer_left": "Portavoce del Ministero Obanyaki",
+  "default_footer_right": "15 novembre 2015",
+  "default_yellow": "fuoco"
+}
