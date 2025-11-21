@@ -229,15 +229,6 @@ if agreed:
     mode_js = json.dumps(mode_internal)
 
     # =========================================================
-    # フォント選択（NORMAL モードのみ）
-    # =========================================================
-    if mode_internal == "NORMAL":
-        font_choice_label = st.selectbox(T["font_select"], FONT_LABEL_LIST)
-        ss.font_choice = FONT_MAP[font_choice_label]
-    else:
-        ss.font_choice = AA_FONT_FILE
-
-    # =========================================================
     # ★巨大 JSテンプレート（キャンバス本体）
     # =========================================================
     html_template = """
@@ -460,6 +451,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
