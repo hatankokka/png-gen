@@ -1,0 +1,37 @@
+{
+  "title": "Gerador do Ministério Obanyaki ver3.0",
+  "author": "Criador: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ Avisos & Restrições",
+  "notice_body": "Este aplicativo é um **gerador de imagens paródicas para fins exclusivamente recreativos**.\n\n【Proibido】\n- Conteúdos que promovam discriminação, insultos ou ódio étnico\n- Difamação de indivíduos ou grupos\n- Violação de privacidade\n- Conteúdo obsceno ou contrário aos bons costumes\n- Qualquer uso que possa violar a lei\n\n【Aviso de responsabilidade】\n- O criador **não se responsabiliza** por quaisquer problemas causados pelas imagens.\n- Publicar ou reutilizar imagens nas redes sociais é **totalmente por sua conta e risco**.\n- Este aplicativo **não está afiliado** a nenhuma pessoa, organização ou governo real.\n- Mesmo que imagens parecidas com instituições públicas sejam geradas, **são paródias e não declarações oficiais.**",
+
+  "agree_label": "📘 Concordo com os termos e usarei o aplicativo com responsabilidade.",
+  "agree_warning": "*Você deve concordar para continuar.*",
+
+  "ascii_links": "### 🔗 Referências de Arte ASCII\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB é administrado por @aahub_dev. Apoie o criador quando utilizar seu conteúdo.*",
+
+  "mode_select": "Seleção de modo",
+  "normal_mode": "Modo normal",
+  "aa_mode": "Modo ASCII Art",
+
+  "font_select": "Selecionar fonte (somente modo normal)",
+  "yellow_words": "Palavras destacadas (uma por linha)",
+  "main_text": "Texto principal",
+  "footer_left": "Rodapé (esquerda)",
+  "footer_right": "Rodapé (direita)",
+  "background_select": "Selecionar fundo",
+
+  "apply": "Aplicar",
+  "reset": "Redefinir",
+  "watermark": "Esta imagem é uma paródia.",
+
+  "save": "Salvar imagem (JPEG)",
+  "tweet": "Postar no X (anexar imagem manualmente)",
+
+  "tweet_template": "Esta imagem foi criada com o Gerador do Ministério Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCriador: @InsHatanCountry\n*A imagem não é enviada automaticamente. Por favor, anexe manualmente.*",
+
+  "default_main": "\"Avisamos à facção Imagawayaki:\nNão brinque com fogo na questão Obanyaki.\nSe continuar, formaremos uma aliança.\"",
+  "default_footer_left": "Porta-voz do Ministério Obanyaki",
+  "default_footer_right": "15 de novembro de 2015",
+  "default_yellow": "fogo"
+}
