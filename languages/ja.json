@@ -2,9 +2,12 @@
   "title": "大判焼外交部ジェネレーター ver2.4（軽量版）",
   "notice_title": "⚠️ 注意事項・禁止事項",
   "notice_body": "当アプリは **娯楽目的のパロディ画像生成ツール** です。\n\n【禁止事項】\n- 差別・侮辱・民族憎悪を助長する表現\n- 特定個人・団体の誹謗中傷\n- 名誉毀損・プライバシー侵害\n- 猥褻物、公序良俗に反する内容\n- 法令違反につながる利用",
+
+  "agree_label": "📘 注意事項・禁止事項に同意しました。私はルールを守ってパロディ画像を生成します。",
+  "agree_warning": "※ 同意すると操作できるようになります。",
   
-  "ascii_links": "### 🔗 アスキーアート参考サイト\n\n- [新・マンガ総合AA保管庫](https://seesaawiki.jp/asciiart/)\n- [AAHUB（@aahub_dev）](https://aahub.org/mlt)",
-  
+  "ascii_links": "### 🔗 アスキーアート参考サイト\n\n- [新・マンガ総合AA保管庫](https://seesaawiki.jp/asciiart/)\n- [AAHUB（感受性応答セヨ / AAHub＆東方やる夫スレ纏め 管理人 @aahub_dev）](https://aahub.org/mlt)\n\n※ AAHUB は @aahub_dev 氏によって運営されています。\n※ アスキーアートを引用する場合は、ぜひ @aahub_dev 氏のXアカウントもフォローしてください。",
+    
   "mode_select": "モード選択",
   "normal_mode": "通常モード",
   "aa_mode": "ASCIIアートモード",
