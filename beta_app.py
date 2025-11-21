@@ -5,7 +5,7 @@ import os
 import json
 from streamlit.components.v1 import html as st_html
 
-st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.3", layout="centered")
+st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # =========================================================
 # タイトル
@@ -446,6 +446,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
