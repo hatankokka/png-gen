@@ -9,51 +9,38 @@ st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", 
 
 # -----------------------------------------------------------
 # ★ 一時的に session_state を全クリアして古い値を削除する ★
-# （1回実行したら消してOK）
 # -----------------------------------------------------------
 st.session_state.clear()
 
 
 # -----------------------------------------------------------
-# 言語選択（日本語 / English）
+# 言語選択（国旗アイコンボタン版）
 # -----------------------------------------------------------
 
 # 表示名 → 内部言語コード のマッピング
 LANG_OPTIONS = {
-    "日本語": "ja",
-    "English": "en",
-    # 今後追加したい場合はここに書くだけ：
-    # "繁體中文": "zh-Hant",
-    # "简体中文": "zh-Hans",
-    # "한국어": "ko",
+    "🇯🇵 日本語": "ja",
+    "🇺🇸 English": "en",
+    # 今後追加する場合はここに書くだけ：
+    # "🇹🇼 繁體中文": "zh-Hant",
+    # "🇨🇳 简体中文": "zh-Hans",
+    # "🇰🇷 한국어": "ko",
 }
 
 # 初回起動時のデフォルト言語
 if "lang" not in st.session_state:
     st.session_state.lang = "ja"
 
-# 現在の内部コードに対応する “表示名” を取得
-def get_display_name_from_code(code):
-    for display, internal in LANG_OPTIONS.items():
-        if internal == code:
-            return display
-    return "日本語"  # fallback
+current_lang = st.session_state.lang
 
-current_display = get_display_name_from_code(st.session_state.lang)
+# 国旗ボタンUI（押すと即切り替え）
+cols = st.columns(len(LANG_OPTIONS))
 
-# UI に表示する文字列（日本語 / English など）
-display_names = list(LANG_OPTIONS.keys())
+for i, (disp, code) in enumerate(LANG_OPTIONS.items()):
+    if cols[i].button(disp):
+        st.session_state.lang = code
+        st.rerun()  # 押した瞬間に切り替え
 
-# ラジオボタン（表示名だけ見せる）
-selected_display = st.radio(
-    "言語 / Language",
-    options=display_names,
-    index=display_names.index(current_display),
-    horizontal=True
-)
-
-# 選ばれた表示名 → 内部コードに変換
-st.session_state.lang = LANG_OPTIONS[selected_display]
 
 
 # -----------------------------------------------------------
@@ -507,6 +494,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
