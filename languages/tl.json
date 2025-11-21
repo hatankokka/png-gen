@@ -1,0 +1,25 @@
+{
+  "title": "Obanyaki MOFA Generator ver3.0",
+  "author": "May-akda: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ Paalala at Mga Pagbabawal",
+  "notice_body": "Ang app na ito ay isang **parody image generator para lamang sa libangan**.\n\n【Mga Ipinagbabawal】\n- Mga pahayag na nagtataguyod ng diskriminasyon, pang-iinsulto, o pagkapoot\n- Paninirang-puri laban sa indibidwal o grupo\n- Paglabag sa pribasiya\n- Malaswang nilalaman o labag sa kabutihang-asal\n- Anumang posibleng labag sa batas\n\n【Paunawa】\n- Ang may-akda ay **hindi mananagot** sa anumang gulong dulot ng mga larawang nalikha.\n- Ang pag-post o paggamit muli ng larawan sa social media ay **responsibilidad ng gumagamit**.\n- Ang app na ito ay walang kaugnayan sa anumang tunay na tao, organisasyon, o pamahalaan.\n- Maaaring lumikha ng larawang ginagaya ang mga ahensya o grupo sa politika, ngunit **ito ay parody lamang at hindi opisyal na pahayag**.",
+
+  "agree_label": "📘 Sumasang-ayon ako sa mga paalala at gagamitin ang app nang may pananagutan.",
+  "agree_warning": "*Kailangan mong sumang-ayon upang magpatuloy.*",
+
+  "ascii_links": "### 🔗 Mga Sanggunian ng ASCII Art\n\n- [Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*Ang AAHUB ay pinapatakbo ni @aahub_dev. Kung gagamit ka ng AA mula sa site, pakisuportahan ang may-akda.*",
+
+  "mode_select": "Piliin ang Mode",
+  "normal_mode": "Normal Mode",
+  "aa_mode": "ASCII Art Mode",
+
+  "font_select": "Piliin ang Font (Normal Mode lang)",
+  "yellow_words": "Mga salitang iha-highlight (isang linya bawat isa)",
+  "main_text": "Pangunahing Teksto",
+  "footer_left": "Footer (Kaliwa)",
+  "footer_right": "Footer (Kanan)",
+  "background_select": "Piliin ang Background",
+
+  "apply": "Ilapat",
+  "reset": "
