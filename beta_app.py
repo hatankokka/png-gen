@@ -10,8 +10,9 @@ st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", 
 # -----------------------------------------------------------
 # ★ 一時的に session_state を全クリアして古い値を削除する ★
 # -----------------------------------------------------------
-#st.session_state.clear()
-
+if "initialized" not in st.session_state:
+    st.session_state.clear()
+    st.session_state.initialized = True
 
 # -----------------------------------------------------------
 # 言語選択（セレクトボックス版 / 完全安定化）
@@ -497,6 +498,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
