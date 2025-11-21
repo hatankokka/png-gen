@@ -50,9 +50,7 @@ selected_code = display_to_code[selected_display]
 # 選択が変更されたら rerun
 if selected_code != st.session_state.lang:
     st.session_state.lang = selected_code
-    st.experimental_rerun()  # ← セレクトボックスでは必須！
-
-
+    st.rerun()
 
 
 # -----------------------------------------------------------
@@ -506,6 +504,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
