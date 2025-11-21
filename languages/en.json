@@ -9,6 +9,7 @@
   "agree_warning": "*You must agree to proceed.*",
 
   "ascii_links": "### 🔗 ASCII Art Reference Sites\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB is operated by @aahub_dev. Please follow the creator if you use artwork from the site.*",
+  "font_select": "Select Font (Normal Mode Only)",
 
   "mode_select": "Mode Selection",
   "normal_mode": "Normal Mode",
