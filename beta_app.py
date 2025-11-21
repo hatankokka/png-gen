@@ -430,15 +430,14 @@ document.getElementById("tweetBtn").onclick = function() {
     const text = encodeURIComponent({{TWEET_TEXT}});
     window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
 };
-    window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
-};
 
 </script>
 """
 
-# ★★★ ここに追加する！★★★
 html_template = html_template.replace("{{SAVE}}", T["save"])
 html_template = html_template.replace("{{TWEET}}", T["tweet"])
+tweet_template_js = json.dumps(T["tweet_template"])
+html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
 
 
 html_final = (
@@ -453,6 +452,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
