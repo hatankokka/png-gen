@@ -122,11 +122,23 @@ FONT_LABEL_LIST = list(FONT_LABELS.values())
 
 ss = st.session_state
 
-# =========================================================
-# モード選択（通常 / ASCIIアート）
-# =========================================================
-# mode = st.radio("モード選択", ["通常モード", "ASCIIアートモード"])
-mode = st.radio(T["mode_select"], [T["normal_mode"], T["aa_mode"]])
+# -----------------------------------------------------------
+# モード選択（多言語対応：内部値を固定化）
+# -----------------------------------------------------------
+
+MODE_OPTIONS = {
+    T["normal_mode"]: "NORMAL",
+    T["aa_mode"]: "AA",
+}
+
+mode_display = st.radio(
+    T["mode_select"],
+    options=list(MODE_OPTIONS.keys()),
+    horizontal=True
+)
+
+mode_internal = MODE_OPTIONS[mode_display]
+
 
 # -----------------------------------------------------------
 # アスキーアート参照リンク
@@ -137,7 +149,7 @@ st.markdown(T["ascii_links"])
 # =========================================================
 # フォント選択（通常モードのみ）
 # =========================================================
-if mode == "通常モード":
+if mode_internal == "NORMAL":
     if "font_choice" in ss and ss.font_choice in FONT_LABEL_LIST:
         default_font_idx = FONT_LABEL_LIST.index(ss.font_choice)
     else:
@@ -493,6 +505,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
