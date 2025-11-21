@@ -46,6 +46,7 @@ def load_lang(lang_code):
 LANG_OPTIONS = {
     "ja": "日本語",
     "en": "English",
+    "ko": "한국어",
     "zh_cn": "简体中文",
     "zh_tw": "繁體中文",
     "fr": "Français",
@@ -56,7 +57,7 @@ LANG_OPTIONS = {
     "ar": "العربية",
     "fa": "فارسی",
     "tl": "Tagalog",
-    "ko": "한국어",
+    "th": "ภาษาไทย",
     "mn": "Монгол",
     "vi": "Tiếng Việt",
     "hi": "हिन्दी",
@@ -496,6 +497,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
