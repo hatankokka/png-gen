@@ -55,6 +55,7 @@ BACKGROUND_CHOICES = {
     "背景 04": ".streamlit/background04.png",
     "背景 05": ".streamlit/background05.png",
     "背景 06": ".streamlit/background06.png",
+    "背景 07": ".streamlit/background07.png",
 }
 
 # =========================================================
@@ -436,6 +437,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
