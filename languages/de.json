@@ -1,0 +1,37 @@
+{
+  "title": "Obanyaki Außenministerium-Generator ver3.0",
+  "author": "Ersteller: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ Hinweise & Einschränkungen",
+  "notice_body": "Diese Anwendung ist ein **Parodie-Bildgenerator nur zu Unterhaltungszwecken**.\n\n【Verboten】\n- Inhalte, die Diskriminierung, Beleidigung oder ethnischen Hass fördern\n- Verleumdung von Personen oder Gruppen\n- Verletzung der Privatsphäre\n- Obszöne oder gesellschaftlich unangemessene Inhalte\n- Jegliche Nutzung, die gegen Gesetze verstoßen könnte\n\n【Haftungsausschluss】\n- Der Ersteller übernimmt **keine Verantwortung** für Probleme, die durch generierte Bilder entstehen.\n- Das Hochladen oder Wiederverwenden in sozialen Medien erfolgt **auf eigene Verantwortung**.\n- Diese Anwendung steht **in keinem Zusammenhang** mit realen Personen, Organisationen oder Regierungen.\n- Obwohl Bilder erzeugt werden können, die öffentlichen Behörden ähneln, **handelt es sich um Parodien und nicht um offizielle Aussagen.**",
+
+  "agree_label": "📘 Ich stimme den Bedingungen zu und werde die Anwendung verantwortungsbewusst nutzen.",
+  "agree_warning": "*Sie müssen zustimmen, um fortzufahren.*",
+
+  "ascii_links": "### 🔗 ASCII-Kunst-Referenzen\n\n- [Shin Manga AA Archiv](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB wird von @aahub_dev betrieben. Bitte unterstützen Sie den Ersteller.*",
+
+  "mode_select": "Modusauswahl",
+  "normal_mode": "Normalmodus",
+  "aa_mode": "ASCII-Kunst-Modus",
+
+  "font_select": "Schriftart wählen (nur Normalmodus)",
+  "yellow_words": "Hervorzuhebende Wörter (pro Zeile eines)",
+  "main_text": "Haupttext",
+  "footer_left": "Fußzeile (links)",
+  "footer_right": "Fußzeile (rechts)",
+  "background_select": "Hintergrund wählen",
+
+  "apply": "Anwenden",
+  "reset": "Zurücksetzen",
+  "watermark": "Dieses Bild ist eine Parodie.",
+
+  "save": "Bild speichern (JPEG)",
+  "tweet": "Auf X posten (Bild manuell anhängen)",
+
+  "tweet_template": "Dieses Bild wurde mit dem Obanyaki Außenministerium-Generator ver3.0 erstellt.\nhttps://ikan-no-i-gen.streamlit.app/\nErsteller: @InsHatanCountry\n*Das Bild wird nicht automatisch hochgeladen. Bitte manuell anhängen.*",
+
+  "default_main": "\"Wir warnen die Imagawayaki-Fraktion:\nSpielt nicht mit dem Feuer im Obanyaki-Konflikt.\nWenn ihr fortfahrt, werden wir ein Bündnis eingehen.\"",
+  "default_footer_left": "Sprecher des Obanyaki-Außenministeriums",
+  "default_footer_right": "15. November 2015",
+  "default_yellow": "Feuer"
+}
