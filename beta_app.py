@@ -45,8 +45,28 @@ def load_lang(lang_code):
 # -----------------------------------------------------------
 LANG_OPTIONS = {
     "ja": "日本語",
-    "en": "English"
+    "en": "English",
+    "zh_cn": "简体中文",
+    "zh_tw": "繁體中文",
+    "fr": "Français",
+    "es": "Español",
+    "de": "Deutsch",
+    "it": "Italiano",
+    "pt": "Português",
+    "ar": "العربية",
+    "fa": "فارسی",
+    "tl": "Tagalog",
+    "ko": "한국어",
+    "mn": "Монгол",
+    "vi": "Tiếng Việt",
+    "hi": "हिन्दी",
+    "ru": "Русский",
+    "he": "עברית",
+    "ms": "Bahasa Melayu",
+    "ta": "தமிழ்",
+    "egy": "𓂀 Egyptian Hieroglyphs"
 }
+
 
 # 初期言語
 if "lang" not in st.session_state:
@@ -476,6 +496,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
