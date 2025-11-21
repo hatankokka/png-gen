@@ -59,14 +59,17 @@ else:
 # 背景画像
 # =========================================================
 BACKGROUND_CHOICES = {
-    "背景 01": ".streamlit/background01.png",
-    "背景 02": ".streamlit/background02.png",
-    "背景 03": ".streamlit/background03.png",
-    "背景 04": ".streamlit/background04.png",
-    "背景 05": ".streamlit/background05.png",
-    "背景 06": ".streamlit/background06.png",
-    "背景 07": ".streamlit/background07.png",
+    "01": ".streamlit/background01.png",
+    "02": ".streamlit/background02.png",
+    "03": ".streamlit/background03.png",
+    "04": ".streamlit/background04.png",
+    "05": ".streamlit/background05.png",
+    "06": ".streamlit/background06.png",
+    "07": ".streamlit/background07.png",
 }
+
+# 表示ラベルも数字のみ
+BG_LABELS = list(BACKGROUND_CHOICES.keys())
 
 # =========================================================
 # フォント
@@ -122,16 +125,10 @@ else:
 # =========================================================
 # 初期値
 # =========================================================
-DEFAULT_MAIN = """“われわれは
-回転焼派に告げる
-大判焼問題で
-火遊びをするな
-火遊びをすれば
-今川焼と同盟を組む”"""
-
-DEFAULT_LEFT = "大判焼外交部報道官"
-DEFAULT_RIGHT = "2015年11月15日"
-DEFAULT_YELLOW = "火遊び"
+DEFAULT_MAIN = T["default_main"]
+DEFAULT_LEFT = T["default_footer_left"]
+DEFAULT_RIGHT = T["default_footer_right"]
+DEFAULT_YELLOW = T["default_yellow"]
 
 # =========================================================
 # session_state 初期化
@@ -145,15 +142,15 @@ if "footer_right" not in ss:
 if "yellow_words" not in ss:
     ss.yellow_words = DEFAULT_YELLOW
 if "bg_choice" not in ss:
-    ss.bg_choice = "背景 01"
+    ss.bg_choice = "01"
 
 # =========================================================
 # 背景選択
 # =========================================================
 bg_choice = st.selectbox(
     T["background_select"],
-    list(BACKGROUND_CHOICES.keys()),
-    index=list(BACKGROUND_CHOICES.keys()).index(ss.bg_choice),
+    BG_LABELS,
+    index=BG_LABELS.index(ss.bg_choice)
 )
 ss.bg_choice = bg_choice
 
@@ -430,11 +427,9 @@ document.getElementById("saveBtn").onclick = function() {
 };
 
 document.getElementById("tweetBtn").onclick = function() {
-    const text = encodeURIComponent(
-        "この画像は『大判焼外交部ジェネレーター』で作りました。\\n" +
-        "https://ikan-no-i-gen.streamlit.app/\\n" +
-        "※画像は自動投稿されません。画像は自分で貼ってください。"
-    );
+    const text = encodeURIComponent({{TWEET_TEXT}});
+    window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
+};
     window.open("https://twitter.com/intent/tweet?text=" + text, "_blank");
 };
 
@@ -458,6 +453,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
