@@ -11,8 +11,9 @@ from streamlit.components.v1 import html as st_html
 FONT_DIR = "fonts"
 
 FONT_LABELS = {
-    "BIZUDMincho-Regular.ttf": "01. 明朝",
+    "BIZUDMincho-Regular.ttf": "01. MINCHO",
     "UnGungseo.ttf": "02. KOREA FONT",
+    "NotoSansJP-Regular.ttf": "03. ALL Country FONT",
 }
 
 AA_FONT_FILE = "ms-pgothic-regular.ttf"
@@ -497,6 +498,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
