@@ -439,8 +439,12 @@ document.getElementById("tweetBtn").onclick = function() {
 };
 
 </script>
-
 """
+
+# ★★★ ここに追加する！★★★
+html_template = html_template.replace("{{SAVE}}", T["save"])
+html_template = html_template.replace("{{TWEET}}", T["tweet"])
+
 
 html_final = (
     html_template
@@ -454,6 +458,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
