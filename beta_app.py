@@ -435,48 +435,4 @@ tweet_template_js = json.dumps(T["tweet_template"])
 html_template = html_template.replace("{{TWEET_TEXT}}", tweet_template_js)
 
 
-html_final = (
-    html_template
-        .replace("{{MAIN}}", main_js)
-        .replace("{{LEFT}}", footer_left_js)
-        .replace("{{RIGHT}}", footer_right_js)
-        .replace("{{YELLOW}}", yellow_js)
-        .replace("{{FONTDATA}}", font_b64)
-        .replace("{{BGDATA}}", bg_b64_safe)
-        .replace("{{MODE}}", mode_js)
-)
-
-st_html(html_final, height=1050, scrolling=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
