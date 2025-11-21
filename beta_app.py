@@ -14,32 +14,41 @@ st.session_state.clear()
 
 
 # -----------------------------------------------------------
-# 言語選択（国旗アイコンボタン版）
+# 言語選択（セレクトボックス版）
 # -----------------------------------------------------------
 
-# 表示名 → 内部言語コード のマッピング
 LANG_OPTIONS = {
-    "🇯🇵 日本語": "ja",
-    "🇺🇸 English": "en",
-    # 今後追加する場合はここに書くだけ：
-    # "🇹🇼 繁體中文": "zh-Hant",
-    # "🇨🇳 简体中文": "zh-Hans",
-    # "🇰🇷 한국어": "ko",
+    "日本語": "ja",
+    "English": "en",
+    # 今後追加したい場合はここに書くだけ：
+    # "繁體中文": "zh-Hant",
+    # "简体中文": "zh-Hans",
+    # "한국어": "ko",
 }
 
-# 初回起動時のデフォルト言語
+# 初期言語
 if "lang" not in st.session_state:
     st.session_state.lang = "ja"
 
-current_lang = st.session_state.lang
+current_lang_code = st.session_state.lang
 
-# 国旗ボタンUI（押すと即切り替え）
-cols = st.columns(len(LANG_OPTIONS))
+# 現在のコードに対応する表示名を探す
+current_display = [disp for disp, code in LANG_OPTIONS.items() if code == current_lang_code][0]
 
-for i, (disp, code) in enumerate(LANG_OPTIONS.items()):
-    if cols[i].button(disp):
-        st.session_state.lang = code
-        st.rerun()  # 押した瞬間に切り替え
+# セレクトボックス
+selected_display = st.selectbox(
+    "言語 / Language",
+    list(LANG_OPTIONS.keys()),
+    index=list(LANG_OPTIONS.keys()).index(current_display)
+)
+
+# 内部コードに変換して保存
+selected_code = LANG_OPTIONS[selected_display]
+
+# 言語切替されたら即リロード
+if selected_code != st.session_state.lang:
+    st.session_state.lang = selected_code
+    st.rerun()
 
 
 
@@ -494,6 +503,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
