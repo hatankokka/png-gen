@@ -14,43 +14,36 @@ st.session_state.clear()
 
 
 # -----------------------------------------------------------
-# 言語選択（セレクトボックス版）
+# 言語選択（セレクトボックス版 / 完全安定化）
 # -----------------------------------------------------------
 
 LANG_OPTIONS = {
-    "日本語": "ja",
-    "English": "en",
-    # "繁體中文": "zh-Hant",
-    # "简体中文": "zh-Hans",
-    # "한국어": "ko",
+    "ja": "日本語",
+    "en": "English",
+    # "zh-Hant": "繁體中文",
+    # "zh-Hans": "简体中文",
+    # "ko": "한국어",
 }
 
 # 初期言語
 if "lang" not in st.session_state:
     st.session_state.lang = "ja"
 
-current_lang_code = st.session_state.lang
+current_code = st.session_state.lang
 
-# 表示名 → コード を逆引き
-display_to_code = LANG_OPTIONS
-code_to_display = {v: k for k, v in LANG_OPTIONS.items()}
-
-current_display = code_to_display[current_lang_code]
-
-# セレクトボックス（表示名）
-selected_display = st.selectbox(
+# セレクトボックス（内部値=ja/en を選びつつ、表示は人間用）
+selected_code = st.selectbox(
     "言語 / Language",
-    list(display_to_code.keys()),
-    index=list(display_to_code.keys()).index(current_display)
+    options=list(LANG_OPTIONS.keys()),      # 内部用の言語コード
+    index=list(LANG_OPTIONS.keys()).index(current_code),
+    format_func=lambda code: LANG_OPTIONS[code]   # 表示用文字列
 )
 
-# 内部コードに変換
-selected_code = display_to_code[selected_display]
-
-# 選択が変更されたら rerun
+# 変わったら即反映
 if selected_code != st.session_state.lang:
     st.session_state.lang = selected_code
     st.rerun()
+
 
 
 # -----------------------------------------------------------
@@ -504,6 +497,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
