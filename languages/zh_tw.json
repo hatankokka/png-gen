@@ -1,0 +1,37 @@
+{
+  "title": "Obanyaki 外交部產生器 ver3.0",
+  "author": "作者：失敗國家研究所 (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+
+  "notice_title": "⚠️ 注意事項與限制",
+  "notice_body": "本應用為**娛樂用途的惡搞圖像生成工具**。\n\n【禁止事項】\n- 助長歧視、侮辱或民族仇恨的表現\n- 誹謗個人或團體\n- 侵犯隱私\n- 猥褻或違反公共秩序良俗之內容\n- 任何可能違反法律之行為\n\n【免責聲明】\n- 對因圖像產生所造成的任何問題，本作者概不負責。\n- 圖像之社群媒體發布或二次利用皆由使用者自行承擔風險。\n- 本應用與任何真實個人、組織或政府無關。\n- 雖可生成模仿政府機構或政治團體之圖像，但**純屬惡搞，並非真實立場或官方聲明。**",
+
+  "agree_label": "📘 我同意上述注意事項，並會負責任地生成惡搞圖像。",
+  "agree_warning": "※ 請勾選以繼續。",
+
+  "ascii_links": "### 🔗 ASCII 藝術參考網站\n\n- [新・漫畫綜合 AA 資料庫](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB 由 @aahub_dev 經營，若引用請考慮關注創作者。*",
+
+  "mode_select": "模式選擇",
+  "normal_mode": "一般模式",
+  "aa_mode": "ASCII 藝術模式",
+
+  "font_select": "選擇字體（僅一般模式）",
+  "yellow_words": "高亮詞（每行一個）",
+  "main_text": "主要文字",
+  "footer_left": "頁腳（左）",
+  "footer_right": "頁腳（右）",
+  "background_select": "選擇背景",
+
+  "apply": "套用",
+  "reset": "恢復預設",
+  "watermark": "此圖片為惡搞內容。",
+
+  "save": "儲存圖片（JPEG）",
+  "tweet": "分享到 X（需手動上傳圖片）",
+
+  "tweet_template": "此圖片由 Obanyaki 外交部產生器 ver3.0 建立。\nhttps://ikan-no-i-gen.streamlit.app/\n作者 @InsHatanCountry\n*圖片不會自動上傳，請自行添加。*",
+
+  "default_main": "「我們警告今川燒派：\n不要在大判燒問題上玩火。\n若再繼續，我們將與今川燒陣營結盟。」",
+  "default_footer_left": "Obanyaki 外交部發言人",
+  "default_footer_right": "2015年11月15日",
+  "default_yellow": "玩火"
+}
