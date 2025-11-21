@@ -5,6 +5,22 @@ import os
 import json
 from streamlit.components.v1 import html as st_html
 
+# =========================================================
+# フォント定義
+# =========================================================
+FONT_DIR = "fonts"
+
+FONT_LABELS = {
+    "BIZUDMincho-Regular.ttf": "01. 明朝",
+    "UnGungseo.ttf": "02. KOREA FONT",
+}
+
+AA_FONT_FILE = "ms-pgothic-regular.ttf"
+
+FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
+FONT_LABEL_LIST = list(FONT_LABELS.values())
+
+
 ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
@@ -87,7 +103,7 @@ if not agreed:
     st.warning(T["agree_warning"])
 
 # =========================================================
-# ★ モード選択
+# モード選択
 # =========================================================
 mode_label = st.radio(
     T["mode_select"],
@@ -98,6 +114,7 @@ if mode_label == T["normal_mode"]:
     mode_internal = "NORMAL"
 else:
     mode_internal = "AA"
+
 
 # =========================================================
 # NGワード読み込み ~ 画像生成全て
@@ -113,10 +130,21 @@ if agreed:
     else:
         ss.font_choice = AA_FONT_FILE
 
+    # =========================================================
     # Base64変換
+    # =========================================================
     font_path = os.path.join(FONT_DIR, ss.font_choice)
     with open(font_path, "rb") as f:
         font_b64 = base64.b64encode(f.read()).decode()
+
+
+    # =========================================================
+    # Base64変換
+    # =========================================================
+    font_path = os.path.join(FONT_DIR, ss.font_choice)
+    with open(font_path, "rb") as f:
+        font_b64 = base64.b64encode(f.read()).decode()
+
     
     # =========================================================
     # NGワード読み込み
@@ -273,6 +301,7 @@ const mode        = {{MODE}};
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
