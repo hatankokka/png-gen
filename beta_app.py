@@ -8,6 +8,13 @@ from streamlit.components.v1 import html as st_html
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # -----------------------------------------------------------
+# ★ 一時的に session_state を全クリアして古い値を削除する ★
+# （1回実行したら消してOK）
+# -----------------------------------------------------------
+st.session_state.clear()
+
+
+# -----------------------------------------------------------
 # 言語選択（日本語 / English）
 # -----------------------------------------------------------
 
@@ -486,6 +493,7 @@ html_final = (
 )
 
 st_html(html_final, height=1050, scrolling=True)
+
 
 
 
