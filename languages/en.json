@@ -24,6 +24,7 @@
 
   "apply": "Apply",
   "reset": "Reset to Default",
+  "watermark": "This image is a parody.",
 
   "save": "Save Image (JPEG)",
   "tweet": "Post to X (attach image manually)",
