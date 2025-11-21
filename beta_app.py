@@ -123,13 +123,14 @@ else:
 if agreed:
 
     # =========================================================
-    # モード別フォント選択
+    # モード別フォント選択（多言語対応）
     # =========================================================
     if mode_internal == "NORMAL":
-        font_choice_label = st.selectbox("フォント選択", FONT_LABEL_LIST)
+        font_choice_label = st.selectbox(T["font_select"], FONT_LABEL_LIST)
         ss.font_choice = FONT_MAP[font_choice_label]
     else:
         ss.font_choice = AA_FONT_FILE
+
 
     # =========================================================
     # Base64変換
@@ -459,6 +460,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
