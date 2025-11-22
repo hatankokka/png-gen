@@ -199,32 +199,67 @@ if agreed:
     else:
         NG_WORDS = []
 
-    # =========================================================
-    # 背景画像（クリック選択式・完全動作版）
+       # =========================================================
+    # 背景画像（固定窓枠＋3列グリッド）
     # =========================================================
 
-    # 1) Streamlit RPC 用の JavaScript
-    rpc_js = """
-    <script>
-    function selectBg(val){
-        window.parent.postMessage(
-            {
-                isStreamlitMessage: true,
-                type: "streamlit:setComponentValue",
-                value: val
-            },
-            "*"
-        );
+    # 背景ファイル一覧を取得
+    BACKGROUND_CHOICES = {
+        Path(p).stem.replace("background", ""): p
+        for p in sorted(glob.glob(".streamlit/background*.png"))
     }
-    </script>
-    """
-    st.markdown(rpc_js, unsafe_allow_html=True)
 
-    # 2) 背景 HTML グリッド
+    if not BACKGROUND_CHOICES:
+        st.error(".streamlit/background*.png が見つかりません。")
+        st.stop()
+
+    keys = list(BACKGROUND_CHOICES.keys())
+
+    # 初期選択の保証
+    if "bg_choice" not in ss or ss.bg_choice not in keys:
+        ss.bg_choice = keys[0]
+
+    st.markdown("### " + T["background_select"])
+
+    # CSS
+    st.markdown("""
+    <style>
+    .bg-window {
+        width: 680px;
+        height: 520px;
+        overflow-y: scroll;
+        margin: 0 auto;
+        padding: 10px;
+        border: 1px solid #444;
+        border-radius: 8px;
+    }
+    .bg-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 24px;
+    }
+    .bg-item {
+        text-align: center;
+    }
+    .bg-img {
+        width: 140px;
+        border-radius: 8px;
+    }
+    .selected {
+        outline: 4px solid #ff4b4b;
+        outline-offset: 3px;
+    }
+    .label {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # サムネイルグリッド（HTML一括）
     html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
-
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
         img_thumb.thumbnail((140, 200))
@@ -233,26 +268,32 @@ if agreed:
         img_thumb.save(buf, format="PNG")
         thumb_b64 = base64.b64encode(buf.getvalue()).decode()
 
-        border_class = "selected" if key == selected else ""
+        border_class = "selected" if key == ss.bg_choice else ""
 
-        html_body += textwrap.dedent(f"""
-        <div class="bg-item" onclick="selectBg('{key}')">
+        html_body += f"""
+        <div class="bg-item">
             <div class="label">{key}</div>
-            <img src="data:image/png;base64,{thumb_b64}"
-                 class="bg-img {border_class}">
+            <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
         </div>
-        """)
+        """
 
     html_body += "</div></div>"
 
     st.markdown(html_body, unsafe_allow_html=True)
 
-    # 3) JS から送られた選択値を受け取る
-    params = st.experimental_get_query_params()
-    if "streamlitComponentValue" in params:
-        ss.bg_choice = params["streamlitComponentValue"][0]
-        st.experimental_set_query_params()  # パラメータ消す
-        st.rerun()
+    # 選択ボタン（3列に並べる）
+    cols = st.columns(3)
+    for i, key in enumerate(keys):
+        col = cols[i % 3]
+        with col:
+            if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
+                ss.bg_choice = key
+                st.rerun()
+
+    # キャンバス用背景画像を Base64 化
+    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+        bg_b64_safe = base64.b64encode(f.read()).decode()
+
     
  
     # =========================================================
@@ -577,6 +618,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
