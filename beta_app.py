@@ -29,10 +29,22 @@ ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # -----------------------------------------------------------
-# ★ 一時的に session_state を全クリア（初回のみ）
+# ★ 初回ロード時：session_state を初期化し、ja.json の初期値を読み込む
 # -----------------------------------------------------------
 if "initialized" not in st.session_state:
     st.session_state.initialized = True
+    
+    # 日本語JSONをロード
+    lang_data = load_lang("ja")
+
+    # 初期値をセット
+    st.session_state.main_text = lang_data["default_main"]
+    st.session_state.footer_left = lang_data["default_footer_left"]
+    st.session_state.footer_right = lang_data["default_footer_right"]
+    st.session_state.yellow_words = lang_data["default_yellow"]
+
+    st.session_state.lang = "ja"   # 初期言語を設定（重要）
+
 
 
 # -----------------------------------------------------------
@@ -500,4 +512,5 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
