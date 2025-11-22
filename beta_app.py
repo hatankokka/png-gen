@@ -19,19 +19,8 @@ FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. MINCHO",
     "UnGungseo.ttf": "02. KOREA FONT",
     "NotoSansJP-Regular.ttf": "03. ALMIGHTY FONT",
-    "NotoSansTamil-VariableFont_wdth,wght.ttf": "04. TAMIL FONT",
-    "NotoSansDevanagari-Regular.ttf": "05. HINDI FONT",
-    "NotoSansEgyptianHieroglyphs-Regular.ttf": "06. HIEROGLYPH FONT",
+    "NotoSansEgyptianHieroglyphs-Regular.ttf": "04. HIEROGLYPH FONT",
 }
-
-
-# ★ 追加：Devanagari fallback font
-with open(os.path.join(FONT_DIR, "NotoSansDevanagari-Regular.ttf"), "rb") as f:
-    fontdata_dev = base64.b64encode(f.read()).decode()
-
-# ★ 追加：Tamil fallback font
-with open(os.path.join(FONT_DIR, "NotoSansTamil-VariableFont_wdth,wght.ttf"), "rb") as f:
-    fontdata_ta = base64.b64encode(f.read()).decode()
 
 AA_FONT_FILE = "ms-pgothic-regular.ttf"
 
@@ -92,11 +81,9 @@ LANG_OPTIONS = {
     "th": "ภาษาไทย",
     "mn": "Монгол",
     "vi": "Tiếng Việt",
-    "hi": "हिन्दी",
     "ru": "Русский",
     "he": "עברית",
     "ms": "Bahasa Melayu",
-    "ta": "தமிழ்",
     "egy": "𓂀 Egyptian Hieroglyphs"
 }
 
@@ -323,17 +310,6 @@ if agreed:
     src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
 }
 
-★★この下に追加★★
-
-@font-face {
-    font-family: "NotoSansDevanagari";
-    src: url("data:font/ttf;base64,{{FONTDATA_DEV}}") format("truetype");
-}
-
-@font-face {
-    font-family: "NotoSansTamil";
-    src: url("data:font/ttf;base64,{{FONTDATA_TA}}") format("truetype");
-}
 
 ★★ここまで追加★★
 
@@ -385,8 +361,6 @@ const ctx = canvas.getContext("2d");
 
 img.onload = async function() {
     try {
-        await document.fonts.load("30px NotoSansDevanagari");
-        await document.fonts.load("30px NotoSansTamil");
         await document.fonts.load("30px customFont");
 
         // 🔥 必須：shaping 完了を待つ
@@ -424,7 +398,7 @@ function drawPoster() {
 
     // === バイナリサーチ ===
     function canFit(fontSize) {
-        ctx.font = `${fontSize}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
+        ctx.font = `${fontSize}px customFont, sans-serif`;
 
 
         let maxLineWidth = 0;
@@ -462,7 +436,7 @@ function drawPoster() {
     if (fontSize < 10) fontSize = 10;
 
     // ★ フォントに Devanagari/Tamil のフォールバックを追加
-    ctx.font = `${fontSize}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
+    ctx.font = `${fontSize}px customFont, sans-serif`;
     ctx.textBaseline = "middle";
 
     const totalTextHeight = lines.length * fontSize * LINE_GAP;
@@ -470,7 +444,7 @@ function drawPoster() {
 
     function drawColoredLine(line, centerX, y) {
         // ★ ここも同じフォント設定に修正
-        ctx.font = `${fontSize}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
+        ctx.font = `${fontSize}px customFont, sans-serif`;
 
         if (mode === "AA") {
             ctx.fillStyle = "white";
@@ -528,14 +502,14 @@ function drawPoster() {
 
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
-    ctx.font = `${footerFont}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
+    ctx.font = `${footerFont}px customFont, sans-serif`;
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.fillText(footerLeft, W * 0.06, footerY);
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
     
-    ctx.font = `${footerFont}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
+    ctx.font = `${footerFont}px customFont, sans-serif`;
     ctx.fillStyle = "white";
 
     ctx.textAlign = "left";
@@ -546,7 +520,7 @@ function drawPoster() {
 
     // === Watermark（右上 / footer の半分サイズ） ===
     const watermarkFont = Math.floor(footerFont * 0.5);
-    ctx.font = `${watermarkFont}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
+    ctx.font = `${watermarkFont}px customFont, sans-serif`;
     ctx.fillStyle = "rgba(255,255,255,0.85)";
     ctx.textAlign = "right";
     ctx.fillText(watermark, W * 0.97, H * 0.07);
@@ -598,6 +572,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
