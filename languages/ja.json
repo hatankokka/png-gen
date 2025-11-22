@@ -1,6 +1,7 @@
 {
-  "title": "大判焼外交部ジェネレーター ver3.0",
-  "author": "作成者：破綻国家研究所（@InsHatanCountry）\nhttps://x.com/InsHatanCountry",
+  "title": "大判焼外交部ジェネレーター",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">作成者：破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ 注意事項・禁止事項",
   "notice_body": "当アプリは **娯楽目的のパロディ画像生成ツール** です。\n\n【禁止事項】\n- 差別・侮辱・民族憎悪を助長する表現\n- 特定個人・団体の誹謗中傷\n- 名誉毀損・プライバシー侵害\n- 猥褻物、公序良俗に反する内容\n- 法令違反につながる利用\n\n【免責事項】\n- 生成物によるトラブルに **当方は一切責任を負いません。**\n- 生成された画像のSNS投稿・二次利用は **ユーザー自身の責任** で行ってください。\n- 本アプリは実在の個人・団体とは一切関係ありません。\n- 公的機関・国家・政治団体を模した画像を生成できますが、**これはパロディであり、実際の見解や声明ではありません。**",
@@ -9,7 +10,6 @@
   "agree_warning": "※ 同意すると操作できるようになります。",
 
   "ascii_links": "### 🔗 アスキーアート参考サイト\n\n- [新・マンガ総合AA保管庫](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n※ AAHUB は（感受性応答セヨ / AAHub＆東方やる夫スレ纏め 管理人）[@aahub_dev](https://x.com/aahub_dev) 氏によって運営されています。\n※ アスキーアートを引用する場合は、ぜひ @aahub_dev 氏のXアカウントもフォローしてください。",
-  "font_select": "フォントを選択（通常モードのみ）",
 
   "mode_select": "モード選択",
   "normal_mode": "通常モード",
