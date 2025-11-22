@@ -29,7 +29,7 @@
   "save": "Save Image (JPEG)",
   "tweet": "Post to X (image not auto-attached)",
 
-  "tweet_template": "This image was created using the Obanyaki MOFA Generator ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCreator @InsHatanCountry\n*Images are not auto-posted. Please attach them manually.*",
+  "tweet_template": "This image was created using the Obanyaki MOFA Generator\nhttps://ikan-no-i-gen.streamlit.app/\nCreator @InsHatanCountry\n*Images are not auto-posted. Please attach them manually.*",
 
   "default_main": "\"We hereby warn the Imagawayaki faction:\nDo not play with fire regarding the Obanyaki issue.\nIf you persist, we will form an alliance with the Imagawayaki forces.\"",
   "default_footer_left": "Obanyaki MOFA Spokesperson",
