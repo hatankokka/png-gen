@@ -29,6 +29,13 @@ ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # -----------------------------------------------------------
+# 翻訳JSONを読み込む関数（上に置く）
+# -----------------------------------------------------------
+def load_lang(lang_code):
+    with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+        
+# -----------------------------------------------------------
 # ★ 初回ロード時：session_state を初期化し、ja.json の初期値を読み込む
 # -----------------------------------------------------------
 if "initialized" not in st.session_state:
@@ -512,5 +519,6 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
