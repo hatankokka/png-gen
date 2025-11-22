@@ -204,7 +204,7 @@ if agreed:
 
     st.markdown("### " + T["background_select"])
 
-    # ラジオボタン（背景選択） ← ひとつだけ置く
+    # ラジオボタン（背景選択）
     selected_bg = st.radio(
         "",
         keys,
@@ -527,6 +527,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
