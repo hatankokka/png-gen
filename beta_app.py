@@ -200,7 +200,7 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（固定窓枠＋3列グリッド）
+    # 背景画像（クリック選択式・完全動作版）
     # =========================================================
 
     import textwrap
@@ -234,11 +234,11 @@ if agreed:
     }
     .bg-item {
         text-align: center;
+        cursor: pointer;
     }
     .bg-img {
         width: 140px;
         border-radius: 8px;
-        cursor: pointer;
     }
     .selected {
         outline: 4px solid #ff4b4b;
@@ -251,11 +251,12 @@ if agreed:
     </style>
     """, unsafe_allow_html=True)
 
-
+    # -------------------------------
+    # HTML一括生成（fetch POST版）
+    # -------------------------------
     html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
-
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
         img_thumb.thumbnail((140, 200))
@@ -266,23 +267,36 @@ if agreed:
 
         border_class = "selected" if key == selected else ""
 
-        # 画像をクリック → 隠しフォームの submit
         html_body += textwrap.dedent(f"""
-        <form action="" method="post">
-            <input type="hidden" name="bg_select" value="{key}">
-            <div class="bg-item" onclick="this.parentElement.submit()">
-                <div class="label">{key}</div>
-                <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
-            </div>
-        </form>
+        <div class="bg-item"
+             onclick="fetch('', {{
+                 method:'POST',
+                 headers:{{'Content-Type':'text/plain'}},
+                 body:'BG={key}'
+             }}).then(()=>window.location.reload());">
+
+            <div class="label">{key}</div>
+            <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
+        </div>
         """)
 
     html_body += "</div></div>"
 
     st.markdown(html_body, unsafe_allow_html=True)
 
+    # -------------------------------
     # POST を受け取る
-    form_val = st.session_state.get("bg_select_form", None)
+    # -------------------------------
+    if st._runtime.handle.request:
+        body = st._runtime.handle.request.get("body", "")
+        if isinstance(body, bytes):
+            body = body.decode()
+
+        if body.startswith("BG="):
+            bg = body.replace("BG=", "").strip()
+            ss.bg_choice = bg
+            st.rerun()
+
     
  
     # =========================================================
@@ -607,6 +621,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
