@@ -1,22 +1,23 @@
 {
-  "title": "Trình Tạo Bộ Ngoại Giao Obanyaki ver3.0",
-  "author": "Tác giả: Viện Nghiên Cứu Quốc Gia Thất Bại (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+  "title": "Trình Tạo Bộ Ngoại Giao Obanyaki",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">Tác giả: 破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ Lưu ý & Hạn chế",
-  "notice_body": "Ứng dụng này là **công cụ tạo hình ảnh parody dùng cho mục đích giải trí**.\n\n【Cấm】\n- Nội dung xúc phạm, phân biệt đối xử hoặc kích động thù hằn\n- Bôi nhọ cá nhân hoặc tổ chức\n- Xâm phạm quyền riêng tư\n- Nội dung khiêu dâm hoặc trái thuần phong mỹ tục\n- Bất kỳ hành vi nào có thể vi phạm pháp luật\n\n【Miễn trừ trách nhiệm】\n- Tác giả **không chịu trách nhiệm** cho bất kỳ rủi ro nào do hình ảnh tạo ra.\n- Việc đăng tải hoặc tái sử dụng hình ảnh trên mạng xã hội hoàn toàn **do người dùng tự chịu trách nhiệm**.\n- Ứng dụng không liên quan đến bất kỳ cá nhân, tổ chức hoặc chính phủ thực tế nào.\n- Dù có thể mô phỏng cơ quan nhà nước hoặc tổ chức chính trị, **đây chỉ là parody và không đại diện cho quan điểm hay tuyên bố chính thức nào.**",
+  "notice_body": "Ứng dụng này là **công cụ tạo hình ảnh parody dùng cho mục đích giải trí**.\n\n【Cấm】\n- Nội dung xúc phạm, phân biệt đối xử hoặc kích động thù hằn sắc tộc\n- Bôi nhọ cá nhân hoặc tổ chức\n- Xâm phạm quyền riêng tư\n- Nội dung khiêu dâm hoặc trái thuần phong mỹ tục\n- Mọi hành vi có thể vi phạm pháp luật\n\n【Miễn trừ trách nhiệm】\n- Tác giả **không chịu bất kỳ trách nhiệm nào** đối với vấn đề phát sinh từ hình ảnh được tạo ra.\n- Việc đăng tải hoặc tái sử dụng hình ảnh trên mạng xã hội **hoàn toàn do người dùng tự chịu trách nhiệm**.\n- Ứng dụng này **không liên quan** đến bất kỳ cá nhân, tổ chức hoặc chính phủ thực tế nào.\n- Dù có thể tạo ra những hình ảnh trông giống cơ quan nhà nước hay tổ chức chính trị, **đây chỉ là parody và không phải tuyên bố chính thức.**",
 
   "agree_label": "📘 Tôi đồng ý và sẽ sử dụng ứng dụng một cách có trách nhiệm.",
   "agree_warning": "*Bạn phải đồng ý để tiếp tục.*",
 
-  "ascii_links": "### 🔗 Tham khảo nghệ thuật ASCII\n\n- [Kho Lưu Trữ AA Manga](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB được vận hành bởi @aahub_dev. Nếu bạn sử dụng AA từ trang, hãy cân nhắc theo dõi tác giả.*",
+  "ascii_links": "### 🔗 Tham khảo nghệ thuật ASCII\n\n- [Kho Lưu Trữ AA Manga](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB được vận hành bởi @aahub_dev. Nếu sử dụng nội dung, vui lòng ủng hộ tác giả.*",
 
   "mode_select": "Chọn chế độ",
   "normal_mode": "Chế độ thường",
   "aa_mode": "Chế độ ASCII Art",
 
-  "font_select": "Chọn phông chữ (Chỉ chế độ thường)",
+  "font_select": "Chọn phông chữ (chỉ cho chế độ thường)",
   "yellow_words": "Từ nhấn mạnh (mỗi dòng một từ)",
-  "main_text": "Nội dung chính",
+  "main_text": "Nội dung chính (hãy thêm xuống dòng nếu văn bản quá lớn hoặc quá nhỏ)",
   "footer_left": "Chân trang (trái)",
   "footer_right": "Chân trang (phải)",
   "background_select": "Chọn nền",
@@ -26,11 +27,11 @@
   "watermark": "Hình ảnh này là parody.",
 
   "save": "Lưu hình (JPEG)",
-  "tweet": "Đăng lên X (tự đính kèm hình)",
+  "tweet": "Đăng lên X (đính kèm hình thủ công)",
 
-  "tweet_template": "Hình ảnh này được tạo bằng Trình Tạo Bộ Ngoại Giao Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nTác giả @InsHatanCountry\n*Hình không được đăng tự động, vui lòng tự đính kèm.*",
+  "tweet_template": "Hình ảnh này được tạo bằng Trình Tạo Bộ Ngoại Giao Obanyaki.\nhttps://ikan-no-i-gen.streamlit.app/\nTác giả: @InsHatanCountry\n*Hình sẽ không được đính kèm tự động — vui lòng đính kèm thủ công.*",
 
-  "default_main": "\"Chúng tôi cảnh cáo phe Imagawayaki:\nĐừng đùa với lửa về vấn đề Obanyaki.\nNếu tiếp tục, chúng tôi sẽ liên minh với phe Imagawayaki.\"",
+  "default_main": "\"Chúng tôi cảnh cáo phe Imagawayaki:\nĐừng đùa với lửa trong vấn đề Obanyaki.\nNếu tiếp tục, chúng tôi sẽ liên minh với họ.\"",
   "default_footer_left": "Người phát ngôn Bộ Ngoại Giao Obanyaki",
   "default_footer_right": "15/11/2015",
   "default_yellow": "lửa"
