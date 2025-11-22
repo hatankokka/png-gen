@@ -3,6 +3,8 @@ import base64
 import html
 import os
 import json
+import glob
+from pathlib import Path
 from streamlit.components.v1 import html as st_html
 
 # =========================================================
@@ -190,32 +192,42 @@ if agreed:
     else:
         NG_WORDS = []
 
-    # =========================================================
-    # 背景画像
-    # =========================================================
-    BACKGROUND_CHOICES = {
-        "01": ".streamlit/background01.png",
-        "02": ".streamlit/background02.png",
-        "03": ".streamlit/background03.png",
-        "04": ".streamlit/background04.png",
-        "05": ".streamlit/background05.png",
-        "06": ".streamlit/background06.png",
-        "07": ".streamlit/background07.png",
-    }
-    BG_LABELS = list(BACKGROUND_CHOICES.keys())
+# =========================================================
+# 背景画像（サムネイル + ラジオボタン方式）
+# =========================================================
 
-    bg_choice = st.selectbox(
-        T["background_select"],
-        BG_LABELS,
-        index=BG_LABELS.index(ss.bg_choice) if "bg_choice" in ss else 0
-    )
-    ss.bg_choice = bg_choice
 
-    with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
-        bg_b64_raw = f.read()
-        bg_b64 = base64.b64encode(bg_b64_raw).decode()
+BACKGROUND_CHOICES = {
+    Path(p).stem.replace("background",""): p
+    for p in sorted(glob.glob(".streamlit/background*.png"))
+}
 
-    bg_b64_safe = html.escape(bg_b64)
+
+st.markdown("### " + T["background_select"])
+
+cols = st.columns(3)  # グリッド3列
+
+selected_bg = ss.bg_choice if "bg_choice" in ss else "01"
+
+i = 0
+for key, path in BACKGROUND_CHOICES.items():
+    col = cols[i % 3]
+    with col:
+        st.image(path, width=100)
+        # ラジオの label は空文字で消す（見た目をスッキリさせるため）
+        if st.radio(" ", [key], index=0 if selected_bg == key else -1, key=f"bg_{key}") == key:
+            selected_bg = key
+    i += 1
+
+ss.bg_choice = selected_bg
+
+# 背景画像を Base64 化
+with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+    bg_b64_raw = f.read()
+    bg_b64 = base64.b64encode(bg_b64_raw).decode()
+
+bg_b64_safe = html.escape(bg_b64)
+
 
     # =========================================================
     # 入力欄（本文 / フッター）
@@ -512,6 +524,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
