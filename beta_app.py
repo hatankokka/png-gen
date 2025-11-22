@@ -4,6 +4,8 @@ import html
 import os
 import json
 import glob
+from PIL import Image
+import io
 from pathlib import Path
 from streamlit.components.v1 import html as st_html
 
@@ -211,40 +213,58 @@ if agreed:
 
     selected = ss.bg_choice if "bg_choice" in ss else keys[0]
 
+    # ---------------------------------------------------------
+    # ★ 超軽量：サムネイルを Pillow で動的生成（Base64廃止）
+    # ---------------------------------------------------------
+
+
+    st.markdown("### 背景画像を選択")
+
+    cols = st.columns(3)
+
+    keys = list(BACKGROUND_CHOICES.keys())
+    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
+
     for i, key in enumerate(keys):
         with cols[i % 3]:
 
-            # Base64画像
-            img_b64 = base64.b64encode(open(BACKGROUND_CHOICES[key], "rb").read()).decode()
-
-            # 選択枠CSS
+            # 選択枠
             border = "3px solid #ff4b4b" if key == selected else "3px solid rgba(0,0,0,0)"
 
-            # HTML + ボタン（透明化）
+            # ★ フル画像を読み込んで縮小（120px）
+            img = Image.open(BACKGROUND_CHOICES[key])
+            img_thumb = img.copy()
+            img_thumb.thumbnail((120, 200))   # ← ここで小さくする
+
+            # ★ PNGをBase64化（縮小版だから10〜30KB）
+            buf = io.BytesIO()
+            img_thumb.save(buf, format="PNG")
+            thumb_b64 = base64.b64encode(buf.getvalue()).decode()
+
+            # ★ HTMLへ縮小版だけ表示（軽い！）
             st.markdown(
                 f"""
                 <div style="position:relative; width:120px; margin-bottom:8px;">
-                    <img src="data:image/png;base64,{img_b64}"
+                    <img src="data:image/png;base64,{thumb_b64}"
                         style="width:120px; border-radius:8px; border:{border};">
                 </div>
                 """,
                 unsafe_allow_html=True
             )
 
-            # ★ 画像の下に透明ボタンを置いてクリック可能にする
+            # ★ 背景選択ボタン
             if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
                 ss.bg_choice = key
-                st.rerun()   # 即反映
+                st.rerun()
 
-    # 背景 Base64
+    # ---------------------------------------------------------
+    # ★ 本番背景は従来のフルサイズ Base64（生成用なのでOK）
+    # ---------------------------------------------------------
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
         bg_b64_raw = f.read()
 
     bg_b64 = base64.b64encode(bg_b64_raw).decode()
     bg_b64_safe = html.escape(bg_b64)
-
-
-
 
  
     # =========================================================
@@ -572,6 +592,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
