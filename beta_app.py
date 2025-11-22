@@ -31,8 +31,8 @@ st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", 
 # -----------------------------------------------------------
 # 翻訳JSONを読み込む関数（上に置く）
 # -----------------------------------------------------------
-def load_lang(lang_code):
-    with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
+def load_lang_initial_ja():
+    with open("languages/ja.json", "r", encoding="utf-8") as f:
         return json.load(f)
         
 # -----------------------------------------------------------
@@ -40,18 +40,14 @@ def load_lang(lang_code):
 # -----------------------------------------------------------
 if "initialized" not in st.session_state:
     st.session_state.initialized = True
-    
-    # 日本語JSONをロード
-    lang_data = load_lang("ja")
 
-    # 初期値をセット
-    st.session_state.main_text = lang_data["default_main"]
-    st.session_state.footer_left = lang_data["default_footer_left"]
-    st.session_state.footer_right = lang_data["default_footer_right"]
-    st.session_state.yellow_words = lang_data["default_yellow"]
+    ja = load_lang_initial_ja()
 
-    st.session_state.lang = "ja"   # 初期言語を設定（重要）
-
+    st.session_state.main_text = ja["default_main"]
+    st.session_state.footer_left = ja["default_footer_left"]
+    st.session_state.footer_right = ja["default_footer_right"]
+    st.session_state.yellow_words = ja["default_yellow"]
+    st.session_state.lang = "ja"
 
 
 # -----------------------------------------------------------
@@ -519,6 +515,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
