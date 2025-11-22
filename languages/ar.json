@@ -29,7 +29,7 @@
   "save": "حفظ الصورة (JPEG)",
   "tweet": "النشر على X (إرفاق الصورة يدويًا)",
 
-  "tweet_template": "تم إنشاء هذه الصورة باستخدام Obanyaki MOFA Generator ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nالمنشئ: @InsHatanCountry\n*لن يتم إرفاق الصورة تلقائيًا. يُرجى إرفاقها يدويًا.*",
+  "tweet_template": "تم إنشاء هذه الصورة باستخدام Obanyaki MOFA Generator\nhttps://ikan-no-i-gen.streamlit.app/\nالمنشئ: @InsHatanCountry\n*لن يتم إرفاق الصورة تلقائيًا. يُرجى إرفاقها يدويًا.*",
 
   "default_main": "\"نحذّر فصيل إيماغاواياكي:\nلا تلعبوا بالنار في قضية أوبانياكي.\nإذا واصلتم ذلك، فسنتحالف مع قوات إيماغاواياكي.\"",
   "default_footer_left": "المتحدث باسم وزارة أوبانياكي",
