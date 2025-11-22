@@ -200,80 +200,73 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（超軽量・行ごとに画像→ボタン）
+    # 背景画像（超軽量・画像行→ボタン行セット表示）
     # =========================================================
 
-    st.markdown("### " + T["background_select"])
+    st.markdown("### 背景画像を選択")
 
-    # 画像を3列グリッドで並べるためのCSS（最低限）
     st.markdown("""
     <style>
     .bg-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 24px;
-        margin-bottom: 8px;
+        margin-top: 8px;
+        margin-bottom: 0px;
     }
-    .bg-item {
-        text-align: center;
-    }
+    .bg-item { text-align:center; }
     .bg-img {
         width: 150px;
         border-radius: 8px;
     }
     .bg-selected {
-        outline: 4px solid #ff4b4b;
-        outline-offset: 2px;
+        outline:4px solid #ff4b4b;
+        outline-offset:2px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # ---------- 行ごとに「画像行」をHTMLで一括描画 ----------
-    html = ""
-
-    # 3枚ずつのブロックに分けて処理
+    # 画像行 → ボタン行の繰り返し
     for row_start in range(0, len(keys), 3):
+
         row_keys = keys[row_start: row_start + 3]
 
-        html += '<div class="bg-row">'
+        # -------------- 画像行（HTML一括） --------------
+        html = '<div class="bg-row">'
         for key in row_keys:
 
             img = Image.open(BACKGROUND_CHOICES[key])
-            img_thumb = img.copy()
-            img_thumb.thumbnail((150, 220))
-
+            thumb = img.copy()
+            thumb.thumbnail((150, 220))
             buf = io.BytesIO()
-            img_thumb.save(buf, format="PNG")
-            thumb_b64 = base64.b64encode(buf.getvalue()).decode()
+            thumb.save(buf, format="PNG")
+            b64 = base64.b64encode(buf.getvalue()).decode()
 
             cls = "bg-img bg-selected" if ss.bg_choice == key else "bg-img"
 
-            html += textwrap.dedent(f"""
+            html += f"""
             <div class="bg-item">
-                <img src="data:image/png;base64,{thumb_b64}" class="{cls}">
+                <img src="data:image/png;base64,{b64}" class="{cls}">
             </div>
-            """)
+            """
 
-        html += "</div>"  # .bg-row の終わり
+        html += "</div>"
+        st.markdown(html, unsafe_allow_html=True)
 
-    st.markdown(html, unsafe_allow_html=True)
-
-    # ---------- 行ごとに「ボタン行」（Streamlitボタン） ----------
-    for row_start in range(0, len(keys), 3):
-        row_keys = keys[row_start: row_start + 3]
+        # -------------- ボタン行（同じ row_keys） --------------
         cols = st.columns(len(row_keys))
         for key, col in zip(row_keys, cols):
             with col:
-                if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
+                if st.button(f"👉 {key}", key=f"btn_{key}"):
                     ss.bg_choice = key
-                    # 選択が変わったら背景Base64も更新
-                    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+                    with open(BACKGROUND_CHOICES[key], "rb") as f:
                         bg_b64_safe = base64.b64encode(f.read()).decode()
                     st.rerun()
 
-    # 最後にもう一度、現在選択されている背景で Base64 を更新
+    # 最後に Base64 を更新
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
         bg_b64_safe = base64.b64encode(f.read()).decode()
+
 
 
     
@@ -600,6 +593,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
