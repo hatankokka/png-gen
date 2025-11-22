@@ -1,14 +1,15 @@
 {
-  "title": "Obanyaki 外交部生成器 ver3.0",
-  "author": "作者：失败国家研究所 (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+  "title": "Obanyaki 外交部生成器",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">作者：破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ 注意事项与限制",
-  "notice_body": "本应用为**娱乐用途的恶搞图像生成工具**。\n\n【禁止事项】\n- 宣扬歧视、侮辱或民族仇恨的内容\n- 诽谤个人或团体\n- 侵犯隐私\n- 色情或违反社会公序良俗的内容\n- 任何可能违反法律的用途\n\n【免责声明】\n- 对因生成图像引发的任何问题，创作者概不负责。\n- 在社交媒体发布或二次利用图像完全由用户自行承担责任。\n- 本应用与任何现实中的个人、组织、政府无关。\n- 虽可生成类似政府机构或政治实体的图像，但**纯属恶搞，不代表任何真实立场或官方声明。**",
+  "notice_body": "本应用是**仅用于娱乐的恶搞（parody）图像生成工具**。\n\n【禁止事项】\n- 宣扬歧视、侮辱或民族仇恨的内容\n- 诽谤个人或团体\n- 侵犯隐私\n- 色情或违反社会公序良俗的内容\n- 任何可能违反法律的用途\n\n【免责声明】\n- 对因生成图像造成的任何问题，作者**不承担任何责任**。\n- 在社交媒体发布或二次使用图像**完全由用户自行负责**。\n- 本应用与任何现实中的个人、机构或政府**毫无关联**。\n- 即便生成的图像可能类似政府机关或政治组织，**也仅为恶搞，不代表任何真实立场或官方声明。**",
 
-  "agree_label": "📘 我同意上述注意事项，并将负责任地生成恶搞图像。",
-  "agree_warning": "※ 请勾选以继续。",
+  "agree_label": "📘 我已阅读并同意上述内容，并将负责任地使用本工具。",
+  "agree_warning": "※ 继续操作前请先勾选同意。",
 
-  "ascii_links": "### 🔗 ASCII 艺术参考站点\n\n- [新·漫画综合 AA 资料库](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB 由 @aahub_dev 运营，如引用请考虑关注创作者。*",
+  "ascii_links": "### 🔗 ASCII 艺术参考站点\n\n- [新·漫画综合 AA 资料库](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB 由 @aahub_dev 运营，如引用请支持创作者。*",
 
   "mode_select": "模式选择",
   "normal_mode": "普通模式",
@@ -16,19 +17,19 @@
 
   "font_select": "选择字体（仅限普通模式）",
   "yellow_words": "高亮词（每行一个）",
-  "main_text": "正文文本",
+  "main_text": "正文文本（若字体过大或过小，请适当换行）",
   "footer_left": "页脚（左）",
   "footer_right": "页脚（右）",
   "background_select": "选择背景",
 
   "apply": "应用",
-  "reset": "重置为默认",
+  "reset": "恢复默认",
   "watermark": "此图为恶搞内容。",
 
   "save": "保存图像（JPEG）",
   "tweet": "分享到 X（需手动上传图片）",
 
-  "tweet_template": "本图由 Obanyaki 外交部生成器 ver3.0 创建。\nhttps://ikan-no-i-gen.streamlit.app/\n作者 @InsHatanCountry\n*图片不会自动上传，请手动添加。*",
+  "tweet_template": "本图由 Obanyaki 外交部生成器 创建。\nhttps://ikan-no-i-gen.streamlit.app/\n作者：@InsHatanCountry\n*图片不会自动上传，请手动添加。*",
 
   "default_main": "“我们警告今川烧派：\n不要在大判烧问题上玩火。\n如果继续，我们将与今川烧阵营结盟。”",
   "default_footer_left": "Obanyaki 外交部发言人",
