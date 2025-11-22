@@ -469,24 +469,35 @@ function drawPoster() {
         }
 
         let segs = [];
+
+        // Unicode-safe glyph 分割
+        const glyphs = Array.from(line);
         let pos = 0;
 
-        while (pos < line.length) {
+        while (pos < glyphs.length) {
             let matched = false;
 
+            // 黄色語の一致判定も Unicode-safe にする
             for (const w of yellowWords) {
-                if (w && line.startsWith(w, pos)) {
+                if (!w) continue;
+
+                const wGlyphs = Array.from(w);
+                const slice = glyphs.slice(pos, pos + wGlyphs.length).join("");
+
+                if (slice === w) {
                     segs.push({ text: w, yellow: true });
-                    pos += w.length;
+                    pos += wGlyphs.length;
                     matched = true;
                     break;
                 }
             }
+
             if (!matched) {
-                segs.push({ text: line[pos], yellow: false });
+                segs.push({ text: glyphs[pos], yellow: false });
                 pos++;
             }
         }
+
 
         let totalW = 0;
         for (const seg of segs) totalW += ctx.measureText(seg.text).width;
@@ -576,6 +587,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
