@@ -246,9 +246,10 @@ if agreed:
     </style>
     """, unsafe_allow_html=True)
 
-
-    # 窓枠 → グリッド
-    st.markdown('<div class="bg-window"><div class="bg-grid">', unsafe_allow_html=True)
+    # ---------------------------------------------------------
+    # HTML を１つにまとめる（←これが重要）
+    # ---------------------------------------------------------
+    html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
 
@@ -262,24 +263,27 @@ if agreed:
 
         border_class = "selected" if key == selected else ""
 
-        st.markdown(
-            f"""
+        html_body += f"""
             <div class="bg-item">
                 <div class="label">{key}</div>
                 <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+        """
 
-    st.markdown('</div></div>', unsafe_allow_html=True)
+    html_body += "</div></div>"
 
+    # グリッド一括描画
+    st.markdown(html_body, unsafe_allow_html=True)
 
     # 選択ボタン
     for key in keys:
         if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
             ss.bg_choice = key
             st.rerun()
+
+
+
+    
  
     # =========================================================
     # 入力欄（本文 / フッター）
@@ -603,6 +607,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
