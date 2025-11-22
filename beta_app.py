@@ -201,6 +201,7 @@ if agreed:
 
     # =========================================================
     # 背景画像（固定窓枠＋3列グリッド）
+    # サムネイルクリックで選択できる完全版
     # =========================================================
 
     import textwrap
@@ -234,13 +235,15 @@ if agreed:
     }
     .bg-item {
         text-align: center;
+        cursor: pointer;
     }
     .bg-img {
         width: 140px;
         border-radius: 8px;
     }
     .selected {
-        border: 3px solid #ff4b4b;
+        outline: 4px solid #ff4b4b;
+        outline-offset: 3px;
     }
     .label {
         font-size: 16px;
@@ -249,13 +252,13 @@ if agreed:
     </style>
     """, unsafe_allow_html=True)
 
+
     # ---------------------------------------------------------
-    # HTML を１つにまとめる（←これが重要）
+    # HTML 全体を一括生成
     # ---------------------------------------------------------
     html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
-
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
         img_thumb.thumbnail((140, 200))
@@ -267,27 +270,24 @@ if agreed:
         border_class = "selected" if key == selected else ""
 
         html_body += textwrap.dedent(f"""
-            <div class="bg-item">
-                <div class="label">{key}</div>
-                <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
-            </div>
+        <div class="bg-item" onclick="window.location.href='?bg_choice={key}'">
+            <div class="label">{key}</div>
+            <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
+        </div>
         """)
 
     html_body += "</div></div>"
 
-    # グリッド一括描画
     st.markdown(html_body, unsafe_allow_html=True)
 
-    # 背景画像のBase64をJS用に保持
-    with open(BACKGROUND_CHOICES[selected], "rb") as f:
-        bg_b64_safe = base64.b64encode(f.read()).decode()
-
-    # 選択ボタン
-    for key in keys:
-        if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
-            ss.bg_choice = key
-            st.rerun()
-
+    # ---------------------------------------------------------
+    # クエリから選択された背景を拾う
+    # ---------------------------------------------------------
+    params = st.experimental_get_query_params()
+    if "bg_choice" in params:
+        ss.bg_choice = params["bg_choice"][0]
+        st.experimental_set_query_params()  # クリア
+        st.rerun()
 
     
  
@@ -613,6 +613,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
