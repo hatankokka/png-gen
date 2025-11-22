@@ -200,6 +200,7 @@ if agreed:
         for p in sorted(glob.glob(".streamlit/background*.png"))
     }
 
+
     st.markdown("### " + T["background_select"])
     cols = st.columns(3)
 
@@ -210,7 +211,8 @@ if agreed:
         col = cols[i % 3]
         with col:
             st.image(path, width=100)
-            if st.radio(" ", [key], index=0 if selected_bg == key else -1, key=f"bg_{key}") == key:
+            # ← index を削除
+            if st.radio(" ", [key], key=f"bg_{key}") == key:
                 selected_bg = key
         i += 1
 
@@ -223,7 +225,7 @@ if agreed:
 
     bg_b64_safe = html.escape(bg_b64)
 
-
+ 
     # =========================================================
     # 入力欄（本文 / フッター）
     # =========================================================
@@ -519,6 +521,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
