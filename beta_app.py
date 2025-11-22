@@ -199,96 +199,88 @@ if agreed:
     else:
         NG_WORDS = []
 
-      # =========================================================
-    # 背景前処理（この定義が無いと keys が未定義になる）
+# =========================================================
+# NGワード読み込み ~ 画像生成全て
+# =========================================================
+if agreed:
+
+    # =========================================================
+    # モード別フォント選択（多言語対応）
+    # =========================================================
+    if mode_internal == "NORMAL":
+        font_choice_label = st.selectbox(T["font_select"], FONT_LABEL_LIST)
+        ss.font_choice = FONT_MAP[font_choice_label]
+    else:
+        ss.font_choice = AA_FONT_FILE
+
+    # =========================================================
+    # Base64変換
+    # =========================================================
+    font_path = os.path.join(FONT_DIR, ss.font_choice)
+    with open(font_path, "rb") as f:
+        font_b64 = base64.b64encode(f.read()).decode()
+
+    # =========================================================
+    # NGワード読み込み
+    # =========================================================
+    NG_FILE = ".streamlit/ng_words.txt"
+    if os.path.exists(NG_FILE):
+        with open(NG_FILE, "r", encoding="utf-8") as f:
+            NG_WORDS = [w.strip() for w in f if w.strip()]
+    else:
+        NG_WORDS = []
+
+    # =========================================================
+    # 背景画像（カードUI：画像クリックで選択）
     # =========================================================
     BACKGROUND_CHOICES = {
         Path(p).stem.replace("background", ""): p
         for p in sorted(glob.glob(".streamlit/background*.png"))
     }
 
-    if not BACKGROUND_CHOICES:
-        st.error("背景画像が読み込めません")
-        st.stop()
-
     keys = list(BACKGROUND_CHOICES.keys())
+    st.markdown("### " + T["background_select"])
 
-    if "bg_choice" not in ss or ss.bg_choice not in keys:
-        ss.bg_choice = keys[0]
+    cols = st.columns(3)
 
-    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
-        bg_b64_safe = base64.b64encode(f.read()).decode()
+    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
 
-    
-    # =========================================================
-    # 背景画像（超軽量・画像行→ボタン行セット表示）
-    # =========================================================
+    for i, key in enumerate(keys):
+        with cols[i % 3]:
 
-    st.markdown("### 背景画像を選択")
-
-    st.markdown("""
-    <style>
-    .bg-row {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
-        margin-top: 8px;
-        margin-bottom: 0px;
-    }
-    .bg-item { text-align:center; }
-    .bg-img {
-        width: 150px;
-        border-radius: 8px;
-    }
-    .bg-selected {
-        outline:4px solid #ff4b4b;
-        outline-offset:2px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # 画像行 → ボタン行の繰り返し
-    for row_start in range(0, len(keys), 3):
-
-        row_keys = keys[row_start: row_start + 3]
-
-        # -------------- 画像行（HTML一括） --------------
-        html = '<div class="bg-row">'
-        for key in row_keys:
-
+            # ★★ 軽量サムネイル生成（置き換え版）★★
             img = Image.open(BACKGROUND_CHOICES[key])
-            thumb = img.copy()
-            thumb.thumbnail((150, 220))
+            img_thumb = img.copy()
+            img_thumb.thumbnail((120, 180))                 # ← ここで縮小する
             buf = io.BytesIO()
-            thumb.save(buf, format="PNG")
-            b64 = base64.b64encode(buf.getvalue()).decode()
+            img_thumb.save(buf, format="JPEG", quality=60)  # ← JPEG化でさらに軽量化
+            img_b64 = base64.b64encode(buf.getvalue()).decode()
 
-            cls = "bg-img bg-selected" if ss.bg_choice == key else "bg-img"
+            # 選択枠CSS
+            border = "3px solid #ff4b4b" if key == selected else "3px solid rgba(0,0,0,0)"
 
-            html += f"""
-            <div class="bg-item">
-                <img src="data:image/png;base64,{b64}" class="{cls}">
-            </div>
-            """
+            # HTML + ボタン（透明化）
+            st.markdown(
+                f"""
+                <div style="position:relative; width:120px; margin-bottom:8px;">
+                    <img src="data:image/jpeg;base64,{img_b64}"
+                        style="width:120px; border-radius:8px; border:{border};">
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-        html += "</div>"
-        st.markdown(html, unsafe_allow_html=True)
+            # ★ 画像の下に透明ボタンを置いてクリック可能にする
+            if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
+                ss.bg_choice = key
+                st.rerun()   # 即反映
 
-        # -------------- ボタン行（同じ row_keys） --------------
-        cols = st.columns(len(row_keys))
-        for key, col in zip(row_keys, cols):
-            with col:
-                if st.button(f"👉 {key}", key=f"btn_{key}"):
-                    ss.bg_choice = key
-                    with open(BACKGROUND_CHOICES[key], "rb") as f:
-                        bg_b64_safe = base64.b64encode(f.read()).decode()
-                    st.rerun()
-
-    # 最後に Base64 を更新
+    # 背景 Base64（本番用はフル解像度のまま）
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
-        bg_b64_safe = base64.b64encode(f.read()).decode()
+        bg_b64_raw = f.read()
 
-
+    bg_b64 = base64.b64encode(bg_b64_raw).decode()
+    bg_b64_safe = html.escape(bg_b64)
 
     
  
@@ -614,6 +606,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
