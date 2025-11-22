@@ -4,6 +4,7 @@ import html
 import os
 import json
 import glob
+import textwrap
 from PIL import Image
 import io
 from pathlib import Path
@@ -202,6 +203,8 @@ if agreed:
     # 背景画像（固定窓枠＋3列グリッド）
     # =========================================================
 
+    import textwrap
+
     BACKGROUND_CHOICES = {
         Path(p).stem.replace("background", ""): p
         for p in sorted(glob.glob(".streamlit/background*.png"))
@@ -263,24 +266,27 @@ if agreed:
 
         border_class = "selected" if key == selected else ""
 
-        html_body += f"""
+        html_body += textwrap.dedent(f"""
             <div class="bg-item">
                 <div class="label">{key}</div>
                 <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
             </div>
-        """
+        """)
 
     html_body += "</div></div>"
 
     # グリッド一括描画
     st.markdown(html_body, unsafe_allow_html=True)
 
+    # 背景画像のBase64をJS用に保持
+    with open(BACKGROUND_CHOICES[selected], "rb") as f:
+        bg_b64_safe = base64.b64encode(f.read()).decode()
+
     # 選択ボタン
     for key in keys:
         if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
             ss.bg_choice = key
             st.rerun()
-
 
 
     
@@ -607,6 +613,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
