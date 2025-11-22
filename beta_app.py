@@ -32,7 +32,6 @@ st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", 
 # ★ 一時的に session_state を全クリア（初回のみ）
 # -----------------------------------------------------------
 if "initialized" not in st.session_state:
-    st.session_state.clear()
     st.session_state.initialized = True
 
 
@@ -501,3 +500,4 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
