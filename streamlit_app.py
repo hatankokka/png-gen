@@ -3,6 +3,8 @@ import base64
 import html
 import os
 import json
+import glob
+from pathlib import Path
 from streamlit.components.v1 import html as st_html
 
 # =========================================================
@@ -29,23 +31,39 @@ ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター ver2.4", layout="centered")
 
 # -----------------------------------------------------------
-# ★ 一時的に session_state を全クリア（初回のみ）
+# 翻訳JSONを読み込む関数（上に置く）
+# -----------------------------------------------------------
+def load_lang_initial_ja():
+    with open("languages/ja.json", "r", encoding="utf-8") as f:
+        return json.load(f)
+        
+# -----------------------------------------------------------
+# ★ 初回ロード時：session_state を初期化し、ja.json の初期値を読み込む
 # -----------------------------------------------------------
 if "initialized" not in st.session_state:
-    st.session_state.clear()
     st.session_state.initialized = True
+
+    ja = load_lang_initial_ja()
+
+    st.session_state.main_text = ja["default_main"]
+    st.session_state.footer_left = ja["default_footer_left"]
+    st.session_state.footer_right = ja["default_footer_right"]
+    st.session_state.yellow_words = ja["default_yellow"]
+    st.session_state.lang = "ja"
+    
+    st.session_state.bg_choice = "01"
+    
 
 
 # -----------------------------------------------------------
-# 翻訳JSONを読み込む関数（上に置く）
+# 翻訳JSONを読み込む関数
 # -----------------------------------------------------------
 def load_lang(lang_code):
     with open(f"languages/{lang_code}.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
-
 # -----------------------------------------------------------
-# 言語選択（セレクトボックス版 / 完全安定型）
+# 言語一覧
 # -----------------------------------------------------------
 LANG_OPTIONS = {
     "ja": "日本語",
@@ -72,14 +90,28 @@ LANG_OPTIONS = {
     "egy": "𓂀 Egyptian Hieroglyphs"
 }
 
-
-# 初期言語
+# -----------------------------------------------------------
+# 初期言語設定
+# -----------------------------------------------------------
 if "lang" not in st.session_state:
     st.session_state.lang = "ja"
 
 current_code = st.session_state.lang
 
-# セレクトボックス（表示は日本語/English、中身はja/en）
+# -----------------------------------------------------------
+# ★ 言語辞書の読み込み（タイトルより前に必要）
+# -----------------------------------------------------------
+T = load_lang(st.session_state.lang)
+
+# -----------------------------------------------------------
+# タイトル & 作者
+# -----------------------------------------------------------
+st.title(T["title"])
+st.markdown(T["author"], unsafe_allow_html=True)
+
+# -----------------------------------------------------------
+# 言語選択（作者の直下）
+# -----------------------------------------------------------
 selected_code = st.selectbox(
     "言語 / Language",
     options=list(LANG_OPTIONS.keys()),
@@ -87,51 +119,35 @@ selected_code = st.selectbox(
     format_func=lambda code: LANG_OPTIONS[code]
 )
 
-# ★ 言語が変わったら初期値も切り替え（方法2）
+# ★ 言語変更処理
 if selected_code != st.session_state.lang:
     st.session_state.lang = selected_code
-
     lang_data = load_lang(selected_code)
     st.session_state.main_text = lang_data["default_main"]
     st.session_state.footer_left = lang_data["default_footer_left"]
     st.session_state.footer_right = lang_data["default_footer_right"]
     st.session_state.yellow_words = lang_data["default_yellow"]
-
     st.rerun()
 
-
 # -----------------------------------------------------------
-# ★★★ 言語が確定した「あと」で翻訳辞書を読み込む ★★★
+# アスキーアート参考リンク
 # -----------------------------------------------------------
-T = load_lang(st.session_state.lang)
-
-
-# =========================================================
-# タイトル & 作者
-# =========================================================
-st.title(T["title"])
-st.markdown(T["author"])   # ← これを追加（JSONから読む）
-
-# =========================================================
-# アスキーアート参考リンク（多言語）
-# =========================================================
 st.markdown(T["ascii_links"])
 
-
-# =========================================================
-# 注意事項（タイトル & 本文）
-# =========================================================
+# -----------------------------------------------------------
+# 注意事項
+# -----------------------------------------------------------
 st.markdown("### " + T["notice_title"])
 st.markdown(T["notice_body"])
 
-
-# =========================================================
-# 注意事項 同意チェック
-# =========================================================
+# -----------------------------------------------------------
+# 同意チェック
+# -----------------------------------------------------------
 agreed = st.checkbox(T["agree_label"])
-
 if not agreed:
     st.warning(T["agree_warning"])
+
+
 
 # =========================================================
 # モード選択
@@ -180,32 +196,56 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像
+    # 背景画像（カードUI：画像クリックで選択）
     # =========================================================
     BACKGROUND_CHOICES = {
-        "01": ".streamlit/background01.png",
-        "02": ".streamlit/background02.png",
-        "03": ".streamlit/background03.png",
-        "04": ".streamlit/background04.png",
-        "05": ".streamlit/background05.png",
-        "06": ".streamlit/background06.png",
-        "07": ".streamlit/background07.png",
+        Path(p).stem.replace("background", ""): p
+        for p in sorted(glob.glob(".streamlit/background*.png"))
     }
-    BG_LABELS = list(BACKGROUND_CHOICES.keys())
 
-    bg_choice = st.selectbox(
-        T["background_select"],
-        BG_LABELS,
-        index=BG_LABELS.index(ss.bg_choice) if "bg_choice" in ss else 0
-    )
-    ss.bg_choice = bg_choice
+    keys = list(BACKGROUND_CHOICES.keys())
+    st.markdown("### " + T["background_select"])
 
-    with open(BACKGROUND_CHOICES[bg_choice], "rb") as f:
+    cols = st.columns(3)
+
+    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
+
+    for i, key in enumerate(keys):
+        with cols[i % 3]:
+
+            # Base64画像
+            img_b64 = base64.b64encode(open(BACKGROUND_CHOICES[key], "rb").read()).decode()
+
+            # 選択枠CSS
+            border = "3px solid #ff4b4b" if key == selected else "3px solid rgba(0,0,0,0)"
+
+            # HTML + ボタン（透明化）
+            st.markdown(
+                f"""
+                <div style="position:relative; width:120px; margin-bottom:8px;">
+                    <img src="data:image/png;base64,{img_b64}"
+                        style="width:120px; border-radius:8px; border:{border};">
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # ★ 画像の下に透明ボタンを置いてクリック可能にする
+            if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
+                ss.bg_choice = key
+                st.rerun()   # 即反映
+
+    # 背景 Base64
+    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
         bg_b64_raw = f.read()
-        bg_b64 = base64.b64encode(bg_b64_raw).decode()
 
+    bg_b64 = base64.b64encode(bg_b64_raw).decode()
     bg_b64_safe = html.escape(bg_b64)
 
+
+
+
+ 
     # =========================================================
     # 入力欄（本文 / フッター）
     # =========================================================
@@ -501,6 +541,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
