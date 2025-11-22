@@ -506,14 +506,14 @@ function drawPoster() {
 
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
-    ctx.font = `${footerFont}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
+    ctx.font = `${footerFont}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.fillText(footerLeft, W * 0.06, footerY);
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
     
-    ctx.font = `${footerFont}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
+    ctx.font = `${footerFont}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
     ctx.fillStyle = "white";
 
     ctx.textAlign = "left";
@@ -524,7 +524,7 @@ function drawPoster() {
 
     // === Watermark（右上 / footer の半分サイズ） ===
     const watermarkFont = Math.floor(footerFont * 0.5);
-    ctx.font = watermarkFont + "px customFont";
+    ctx.font = `${watermarkFont}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
     ctx.fillStyle = "rgba(255,255,255,0.85)";
     ctx.textAlign = "right";
     ctx.fillText(watermark, W * 0.97, H * 0.07);
@@ -576,6 +576,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
