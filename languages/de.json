@@ -1,28 +1,29 @@
 {
-  "title": "Obanyaki Außenministerium-Generator ver3.0",
-  "author": "Ersteller: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+  "title": "Obanyaki Außenministerium-Generator",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">Ersteller: 破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ Hinweise & Einschränkungen",
-  "notice_body": "Diese Anwendung ist ein **Parodie-Bildgenerator nur zu Unterhaltungszwecken**.\n\n【Verboten】\n- Inhalte, die Diskriminierung, Beleidigung oder ethnischen Hass fördern\n- Verleumdung von Personen oder Gruppen\n- Verletzung der Privatsphäre\n- Obszöne oder gesellschaftlich unangemessene Inhalte\n- Jegliche Nutzung, die gegen Gesetze verstoßen könnte\n\n【Haftungsausschluss】\n- Der Ersteller übernimmt **keine Verantwortung** für Probleme, die durch generierte Bilder entstehen.\n- Das Hochladen oder Wiederverwenden in sozialen Medien erfolgt **auf eigene Verantwortung**.\n- Diese Anwendung steht **in keinem Zusammenhang** mit realen Personen, Organisationen oder Regierungen.\n- Obwohl Bilder erzeugt werden können, die öffentlichen Behörden ähneln, **handelt es sich um Parodien und nicht um offizielle Aussagen.**",
+  "notice_body": "Diese Anwendung ist ein **Parodie-Bildgenerator ausschließlich zu Unterhaltungszwecken**.\n\n【Verboten】\n- Inhalte, die Diskriminierung, Beleidigung oder ethnischen Hass fördern\n- Verleumdung von Einzelpersonen oder Gruppen\n- Verletzung der Privatsphäre\n- Obszöne oder gesellschaftlich unangemessene Inhalte\n- Jegliche Nutzung, die gegen geltende Gesetze verstoßen könnte\n\n【Haftungsausschluss】\n- Der Ersteller übernimmt **keinerlei Verantwortung** für Probleme, die durch generierte Bilder entstehen.\n- Das Hochladen oder Wiederverwenden der Bilder in sozialen Medien erfolgt **auf eigene Verantwortung**.\n- Diese Anwendung steht **in keinerlei Verbindung** zu realen Personen, Organisationen oder staatlichen Einrichtungen.\n- Auch wenn Bilder erzeugt werden können, die offiziellen Erklärungen oder staatlichen Mitteilungen ähneln, **handelt es sich um Parodien und nicht um tatsächliche Stellungnahmen.**",
 
-  "agree_label": "📘 Ich stimme den Bedingungen zu und werde die Anwendung verantwortungsbewusst nutzen.",
+  "agree_label": "📘 Ich stimme den Hinweisen und Einschränkungen zu und werde die Anwendung verantwortungsbewusst nutzen.",
   "agree_warning": "*Sie müssen zustimmen, um fortzufahren.*",
 
-  "ascii_links": "### 🔗 ASCII-Kunst-Referenzen\n\n- [Shin Manga AA Archiv](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB wird von @aahub_dev betrieben. Bitte unterstützen Sie den Ersteller.*",
+  "ascii_links": "### 🔗 ASCII-Kunst-Referenzen\n\n- [Shin Manga AA Archiv](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB wird von @aahub_dev betrieben. Bitte unterstützen Sie den Ersteller, wenn Sie Inhalte der Seite nutzen.*",
 
   "mode_select": "Modusauswahl",
   "normal_mode": "Normalmodus",
   "aa_mode": "ASCII-Kunst-Modus",
 
-  "font_select": "Schriftart wählen (nur Normalmodus)",
-  "yellow_words": "Hervorzuhebende Wörter (pro Zeile eines)",
-  "main_text": "Haupttext",
+  "font_select": "Schriftart wählen (nur im Normalmodus)",
+  "yellow_words": "Hervorzuhebende Wörter (ein Wort pro Zeile)",
+  "main_text": "Haupttext (Fügen Sie Zeilenumbrüche hinzu, wenn der Text zu groß oder zu klein wirkt)",
   "footer_left": "Fußzeile (links)",
   "footer_right": "Fußzeile (rechts)",
   "background_select": "Hintergrund wählen",
 
   "apply": "Anwenden",
-  "reset": "Zurücksetzen",
+  "reset": "Auf Standard zurücksetzen",
   "watermark": "Dieses Bild ist eine Parodie.",
 
   "save": "Bild speichern (JPEG)",
@@ -30,7 +31,7 @@
 
   "tweet_template": "Dieses Bild wurde mit dem Obanyaki Außenministerium-Generator ver3.0 erstellt.\nhttps://ikan-no-i-gen.streamlit.app/\nErsteller: @InsHatanCountry\n*Das Bild wird nicht automatisch hochgeladen. Bitte manuell anhängen.*",
 
-  "default_main": "\"Wir warnen die Imagawayaki-Fraktion:\nSpielt nicht mit dem Feuer im Obanyaki-Konflikt.\nWenn ihr fortfahrt, werden wir ein Bündnis eingehen.\"",
+  "default_main": "\"Wir warnen die Imagawayaki-Fraktion:\nSpielt nicht mit dem Feuer in der Obanyaki-Angelegenheit.\nWenn ihr fortfahrt, werden wir ein Bündnis mit den Imagawayaki-Kräften eingehen.\"",
   "default_footer_left": "Sprecher des Obanyaki-Außenministeriums",
   "default_footer_right": "15. November 2015",
   "default_yellow": "Feuer"
