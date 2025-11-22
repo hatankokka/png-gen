@@ -2,13 +2,22 @@
 <html>
 <body>
 
+<!-- テスト用キャンバス -->
 <canvas id="c" width="800" height="200"></canvas>
 
+<style>
+@font-face {
+    font-family: "NotoSansDevanagari";
+    src: url("./NotoSansDevanagari-Regular.ttf") format("truetype");
+}
+</style>
+
 <script>
+// キャンバス取得
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
-// フォント読み込み
+// フォントロードを確実に待つ
 document.fonts.load("40px NotoSansDevanagari").then(() => {
     ctx.font = "40px NotoSansDevanagari";
     ctx.fillText("देते हैं गठबंधन", 10, 80);
