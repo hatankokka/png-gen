@@ -29,7 +29,7 @@
   "save": "画像を保存（JPEG）",
   "tweet": "𝕏に投稿する（画像は自分で貼ってね）",
 
-  "tweet_template": "この画像は『大判焼外交部ジェネレーター ver3.0』で作りました。\nhttps://ikan-no-i-gen.streamlit.app/\n作成者 @InsHatanCountry\n※画像は自動投稿されません。画像は自分で貼ってください。",
+  "tweet_template": "この画像は『大判焼外交部ジェネレーター』で作りました。\nhttps://ikan-no-i-gen.streamlit.app/\n作成者 @InsHatanCountry\n※画像は自動投稿されません。画像は自分で貼ってください。",
 
   "default_main": "“われわれは\n回転焼派に告げる\n大判焼問題で\n火遊びをするな\n火遊びをすれば\n今川焼と同盟を組む”",
   "default_footer_left": "大判焼外交部報道官",
