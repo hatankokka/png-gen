@@ -200,7 +200,7 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像：前処理（絶対に必要）
+    # 背景画像：前処理（ここが絶対に必要）
     # =========================================================
 
     BACKGROUND_CHOICES = {
@@ -212,15 +212,16 @@ if agreed:
         st.error(".streamlit/background*.png が見つかりません。")
         st.stop()
 
+    # 背景キー一覧
     keys = list(BACKGROUND_CHOICES.keys())
 
-    # 初期選択の保証
+    # 初期値が不正なら修正
     if "bg_choice" not in ss or ss.bg_choice not in keys:
         ss.bg_choice = keys[0]
 
     selected = ss.bg_choice
 
-    # JS描画で使うBase64
+    # JS キャンバスで使う Base64 背景
     with open(BACKGROUND_CHOICES[selected], "rb") as f:
         bg_b64_safe = base64.b64encode(f.read()).decode()
 
@@ -644,6 +645,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
