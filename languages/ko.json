@@ -1,14 +1,15 @@
 {
-  "title": "오반야키 외교부 생성기 ver3.0",
-  "author": "제작자: 실패국가연구소 (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+  "title": "오반야키 외교부 생성기",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">제작자: 破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ 유의사항 및 금지사항",
-  "notice_body": "본 앱은 **오락 목적의 패러디 이미지 생성 도구**입니다.\n\n【금지사항】\n- 차별·모욕·민족 혐오를 조장하는 표현\n- 특정 개인·단체에 대한 비방\n- 사생활 침해\n- 음란물 또는 사회적 통념에 반하는 내용\n- 법률 위반 가능성이 있는 사용\n\n【면책조항】\n- 생성된 이미지로 인한 문제에 대해 제작자는 일절 책임지지 않습니다.\n- SNS 게시 및 2차 활용은 **사용자 본인의 책임**입니다.\n- 본 앱은 실제 개인·기관·정부와 아무 관련이 없습니다.\n- 공공기관 또는 정치 단체를 모방한 이미지가 생성될 수 있으나, **이는 패러디이며 실제 입장이나 공식 성명이 아닙니다.**",
+  "notice_body": "본 앱은 **오락 목적의 패러디 이미지 생성 도구**입니다.\n\n【금지사항】\n- 차별·모욕·민족 혐오를 조장하는 표현\n- 특정 개인·단체에 대한 비방\n- 사생활 침해\n- 음란물 또는 사회적 통념에 반하는 내용\n- 법률을 위반할 가능성이 있는 사용\n\n【면책조항】\n- 생성된 이미지로 인해 발생한 문제에 대해 제작자는 **일절 책임을 지지 않습니다.**\n- SNS 게시 및 2차 활용은 **사용자 본인의 책임**입니다.\n- 본 앱은 실제 개인·기관·정부와 **아무 관련이 없습니다.**\n- 공공기관이나 정치 단체를 모방한 이미지가 생성될 수 있으나, **이는 패러디이며 실제 입장이나 공식 성명이 아닙니다.**",
 
   "agree_label": "📘 위 내용을 모두 이해하고 동의합니다.",
-  "agree_warning": "*계속하려면 동의해야 합니다.*",
+  "agree_warning": "*계속하려면 동의가 필요합니다.*",
 
-  "ascii_links": "### 🔗 ASCII 아트 참고 사이트\n\n- [신 만화 종합 AA 보관소](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB은 @aahub_dev 가 운영합니다. 사용 시 창작자에게 감사의 뜻을 전해주세요.*",
+  "ascii_links": "### 🔗 ASCII 아트 참고 사이트\n\n- [신 만화 종합 AA 보관소](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB은 @aahub_dev 가 운영합니다. 콘텐츠 사용 시 창작자를 응원해주세요.*",
 
   "mode_select": "모드 선택",
   "normal_mode": "일반 모드",
@@ -16,7 +17,7 @@
 
   "font_select": "폰트 선택 (일반 모드 전용)",
   "yellow_words": "강조 단어 (줄마다 하나)",
-  "main_text": "본문",
+  "main_text": "본문 (텍스트 크기가 크거나 작아 보일 경우 적절히 줄바꿈을 추가하세요)",
   "footer_left": "푸터 (왼쪽)",
   "footer_right": "푸터 (오른쪽)",
   "background_select": "배경 선택",
@@ -26,9 +27,9 @@
   "watermark": "이 이미지는 패러디입니다.",
 
   "save": "이미지 저장 (JPEG)",
-  "tweet": "X에 공유 (이미지는 직접 첨부)",
+  "tweet": "X에 게시 (이미지는 직접 첨부)",
 
-  "tweet_template": "이 이미지는 오반야키 외교부 생성기 ver3.0으로 만들었습니다.\nhttps://ikan-no-i-gen.streamlit.app/\n제작자 @InsHatanCountry\n*이미지는 자동 첨부되지 않습니다.*",
+  "tweet_template": "이 이미지는 오반야키 외교부 생성기를 이용해 만들었습니다.\nhttps://ikan-no-i-gen.streamlit.app/\n제작자: @InsHatanCountry\n*이미지는 자동으로 첨부되지 않습니다. 직접 추가해주세요.*",
 
   "default_main": "\"우리는 이마가와야키 파에게 경고한다:\n오반야키 문제로 장난치지 마라.\n계속한다면 우리는 이마가와야키 진영과 손잡겠다.\"",
   "default_footer_left": "오반야키 외교부 대변인",
