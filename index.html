@@ -1,23 +1,27 @@
 <!DOCTYPE html>
-<html>
-<body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Hindi Font Test</title>
 
-<!-- テスト用キャンバス -->
+    <style>
+    @font-face {
+        font-family: "NotoSansDevanagari";
+        src: url("./fonts/NotoSansDevanagari-Regular.ttf") format("truetype");
+    }
+    </style>
+</head>
+
+<body>
+<h2>Hindi Font Test</h2>
+<p>Test output below:</p>
+
 <canvas id="c" width="800" height="200"></canvas>
 
-<style>
-@font-face {
-    font-family: "NotoSansDevanagari";
-    src: url("./fonts/NotoSansDevanagari-Regular.ttf") format("truetype");
-}
-</style>
-
 <script>
-// キャンバス取得
 const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d");
 
-// フォントロードを確実に待つ
 document.fonts.load("40px NotoSansDevanagari").then(() => {
     ctx.font = "40px NotoSansDevanagari";
     ctx.fillStyle = "black";
