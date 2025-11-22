@@ -50,6 +50,9 @@ if "initialized" not in st.session_state:
     st.session_state.footer_right = ja["default_footer_right"]
     st.session_state.yellow_words = ja["default_yellow"]
     st.session_state.lang = "ja"
+    
+    st.session_state.bg_choice = "01"
+    
 
 
 # -----------------------------------------------------------
@@ -228,7 +231,7 @@ if agreed:
             )
 
             # ★ 画像の下に透明ボタンを置いてクリック可能にする
-            if st.button(f"選択 {key}", key=f"bg_btn_{key}"):
+            if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
                 ss.bg_choice = key
                 st.rerun()   # 即反映
 
@@ -538,6 +541,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
