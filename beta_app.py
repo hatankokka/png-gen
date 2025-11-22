@@ -200,96 +200,81 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像：前処理（ここが絶対に必要）
+    # 背景画像（超軽量・行ごとに画像→ボタン）
     # =========================================================
 
-    BACKGROUND_CHOICES = {
-        Path(p).stem.replace("background", ""): p
-        for p in sorted(glob.glob(".streamlit/background*.png"))
-    }
+    st.markdown("### " + T["background_select"])
 
-    if not BACKGROUND_CHOICES:
-        st.error(".streamlit/background*.png が見つかりません。")
-        st.stop()
-
-    # 背景キー一覧
-    keys = list(BACKGROUND_CHOICES.keys())
-
-    # 初期値が不正なら修正
-    if "bg_choice" not in ss or ss.bg_choice not in keys:
-        ss.bg_choice = keys[0]
-
-    selected = ss.bg_choice
-
-    # JS キャンバスで使う Base64 背景
-    with open(BACKGROUND_CHOICES[selected], "rb") as f:
-        bg_b64_safe = base64.b64encode(f.read()).decode()
-
-    
-        # =========================================================
-    # 背景画像（最軽量・安定版UI）
-    # =========================================================
-
-    st.markdown("### 背景画像を選択")
-
-    # CSS（軽量）
+    # 画像を3列グリッドで並べるためのCSS（最低限）
     st.markdown("""
     <style>
-    .bg-grid {
+    .bg-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 24px;
-        margin-top: 8px;
+        margin-bottom: 8px;
     }
     .bg-item {
         text-align: center;
     }
-    .bg-thumb {
+    .bg-img {
         width: 150px;
         border-radius: 8px;
     }
-    .selected {
-        outline: 4px solid #ff4444;
+    .bg-selected {
+        outline: 4px solid #ff4b4b;
         outline-offset: 2px;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # ========== サムネイル表示 ==========
-    html = '<div class="bg-grid">'
+    # ---------- 行ごとに「画像行」をHTMLで一括描画 ----------
+    html = ""
 
-    for key in keys:
-        img = Image.open(BACKGROUND_CHOICES[key])
-        img_thumb = img.copy()
-        img_thumb.thumbnail((150, 200))
+    # 3枚ずつのブロックに分けて処理
+    for row_start in range(0, len(keys), 3):
+        row_keys = keys[row_start: row_start + 3]
 
-        buf = io.BytesIO()
-        img_thumb.save(buf, format="PNG")
-        thumb64 = base64.b64encode(buf.getvalue()).decode()
+        html += '<div class="bg-row">'
+        for key in row_keys:
 
-        border = "selected" if ss.bg_choice == key else ""
+            img = Image.open(BACKGROUND_CHOICES[key])
+            img_thumb = img.copy()
+            img_thumb.thumbnail((150, 220))
 
-        html += f"""
-        <div class="bg-item">
-            <img src="data:image/png;base64,{thumb64}" class="bg-thumb {border}">
-        </div>
-        """
+            buf = io.BytesIO()
+            img_thumb.save(buf, format="PNG")
+            thumb_b64 = base64.b64encode(buf.getvalue()).decode()
 
-    html += "</div>"
+            cls = "bg-img bg-selected" if ss.bg_choice == key else "bg-img"
+
+            html += textwrap.dedent(f"""
+            <div class="bg-item">
+                <img src="data:image/png;base64,{thumb_b64}" class="{cls}">
+            </div>
+            """)
+
+        html += "</div>"  # .bg-row の終わり
+
     st.markdown(html, unsafe_allow_html=True)
 
-    # ========== 選択ボタン（軽量） ==========
-    cols = st.columns(3)
-    for i, key in enumerate(keys):
-        col = cols[i % 3]
-        with col:
-            if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
-                ss.bg_choice = key
-                st.rerun()
+    # ---------- 行ごとに「ボタン行」（Streamlitボタン） ----------
+    for row_start in range(0, len(keys), 3):
+        row_keys = keys[row_start: row_start + 3]
+        cols = st.columns(len(row_keys))
+        for key, col in zip(row_keys, cols):
+            with col:
+                if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
+                    ss.bg_choice = key
+                    # 選択が変わったら背景Base64も更新
+                    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+                        bg_b64_safe = base64.b64encode(f.read()).decode()
+                    st.rerun()
 
-    # ========== Base64（キャンバス用） ==========
+    # 最後にもう一度、現在選択されている背景で Base64 を更新
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
         bg_b64_safe = base64.b64encode(f.read()).decode()
+
 
     
  
@@ -615,6 +600,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
