@@ -413,7 +413,7 @@ function drawPoster() {
 
     // === バイナリサーチ ===
     function canFit(fontSize) {
-        ctx.font = `${fontSize}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
+        ctx.font = `${fontSize}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
 
 
         let maxLineWidth = 0;
@@ -451,7 +451,7 @@ function drawPoster() {
     if (fontSize < 10) fontSize = 10;
 
     // ★ フォントに Devanagari/Tamil のフォールバックを追加
-    ctx.font = `${fontSize}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
+    ctx.font = `${fontSize}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
     ctx.textBaseline = "middle";
 
     const totalTextHeight = lines.length * fontSize * LINE_GAP;
@@ -459,7 +459,7 @@ function drawPoster() {
 
     function drawColoredLine(line, centerX, y) {
         // ★ ここも同じフォント設定に修正
-        ctx.font = `${fontSize}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
+        ctx.font = `${fontSize}px NotoSansDevanagari, NotoSansTamil, customFont, sans-serif`;
 
         if (mode === "AA") {
             ctx.fillStyle = "white";
@@ -576,6 +576,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
