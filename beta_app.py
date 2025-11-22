@@ -504,14 +504,14 @@ function drawPoster() {
 
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
-    ctx.font = footerFont + "px customFont";
+    ctx.font = `${footerFont}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.fillText(footerLeft, W * 0.06, footerY);
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
     
-    ctx.font = footerFont + "px customFont";
+    ctx.font = `${footerFont}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
     ctx.fillStyle = "white";
 
     ctx.textAlign = "left";
@@ -574,6 +574,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
