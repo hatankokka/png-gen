@@ -4,14 +4,8 @@ import html
 import os
 import json
 import glob
-import textwrap
-from PIL import Image
-import io
 from pathlib import Path
 from streamlit.components.v1 import html as st_html
-
-# ★ ここに移動する（重要）
-ss = st.session_state
 
 # =========================================================
 # フォント定義
@@ -22,7 +16,9 @@ FONT_LABELS = {
     "BIZUDMincho-Regular.ttf": "01. MINCHO",
     "UnGungseo.ttf": "02. KOREA FONT",
     "NotoSansJP-Regular.ttf": "03. ALMIGHTY FONT",
-    "NotoSansEgyptianHieroglyphs-Regular.ttf": "04. HIEROGLYPH FONT",
+    "NotoSansTamil-VariableFont_wdth,wght.ttf": "04. TAMIL FONT",
+    "NotoSansDevanagari-Regular.ttf": "05. HINDI FONT",
+    "NotoSansEgyptianHieroglyphs-Regular.ttf": "06. HIEROGLYPH FONT",
 }
 
 AA_FONT_FILE = "ms-pgothic-regular.ttf"
@@ -30,6 +26,8 @@ AA_FONT_FILE = "ms-pgothic-regular.ttf"
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 FONT_LABEL_LIST = list(FONT_LABELS.values())
 
+
+ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター", layout="centered")
 
 # -----------------------------------------------------------
@@ -84,9 +82,11 @@ LANG_OPTIONS = {
     "th": "ภาษาไทย",
     "mn": "Монгол",
     "vi": "Tiếng Việt",
+    "hi": "हिन्दी",
     "ru": "Русский",
     "he": "עברית",
     "ms": "Bahasa Melayu",
+    "ta": "தமிழ்",
     "egy": "𓂀 Egyptian Hieroglyphs"
 }
 
@@ -177,41 +177,6 @@ if agreed:
     else:
         ss.font_choice = AA_FONT_FILE
 
-    # ★ここに移動（正しい位置）
-    font_path = os.path.join(FONT_DIR, ss.font_choice)
-    with open(font_path, "rb") as f:
-        font_b64 = base64.b64encode(f.read()).decode()
-
-    # =========================================================
-    # Base64変換
-    # =========================================================
-    font_path = os.path.join(FONT_DIR, ss.font_choice)
-    with open(font_path, "rb") as f:
-        font_b64 = base64.b64encode(f.read()).decode()
-
-    # =========================================================
-    # NGワード読み込み
-    # =========================================================
-    NG_FILE = ".streamlit/ng_words.txt"
-    if os.path.exists(NG_FILE):
-        with open(NG_FILE, "r", encoding="utf-8") as f:
-            NG_WORDS = [w.strip() for w in f if w.strip()]
-    else:
-        NG_WORDS = []
-
-# =========================================================
-# NGワード読み込み ~ 画像生成全て
-# =========================================================
-if agreed:
-
-    # =========================================================
-    # モード別フォント選択（多言語対応）
-    # =========================================================
-    if mode_internal == "NORMAL":
-        font_choice_label = st.selectbox(T["font_select"], FONT_LABEL_LIST)
-        ss.font_choice = FONT_MAP[font_choice_label]
-    else:
-        ss.font_choice = AA_FONT_FILE
 
     # =========================================================
     # Base64変換
@@ -248,44 +213,38 @@ if agreed:
     for i, key in enumerate(keys):
         with cols[i % 3]:
 
-            # ★★ 軽量サムネイル生成（置き換え版）★★
-            img = Image.open(BACKGROUND_CHOICES[key])
-            img_thumb = img.copy()
-            img_thumb.thumbnail((120, 180))                 # ← ここで縮小する
-            buf = io.BytesIO()
-            img_thumb.save(buf, format="JPEG", quality=60)  # ← JPEG化でさらに軽量化
-            img_b64 = base64.b64encode(buf.getvalue()).decode()
+            # Base64画像
+            img_b64 = base64.b64encode(open(BACKGROUND_CHOICES[key], "rb").read()).decode()
 
             # 選択枠CSS
             border = "3px solid #ff4b4b" if key == selected else "3px solid rgba(0,0,0,0)"
 
             # HTML + ボタン（透明化）
             st.markdown(
-                (
-                    f"""
-<div style="position:relative; width:120px; margin-bottom:8px;">
-    <img src="data:image/jpeg;base64,{img_b64}"
-        style="width:120px; border-radius:8px; border:{border};">
-</div>
-"""
-                ).strip(),
+                f"""
+                <div style="position:relative; width:120px; margin-bottom:8px;">
+                    <img src="data:image/png;base64,{img_b64}"
+                        style="width:120px; border-radius:8px; border:{border};">
+                </div>
+                """,
                 unsafe_allow_html=True
             )
-
 
             # ★ 画像の下に透明ボタンを置いてクリック可能にする
             if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
                 ss.bg_choice = key
                 st.rerun()   # 即反映
 
-    # 背景 Base64（本番用はフル解像度のまま）
+    # 背景 Base64
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
         bg_b64_raw = f.read()
 
     bg_b64 = base64.b64encode(bg_b64_raw).decode()
     bg_b64_safe = html.escape(bg_b64)
 
-    
+
+
+
  
     # =========================================================
     # 入力欄（本文 / フッター）
@@ -349,10 +308,6 @@ if agreed:
     font-family: "customFont";
     src: url("data:font/ttf;base64,{{FONTDATA}}") format("truetype");
 }
-
-
-★★ここまで追加★★
-
 body { margin: 0; padding: 0; }
 </style>
 
@@ -400,18 +355,9 @@ const canvas = document.getElementById("posterCanvas");
 const ctx = canvas.getContext("2d");
 
 img.onload = async function() {
-    try {
-        await document.fonts.load("30px customFont");
-
-        // 🔥 必須：shaping 完了を待つ
-        await document.fonts.ready;
-
-    } catch(e){}
+    try { await document.fonts.load("30px customFont"); } catch(e){}
     drawPoster();
 };
-
-
-
 
 function drawPoster() {
 
@@ -438,8 +384,7 @@ function drawPoster() {
 
     // === バイナリサーチ ===
     function canFit(fontSize) {
-        ctx.font = `${fontSize}px customFont, sans-serif`;
-
+        ctx.font = fontSize + "px customFont";
 
         let maxLineWidth = 0;
         for (const line of lines) {
@@ -473,18 +418,16 @@ function drawPoster() {
         const K_len  = 1 / (1 + 0.010 * Math.max(maxLen - 10, 0));
         fontSize = best * K_line * K_len;
     }
-    if (fontSize < 10) fontSize = 10;
 
-    // ★ フォントに Devanagari/Tamil のフォールバックを追加
-    ctx.font = `${fontSize}px customFont, sans-serif`;
+    if (fontSize < 10) fontSize = 10;
+    ctx.font = fontSize + "px customFont";
     ctx.textBaseline = "middle";
 
     const totalTextHeight = lines.length * fontSize * LINE_GAP;
     let currentY = marginTop + (areaH - totalTextHeight) / 2 + fontSize * 0.5;
 
     function drawColoredLine(line, centerX, y) {
-        // ★ ここも同じフォント設定に修正
-        ctx.font = `${fontSize}px customFont, sans-serif`;
+        ctx.font = fontSize + "px customFont";
 
         if (mode === "AA") {
             ctx.fillStyle = "white";
@@ -494,35 +437,24 @@ function drawPoster() {
         }
 
         let segs = [];
-
-        // Unicode-safe glyph 分割
-        const glyphs = Array.from(line);
         let pos = 0;
 
-        while (pos < glyphs.length) {
+        while (pos < line.length) {
             let matched = false;
 
-            // 黄色語の一致判定も Unicode-safe にする
             for (const w of yellowWords) {
-                if (!w) continue;
-
-                const wGlyphs = Array.from(w);
-                const slice = glyphs.slice(pos, pos + wGlyphs.length).join("");
-
-                if (slice === w) {
+                if (w && line.startsWith(w, pos)) {
                     segs.push({ text: w, yellow: true });
-                    pos += wGlyphs.length;
+                    pos += w.length;
                     matched = true;
                     break;
                 }
             }
-
             if (!matched) {
-                segs.push({ text: glyphs[pos], yellow: false });
+                segs.push({ text: line[pos], yellow: false });
                 pos++;
             }
         }
-
 
         let totalW = 0;
         for (const seg of segs) totalW += ctx.measureText(seg.text).width;
@@ -542,14 +474,14 @@ function drawPoster() {
 
     const footerY = H * 0.90;
     const footerFont = Math.max(22, Math.floor(H * 0.035));
-    ctx.font = `${footerFont}px customFont, sans-serif`;
+    ctx.font = footerFont + "px customFont";
     ctx.fillStyle = "white";
     ctx.textAlign = "left";
     ctx.fillText(footerLeft, W * 0.06, footerY);
     ctx.textAlign = "right";
     ctx.fillText(footerRight, W * 0.94, footerY);
     
-    ctx.font = `${footerFont}px customFont, sans-serif`;
+    ctx.font = footerFont + "px customFont";
     ctx.fillStyle = "white";
 
     ctx.textAlign = "left";
@@ -560,7 +492,7 @@ function drawPoster() {
 
     // === Watermark（右上 / footer の半分サイズ） ===
     const watermarkFont = Math.floor(footerFont * 0.5);
-    ctx.font = `${watermarkFont}px customFont, sans-serif`;
+    ctx.font = watermarkFont + "px customFont";
     ctx.fillStyle = "rgba(255,255,255,0.85)";
     ctx.textAlign = "right";
     ctx.fillText(watermark, W * 0.97, H * 0.07);
@@ -609,43 +541,6 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
