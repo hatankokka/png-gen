@@ -199,7 +199,7 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（固定窓枠＋3列グリッド＋縦スクロール）
+    # 背景画像（固定窓枠＋3列グリッド）
     # =========================================================
 
     BACKGROUND_CHOICES = {
@@ -212,67 +212,49 @@ if agreed:
 
     st.markdown("### " + T["background_select"])
 
-    # ------------------------------
-    # CSS（固定窓枠＋3列グリッド）
-    # ------------------------------
+    # CSS
     st.markdown("""
     <style>
-    /* 固定窓枠 */
     .bg-window {
-        width: 100%;
-        max-width: 650px;
+        width: 680px;
         height: 520px;
         overflow-y: scroll;
         margin: 0 auto;
-        padding-right: 8px;
-        border: 1px solid #333;
+        padding: 10px;
+        border: 1px solid #444;
         border-radius: 8px;
     }
-
-    /* 3列のグリッド */
     .bg-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 18px;
-        padding: 12px;
+        gap: 24px;
     }
-
     .bg-item {
         text-align: center;
     }
-
-    /* 画像 */
-    .bg-item img {
+    .bg-img {
         width: 140px;
         border-radius: 8px;
     }
-
-    /* 選択中の赤枠 */
     .selected {
         border: 3px solid #ff4b4b;
     }
-
-    /* 番号のテキスト */
-    .bg-label {
+    .label {
         font-size: 16px;
         margin-bottom: 6px;
-        color: #ddd;
-        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # ------------------------------
-    # HTML構造（番号 → 画像 → 番号 → 画像）
-    # ------------------------------
+
+    # 窓枠 → グリッド
     st.markdown('<div class="bg-window"><div class="bg-grid">', unsafe_allow_html=True)
 
     for key in keys:
 
-        # サムネイル生成（軽量）
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
-        img_thumb.thumbnail((140, 220))
+        img_thumb.thumbnail((140, 200))
 
         buf = io.BytesIO()
         img_thumb.save(buf, format="PNG")
@@ -283,8 +265,8 @@ if agreed:
         st.markdown(
             f"""
             <div class="bg-item">
-                <div class="bg-label">{key}</div>
-                <img src="data:image/png;base64,{thumb_b64}" class="{border_class}">
+                <div class="label">{key}</div>
+                <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
             </div>
             """,
             unsafe_allow_html=True
@@ -292,14 +274,12 @@ if agreed:
 
     st.markdown('</div></div>', unsafe_allow_html=True)
 
-    # ------------------------------
-    # 背景選択ボタン（押したら即反映）
-    # ------------------------------
+
+    # 選択ボタン
     for key in keys:
         if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
             ss.bg_choice = key
             st.rerun()
-   
  
     # =========================================================
     # 入力欄（本文 / フッター）
@@ -626,6 +606,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
