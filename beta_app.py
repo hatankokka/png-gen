@@ -214,11 +214,10 @@ if agreed:
     selected = ss.bg_choice if "bg_choice" in ss else keys[0]
 
     # ---------------------------------------------------------
-    # ★ 超軽量：サムネイルを Pillow で動的生成（Base64廃止）
+    # ★ サムネイルを Pillow で動的生成（Base64廃止）
     # ---------------------------------------------------------
 
-
-    st.markdown("### 背景画像を選択")
+    #st.markdown("### 背景画像を選択")
 
     cols = st.columns(3)
 
@@ -592,6 +591,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
