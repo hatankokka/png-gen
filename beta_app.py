@@ -251,12 +251,26 @@ if agreed:
     </style>
     """, unsafe_allow_html=True)
 
-    # -------------------------------
-    # HTML一括生成（fetch POST版）
-    # -------------------------------
+    # === JS (RPC) ===
+    rpc_js = """
+    <script>
+    function selectBg(val){
+        window.parent.postMessage(
+            {isStreamlitMessage: true,
+             type: "streamlit:setComponentValue",
+             value: val},
+            "*"
+        );
+    }
+    </script>
+    """
+    st.markdown(rpc_js, unsafe_allow_html=True)
+
+    # === HTML本体 ===
     html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
+
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
         img_thumb.thumbnail((140, 200))
@@ -268,13 +282,7 @@ if agreed:
         border_class = "selected" if key == selected else ""
 
         html_body += textwrap.dedent(f"""
-        <div class="bg-item"
-             onclick="fetch('', {{
-                 method:'POST',
-                 headers:{{'Content-Type':'text/plain'}},
-                 body:'BG={key}'
-             }}).then(()=>window.location.reload());">
-
+        <div class="bg-item" onclick="selectBg('{key}')">
             <div class="label">{key}</div>
             <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
         </div>
@@ -284,18 +292,13 @@ if agreed:
 
     st.markdown(html_body, unsafe_allow_html=True)
 
-    # -------------------------------
-    # POST を受け取る
-    # -------------------------------
-    if st._runtime.handle.request:
-        body = st._runtime.handle.request.get("body", "")
-        if isinstance(body, bytes):
-            body = body.decode()
+    # === JS経由で値を受け取る ===
+    params = st.experimental_get_query_params()
+    if "streamlitComponentValue" in params:
+        ss.bg_choice = params["streamlitComponentValue"][0]
+        st.experimental_set_query_params()
+        st.rerun()
 
-        if body.startswith("BG="):
-            bg = body.replace("BG=", "").strip()
-            ss.bg_choice = bg
-            st.rerun()
 
     
  
@@ -621,6 +624,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
