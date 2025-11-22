@@ -388,9 +388,14 @@ img.onload = async function() {
         await document.fonts.load("30px NotoSansDevanagari");
         await document.fonts.load("30px NotoSansTamil");
         await document.fonts.load("30px customFont");
+
+        // 🔥 必須：shaping 完了を待つ
+        await document.fonts.ready;
+
     } catch(e){}
     drawPoster();
 };
+
 
 
 
@@ -593,6 +598,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
