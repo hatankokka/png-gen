@@ -32,7 +32,7 @@
   "tweet_template": "本圖由 Obanyaki 外交部產生器 建立。\nhttps://ikan-no-i-gen.streamlit.app/\n作者：@InsHatanCountry\n*圖片不會自動上傳，請手動添加。*",
 
   "default_main": "「我們警告今川燒派：\n不要在大判燒問題上玩火。\n若再繼續，我們將與今川燒陣營結盟。」",
-  "default_footer_left": "Obanyaki 外交部發言人",
+  "default_footer_left": "大判燒外交部發言人",
   "default_footer_right": "民國105年11月15日",
   "default_yellow": "玩火"
 }
