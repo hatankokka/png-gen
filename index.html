@@ -8,7 +8,7 @@
 <style>
 @font-face {
     font-family: "NotoSansDevanagari";
-    src: url("./NotoSansDevanagari-Regular.ttf") format("truetype");
+    src: url("./fonts/NotoSansDevanagari-Regular.ttf") format("truetype");
 }
 </style>
 
@@ -20,6 +20,7 @@ const ctx = canvas.getContext("2d");
 // フォントロードを確実に待つ
 document.fonts.load("40px NotoSansDevanagari").then(() => {
     ctx.font = "40px NotoSansDevanagari";
+    ctx.fillStyle = "black";
     ctx.fillText("देते हैं गठबंधन", 10, 80);
 });
 </script>
