@@ -193,7 +193,7 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（ラジオ + サムネイル）
+    # 背景画像（カードUI：画像クリックで選択）
     # =========================================================
     BACKGROUND_CHOICES = {
         Path(p).stem.replace("background", ""): p
@@ -204,31 +204,62 @@ if agreed:
 
     st.markdown("### " + T["background_select"])
 
-    # ラジオボタン（背景選択）
-    selected_bg = st.radio(
-        "",
-        keys,
-        index=keys.index(ss.bg_choice) if "bg_choice" in ss else 0,
-        key="bg_choice_radio"
-    )
+    # カードCSS：hover効果 & 選択枠
+    st.markdown("""
+    <style>
+    .bg-card {
+        border: 3px solid transparent;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+    .bg-card:hover {
+        transform: scale(1.03);
+        opacity: 0.9;
+    }
+    .bg-card.selected {
+        border: 3px solid #ff4b4b;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    # 選ばれた背景を保存
-    ss.bg_choice = selected_bg
-
-    # サムネイル表示（3列）
     cols = st.columns(3)
-    i = 0
-    for key in keys:
-        with cols[i % 3]:
-            st.image(BACKGROUND_CHOICES[key], width=100)
-        i += 1
 
-    # 背景画像 Base64 化
+    # 現在選択されている背景（初期値含む）
+    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
+
+    for i, key in enumerate(keys):
+        with cols[i % 3]:
+            # Base64へ
+            img_b64 = base64.b64encode(open(BACKGROUND_CHOICES[key], "rb").read()).decode()
+
+            is_selected = (key == selected)
+            selected_class = "selected" if is_selected else ""
+
+            # HTMLで画像クリック → Streamlitのパラメータ更新
+            st.markdown(
+                f"""
+                <img src="data:image/png;base64,{img_b64}"
+                     class="bg-card {selected_class}"
+                     width="120"
+                     onclick="window.location.href='?bg={key}'">
+                """,
+                unsafe_allow_html=True
+            )
+
+    # URLパラメータを拾う
+    if "bg" in st.query_params:
+        ss.bg_choice = st.query_params["bg"]
+        st.query_params.clear()
+    else:
+        ss.bg_choice = selected
+
+    # 背景 Base64
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
         bg_b64_raw = f.read()
-        bg_b64 = base64.b64encode(bg_b64_raw).decode()
-
+    bg_b64 = base64.b64encode(bg_b64_raw).decode()
     bg_b64_safe = html.escape(bg_b64)
+
 
 
  
@@ -527,6 +558,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
