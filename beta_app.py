@@ -203,62 +203,16 @@ if agreed:
     # 背景画像（クリック選択式・完全動作版）
     # =========================================================
 
-    import textwrap
-
-    BACKGROUND_CHOICES = {
-        Path(p).stem.replace("background", ""): p
-        for p in sorted(glob.glob(".streamlit/background*.png"))
-    }
-
-    keys = list(BACKGROUND_CHOICES.keys())
-    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
-
-    st.markdown("### " + T["background_select"])
-
-    # CSS
-    st.markdown("""
-    <style>
-    .bg-window {
-        width: 680px;
-        height: 520px;
-        overflow-y: scroll;
-        margin: 0 auto;
-        padding: 10px;
-        border: 1px solid #444;
-        border-radius: 8px;
-    }
-    .bg-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 24px;
-    }
-    .bg-item {
-        text-align: center;
-        cursor: pointer;
-    }
-    .bg-img {
-        width: 140px;
-        border-radius: 8px;
-    }
-    .selected {
-        outline: 4px solid #ff4b4b;
-        outline-offset: 3px;
-    }
-    .label {
-        font-size: 16px;
-        margin-bottom: 6px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # === JS (RPC) ===
+    # 1) Streamlit RPC 用の JavaScript
     rpc_js = """
     <script>
     function selectBg(val){
         window.parent.postMessage(
-            {isStreamlitMessage: true,
-             type: "streamlit:setComponentValue",
-             value: val},
+            {
+                isStreamlitMessage: true,
+                type: "streamlit:setComponentValue",
+                value: val
+            },
             "*"
         );
     }
@@ -266,7 +220,7 @@ if agreed:
     """
     st.markdown(rpc_js, unsafe_allow_html=True)
 
-    # === HTML本体 ===
+    # 2) 背景 HTML グリッド
     html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
@@ -284,7 +238,8 @@ if agreed:
         html_body += textwrap.dedent(f"""
         <div class="bg-item" onclick="selectBg('{key}')">
             <div class="label">{key}</div>
-            <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
+            <img src="data:image/png;base64,{thumb_b64}"
+                 class="bg-img {border_class}">
         </div>
         """)
 
@@ -292,14 +247,12 @@ if agreed:
 
     st.markdown(html_body, unsafe_allow_html=True)
 
-    # === JS経由で値を受け取る ===
+    # 3) JS から送られた選択値を受け取る
     params = st.experimental_get_query_params()
     if "streamlitComponentValue" in params:
         ss.bg_choice = params["streamlitComponentValue"][0]
-        st.experimental_set_query_params()
+        st.experimental_set_query_params()  # パラメータ消す
         st.rerun()
-
-
     
  
     # =========================================================
@@ -624,6 +577,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
