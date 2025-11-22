@@ -261,14 +261,17 @@ if agreed:
 
             # HTML + ボタン（透明化）
             st.markdown(
-                f"""
-                <div style="position:relative; width:120px; margin-bottom:8px;">
-                    <img src="data:image/jpeg;base64,{img_b64}"
-                        style="width:120px; border-radius:8px; border:{border};">
-                </div>
-                """,
+                (
+                    f"""
+<div style="position:relative; width:120px; margin-bottom:8px;">
+    <img src="data:image/jpeg;base64,{img_b64}"
+        style="width:120px; border-radius:8px; border:{border};">
+</div>
+"""
+                ).strip(),
                 unsafe_allow_html=True
             )
+
 
             # ★ 画像の下に透明ボタンを置いてクリック可能にする
             if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
@@ -606,6 +609,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
