@@ -199,7 +199,33 @@ if agreed:
     else:
         NG_WORDS = []
 
-       # =========================================================
+    # =========================================================
+    # 背景画像：前処理（絶対に必要）
+    # =========================================================
+
+    BACKGROUND_CHOICES = {
+        Path(p).stem.replace("background", ""): p
+        for p in sorted(glob.glob(".streamlit/background*.png"))
+    }
+
+    if not BACKGROUND_CHOICES:
+        st.error(".streamlit/background*.png が見つかりません。")
+        st.stop()
+
+    keys = list(BACKGROUND_CHOICES.keys())
+
+    # 初期選択の保証
+    if "bg_choice" not in ss or ss.bg_choice not in keys:
+        ss.bg_choice = keys[0]
+
+    selected = ss.bg_choice
+
+    # JS描画で使うBase64
+    with open(BACKGROUND_CHOICES[selected], "rb") as f:
+        bg_b64_safe = base64.b64encode(f.read()).decode()
+
+    
+     # =========================================================
     # 背景画像（固定窓枠＋3列グリッド）
     # =========================================================
 
@@ -618,6 +644,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
