@@ -200,6 +200,29 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
+    # 背景前処理（UIより先に keys を定義する必要がある）
+    # =========================================================
+
+    BACKGROUND_CHOICES = {
+        Path(p).stem.replace("background", ""): p
+        for p in sorted(glob.glob(".streamlit/background*.png"))
+    }
+
+    if not BACKGROUND_CHOICES:
+        st.error("背景画像が読み込めません")
+        st.stop()
+
+    keys = list(BACKGROUND_CHOICES.keys())
+
+    if "bg_choice" not in ss or ss.bg_choice not in keys:
+        ss.bg_choice = keys[0]
+
+    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+        bg_b64_safe = base64.b64encode(f.read()).decode()
+
+
+    
+    # =========================================================
     # 背景画像（超軽量・画像行→ボタン行セット表示）
     # =========================================================
 
@@ -593,6 +616,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
