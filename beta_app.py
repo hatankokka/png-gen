@@ -201,7 +201,6 @@ if agreed:
 
     # =========================================================
     # 背景画像（固定窓枠＋3列グリッド）
-    # サムネイルクリックで選択できる完全版
     # =========================================================
 
     import textwrap
@@ -235,11 +234,11 @@ if agreed:
     }
     .bg-item {
         text-align: center;
-        cursor: pointer;
     }
     .bg-img {
         width: 140px;
         border-radius: 8px;
+        cursor: pointer;
     }
     .selected {
         outline: 4px solid #ff4b4b;
@@ -253,12 +252,10 @@ if agreed:
     """, unsafe_allow_html=True)
 
 
-    # ---------------------------------------------------------
-    # HTML 全体を一括生成
-    # ---------------------------------------------------------
     html_body = '<div class="bg-window"><div class="bg-grid">'
 
     for key in keys:
+
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
         img_thumb.thumbnail((140, 200))
@@ -269,26 +266,23 @@ if agreed:
 
         border_class = "selected" if key == selected else ""
 
+        # 画像をクリック → 隠しフォームの submit
         html_body += textwrap.dedent(f"""
-        <div class="bg-item" onclick="window.location.href='?bg_choice={key}'">
-            <div class="label">{key}</div>
-            <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
-        </div>
+        <form action="" method="post">
+            <input type="hidden" name="bg_select" value="{key}">
+            <div class="bg-item" onclick="this.parentElement.submit()">
+                <div class="label">{key}</div>
+                <img src="data:image/png;base64,{thumb_b64}" class="bg-img {border_class}">
+            </div>
+        </form>
         """)
 
     html_body += "</div></div>"
 
     st.markdown(html_body, unsafe_allow_html=True)
 
-    # ---------------------------------------------------------
-    # クエリから選択された背景を拾う
-    # ---------------------------------------------------------
-    params = st.experimental_get_query_params()
-    if "bg_choice" in params:
-        ss.bg_choice = params["bg_choice"][0]
-        st.experimental_set_query_params()  # クリア
-        st.rerun()
-
+    # POST を受け取る
+    form_val = st.session_state.get("bg_select_form", None)
     
  
     # =========================================================
@@ -613,6 +607,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
