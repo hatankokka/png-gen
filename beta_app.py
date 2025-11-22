@@ -199,7 +199,7 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（カードUI：画像クリックで選択）
+    # 背景画像（Explorer風グリッド UI）
     # =========================================================
     BACKGROUND_CHOICES = {
         Path(p).stem.replace("background", ""): p
@@ -207,63 +207,71 @@ if agreed:
     }
 
     keys = list(BACKGROUND_CHOICES.keys())
+    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
+
     st.markdown("### " + T["background_select"])
 
-    cols = st.columns(3)
+    # ------------------------------
+    # CSS（Windowsエクスプローラー風グリッド）
+    # ------------------------------
+    st.markdown("""
+    <style>
+    .grid-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
+        padding: 12px;
+        height: 500px;
+        overflow-y: auto;
+    }
+    .tile { text-align: center; }
+    .tile img {
+        width: 120px;
+        border-radius: 8px;
+    }
+    .selected {
+        border: 3px solid #ff4b4b;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
+    # ------------------------------
+    # グリッド描画
+    # ------------------------------
+    st.markdown('<div class="grid-container">', unsafe_allow_html=True)
 
-    # ---------------------------------------------------------
-    # ★ サムネイルを Pillow で動的生成（Base64廃止）
-    # ---------------------------------------------------------
+    for key in keys:
 
-    #st.markdown("### 背景画像を選択")
+        # サムネイル生成（軽量）
+        img = Image.open(BACKGROUND_CHOICES[key])
+        img_thumb = img.copy()
+        img_thumb.thumbnail((120, 200))
 
-    cols = st.columns(3)
+        buf = io.BytesIO()
+        img_thumb.save(buf, format="PNG")
+        thumb_b64 = base64.b64encode(buf.getvalue()).decode()
 
-    keys = list(BACKGROUND_CHOICES.keys())
-    selected = ss.bg_choice if "bg_choice" in ss else keys[0]
+        border_class = "selected" if key == selected else ""
 
-    for i, key in enumerate(keys):
-        with cols[i % 3]:
+        st.markdown(
+            f"""
+            <div class="tile">
+                <img src="data:image/png;base64,{thumb_b64}" class="{border_class}">
+                <div style="margin-top:4px;">{key}</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
-            # 選択枠
-            border = "3px solid #ff4b4b" if key == selected else "3px solid rgba(0,0,0,0)"
+    st.markdown("</div>", unsafe_allow_html=True)
 
-            # ★ フル画像を読み込んで縮小（120px）
-            img = Image.open(BACKGROUND_CHOICES[key])
-            img_thumb = img.copy()
-            img_thumb.thumbnail((120, 200))   # ← ここで小さくする
-
-            # ★ PNGをBase64化（縮小版だから10〜30KB）
-            buf = io.BytesIO()
-            img_thumb.save(buf, format="PNG")
-            thumb_b64 = base64.b64encode(buf.getvalue()).decode()
-
-            # ★ HTMLへ縮小版だけ表示（軽い！）
-            st.markdown(
-                f"""
-                <div style="position:relative; width:120px; margin-bottom:8px;">
-                    <img src="data:image/png;base64,{thumb_b64}"
-                        style="width:120px; border-radius:8px; border:{border};">
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
-            # ★ 背景選択ボタン
-            if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
-                ss.bg_choice = key
-                st.rerun()
-
-    # ---------------------------------------------------------
-    # ★ 本番背景は従来のフルサイズ Base64（生成用なのでOK）
-    # ---------------------------------------------------------
-    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
-        bg_b64_raw = f.read()
-
-    bg_b64 = base64.b64encode(bg_b64_raw).decode()
-    bg_b64_safe = html.escape(bg_b64)
+    # ------------------------------
+    # 背景選択ボタン
+    # ------------------------------
+    for key in keys:
+        if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
+            ss.bg_choice = key
+            st.rerun()
 
  
     # =========================================================
@@ -591,6 +599,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
