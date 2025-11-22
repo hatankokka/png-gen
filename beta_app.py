@@ -82,11 +82,11 @@ LANG_OPTIONS = {
     "th": "ภาษาไทย",
     "mn": "Монгол",
     "vi": "Tiếng Việt",
-    "hi": "हिन्दी",
+    #"hi": "हिन्दी",
     "ru": "Русский",
     "he": "עברית",
     "ms": "Bahasa Melayu",
-    "ta": "தமிழ்",
+    #"ta": "தமிழ்",
     "egy": "𓂀 Egyptian Hieroglyphs"
 }
 
@@ -541,6 +541,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
