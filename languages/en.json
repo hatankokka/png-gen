@@ -17,7 +17,7 @@
 
   "font_select": "Select Font (Normal Mode Only)",
   "yellow_words": "Yellow-highlight Words (one per line)",
-  "main_text": "Main Text",
+  "main_text": "Main Text (Add line breaks if the text appears too large or too small)",
   "footer_left": "Footer (Left)",
   "footer_right": "Footer (Right)",
   "background_select": "Select Background",
