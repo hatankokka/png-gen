@@ -501,16 +501,3 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
-
-
-
-
-
-
-
-
-
-
-
-
-
