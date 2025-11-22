@@ -23,10 +23,7 @@ FONT_LABELS = {
     "NotoSansDevanagari-Regular.ttf": "05. HINDI FONT",
     "NotoSansEgyptianHieroglyphs-Regular.ttf": "06. HIEROGLYPH FONT",
 }
-# フォント読み込み
-font_path = os.path.join(FONT_DIR, ss.font_choice)
-with open(font_path, "rb") as f:
-    font_b64 = base64.b64encode(f.read()).decode()
+
 
 # ★ 追加：Devanagari fallback font
 with open(os.path.join(FONT_DIR, "NotoSansDevanagari-Regular.ttf"), "rb") as f:
@@ -190,6 +187,10 @@ if agreed:
     else:
         ss.font_choice = AA_FONT_FILE
 
+    # ★ここに移動（正しい位置）
+    font_path = os.path.join(FONT_DIR, ss.font_choice)
+    with open(font_path, "rb") as f:
+        font_b64 = base64.b64encode(f.read()).decode()
 
     # =========================================================
     # Base64変換
@@ -575,6 +576,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
