@@ -29,7 +29,7 @@
   "save": "Bild speichern (JPEG)",
   "tweet": "Auf X posten (Bild manuell anhängen)",
 
-  "tweet_template": "Dieses Bild wurde mit dem Obanyaki Außenministerium-Generator ver3.0 erstellt.\nhttps://ikan-no-i-gen.streamlit.app/\nErsteller: @InsHatanCountry\n*Das Bild wird nicht automatisch hochgeladen. Bitte manuell anhängen.*",
+  "tweet_template": "Dieses Bild wurde mit dem Obanyaki Außenministerium-Generator erstellt.\nhttps://ikan-no-i-gen.streamlit.app/\nErsteller: @InsHatanCountry\n*Das Bild wird nicht automatisch hochgeladen. Bitte manuell anhängen.*",
 
   "default_main": "\"Wir warnen die Imagawayaki-Fraktion:\nSpielt nicht mit dem Feuer in der Obanyaki-Angelegenheit.\nWenn ihr fortfahrt, werden wir ein Bündnis mit den Imagawayaki-Kräften eingehen.\"",
   "default_footer_left": "Sprecher des Obanyaki-Außenministeriums",
