@@ -211,8 +211,7 @@ if agreed:
 
     for i, key in enumerate(keys):
         with cols[i % 3]:
-
-            # ====== st.image でサムネを直接表示（超軽い） ======
+            # ====== サムネイル（軽量表示） ======
             st.image(
                 BACKGROUND_CHOICES[key],
                 width=120,
@@ -224,6 +223,16 @@ if agreed:
             if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
                 ss.bg_choice = key
                 st.rerun()
+
+    # =========================================================
+    # ★ 選択された背景画像を Base64 化（キャンバス描画用）
+    # =========================================================
+    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+        bg_b64_raw = f.read()
+
+    bg_b64 = base64.b64encode(bg_b64_raw).decode()
+    bg_b64_safe = html.escape(bg_b64)
+   
 
     # =========================================================
     # 入力欄（本文 / フッター）
@@ -520,6 +529,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
