@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<canvas id="c" width="800" height="200"></canvas>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx = canvas.getContext("2d");
+
+// フォント読み込み
+document.fonts.load("40px NotoSansDevanagari").then(() => {
+    ctx.font = "40px NotoSansDevanagari";
+    ctx.fillText("देते हैं गठबंधन", 10, 80);
+});
+</script>
+
+</body>
+</html>
