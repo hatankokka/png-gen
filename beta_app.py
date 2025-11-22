@@ -7,6 +7,9 @@ import glob
 from pathlib import Path
 from streamlit.components.v1 import html as st_html
 
+# ★ ここに移動する（重要）
+ss = st.session_state
+
 # =========================================================
 # フォント定義
 # =========================================================
@@ -38,8 +41,6 @@ AA_FONT_FILE = "ms-pgothic-regular.ttf"
 FONT_MAP = {label: fname for fname, label in FONT_LABELS.items()}
 FONT_LABEL_LIST = list(FONT_LABELS.values())
 
-
-ss = st.session_state
 st.set_page_config(page_title="大判焼外交部ジェネレーター", layout="centered")
 
 # -----------------------------------------------------------
@@ -574,6 +575,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
