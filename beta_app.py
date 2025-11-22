@@ -177,9 +177,8 @@ if agreed:
     else:
         ss.font_choice = AA_FONT_FILE
 
-
     # =========================================================
-    # Base64変換
+    # Base64変換（フォント）
     # =========================================================
     font_path = os.path.join(FONT_DIR, ss.font_choice)
     with open(font_path, "rb") as f:
@@ -213,39 +212,19 @@ if agreed:
     for i, key in enumerate(keys):
         with cols[i % 3]:
 
-            # Base64画像
-            img_b64 = base64.b64encode(open(BACKGROUND_CHOICES[key], "rb").read()).decode()
-
-            # 選択枠CSS
-            border = "3px solid #ff4b4b" if key == selected else "3px solid rgba(0,0,0,0)"
-
-            # HTML + ボタン（透明化）
-            st.markdown(
-                f"""
-                <div style="position:relative; width:120px; margin-bottom:8px;">
-                    <img src="data:image/png;base64,{img_b64}"
-                        style="width:120px; border-radius:8px; border:{border};">
-                </div>
-                """,
-                unsafe_allow_html=True
+            # ====== st.image でサムネを直接表示（超軽い） ======
+            st.image(
+                BACKGROUND_CHOICES[key],
+                width=120,
+                caption=key,
+                use_column_width=False,
             )
 
-            # ★ 画像の下に透明ボタンを置いてクリック可能にする
+            # ====== 選択ボタン ======
             if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
                 ss.bg_choice = key
-                st.rerun()   # 即反映
+                st.rerun()
 
-    # 背景 Base64
-    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
-        bg_b64_raw = f.read()
-
-    bg_b64 = base64.b64encode(bg_b64_raw).decode()
-    bg_b64_safe = html.escape(bg_b64)
-
-
-
-
- 
     # =========================================================
     # 入力欄（本文 / フッター）
     # =========================================================
@@ -541,6 +520,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
