@@ -199,8 +199,9 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（Explorer風グリッド UI）
+    # 背景画像（固定窓枠＋3列グリッド＋縦スクロール）
     # =========================================================
+
     BACKGROUND_CHOICES = {
         Path(p).stem.replace("background", ""): p
         for p in sorted(glob.glob(".streamlit/background*.png"))
@@ -212,40 +213,66 @@ if agreed:
     st.markdown("### " + T["background_select"])
 
     # ------------------------------
-    # CSS（Windowsエクスプローラー風グリッド）
+    # CSS（固定窓枠＋3列グリッド）
     # ------------------------------
     st.markdown("""
     <style>
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 16px;
-        padding: 12px;
-        height: 500px;
-        overflow-y: auto;
-    }
-    .tile { text-align: center; }
-    .tile img {
-        width: 120px;
+    /* 固定窓枠 */
+    .bg-window {
+        width: 100%;
+        max-width: 650px;
+        height: 520px;
+        overflow-y: scroll;
+        margin: 0 auto;
+        padding-right: 8px;
+        border: 1px solid #333;
         border-radius: 8px;
     }
+
+    /* 3列のグリッド */
+    .bg-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        padding: 12px;
+    }
+
+    .bg-item {
+        text-align: center;
+    }
+
+    /* 画像 */
+    .bg-item img {
+        width: 140px;
+        border-radius: 8px;
+    }
+
+    /* 選択中の赤枠 */
     .selected {
         border: 3px solid #ff4b4b;
+    }
+
+    /* 番号のテキスト */
+    .bg-label {
+        font-size: 16px;
+        margin-bottom: 6px;
+        color: #ddd;
+        font-weight: bold;
     }
     </style>
     """, unsafe_allow_html=True)
 
     # ------------------------------
-    # グリッド描画
+    # HTML構造（番号 → 画像 → 番号 → 画像）
     # ------------------------------
-    st.markdown('<div class="grid-container">', unsafe_allow_html=True)
+    st.markdown('<div class="bg-window"><div class="bg-grid">', unsafe_allow_html=True)
 
     for key in keys:
 
         # サムネイル生成（軽量）
         img = Image.open(BACKGROUND_CHOICES[key])
         img_thumb = img.copy()
-        img_thumb.thumbnail((120, 200))
+        img_thumb.thumbnail((140, 220))
 
         buf = io.BytesIO()
         img_thumb.save(buf, format="PNG")
@@ -255,24 +282,24 @@ if agreed:
 
         st.markdown(
             f"""
-            <div class="tile">
+            <div class="bg-item">
+                <div class="bg-label">{key}</div>
                 <img src="data:image/png;base64,{thumb_b64}" class="{border_class}">
-                <div style="margin-top:4px;">{key}</div>
             </div>
             """,
             unsafe_allow_html=True
         )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown('</div></div>', unsafe_allow_html=True)
 
     # ------------------------------
-    # 背景選択ボタン
+    # 背景選択ボタン（押したら即反映）
     # ------------------------------
     for key in keys:
         if st.button(f"👉 {key}", key=f"bg_btn_{key}"):
             ss.bg_choice = key
             st.rerun()
-
+   
  
     # =========================================================
     # 入力欄（本文 / フッター）
@@ -599,6 +626,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
