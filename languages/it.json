@@ -1,14 +1,15 @@
 {
-  "title": "Generatore del Ministero Obanyaki ver3.0",
-  "author": "Creatore: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+  "title": "Generatore del Ministero Obanyaki",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">Creatore: 破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ Avvisi e Restrizioni",
-  "notice_body": "Questa applicazione è un **generatore di immagini parodistiche a scopo puramente ricreativo**.\n\n【Vietato】\n- Contenuti che promuovono discriminazione, insulti o odio etnico\n- Diffamazione di persone o gruppi\n- Violazione della privacy\n- Contenuti osceni o contrari alla morale\n- Qualsiasi uso che possa violare la legge\n\n【Dichiarazione di non responsabilità】\n- Il creatore **non si assume alcuna responsabilità** per problemi derivanti dalle immagini generate.\n- La pubblicazione o il riutilizzo sui social è **interamente a rischio dell’utente**.\n- L’app non è **collegata** ad alcuna persona, organizzazione o governo reale.\n- Anche se possono essere generate immagini che imitano enti pubblici, **rimangono parodie e non dichiarazioni ufficiali.**",
+  "notice_body": "Questa applicazione è un **generatore di immagini parodistiche con finalità esclusivamente ricreative**.\n\n【Vietato】\n- Contenuti che promuovono discriminazione, insulti o odio etnico\n- Diffamazione verso individui o gruppi\n- Violazione della privacy\n- Contenuti osceni o contrari al buon costume\n- Qualsiasi utilizzo che possa violare la legge\n\n【Dichiarazione di non responsabilità】\n- Il creatore **non si assume alcuna responsabilità** per eventuali problemi derivanti dalle immagini generate.\n- La pubblicazione o il riutilizzo delle immagini sui social è **interamente sotto la responsabilità dell’utente**.\n- Questa applicazione **non è collegata** ad alcuna persona, organizzazione o governo reale.\n- Anche se possono essere generate immagini che imitano enti pubblici, **si tratta di parodie e non di dichiarazioni ufficiali.**",
 
-  "agree_label": "📘 Accetto le condizioni e userò l’app responsabilmente.",
-  "agree_warning": "*Devi accettare per continuare.*",
+  "agree_label": "📘 Accetto le condizioni e utilizzerò l’app in modo responsabile.",
+  "agree_warning": "*È necessario accettare per continuare.*",
 
-  "ascii_links": "### 🔗 Riferimenti all’arte ASCII\n\n- [Archivio Shin Manga AA](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB è gestito da @aahub_dev. Sostieni il creatore quando usi i suoi contenuti.*",
+  "ascii_links": "### 🔗 Riferimenti all’arte ASCII\n\n- [Archivio Shin Manga AA](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB è gestito da @aahub_dev. Si prega di sostenere il creatore quando utilizzate i suoi contenuti.*",
 
   "mode_select": "Selezione modalità",
   "normal_mode": "Modalità normale",
@@ -16,7 +17,7 @@
 
   "font_select": "Seleziona carattere (solo modalità normale)",
   "yellow_words": "Parole evidenziate (una per riga)",
-  "main_text": "Testo principale",
+  "main_text": "Testo principale (aggiungi interruzioni di riga se il testo sembra troppo grande o troppo piccolo)",
   "footer_left": "Piè di pagina (sinistra)",
   "footer_right": "Piè di pagina (destra)",
   "background_select": "Seleziona sfondo",
@@ -28,7 +29,7 @@
   "save": "Salva immagine (JPEG)",
   "tweet": "Pubblica su X (allega immagine manualmente)",
 
-  "tweet_template": "Questa immagine è stata creata con il Generatore del Ministero Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCreatore: @InsHatanCountry\n*L’immagine non è allegata automaticamente. Aggiungila manualmente.*",
+  "tweet_template": "Questa immagine è stata creata con il Generatore del Ministero Obanyaki.\nhttps://ikan-no-i-gen.streamlit.app/\nCreatore: @InsHatanCountry\n*L’immagine non viene allegata automaticamente. Aggiungila manualmente.*",
 
   "default_main": "\"Avvertiamo la fazione Imagawayaki:\nNon scherzate col fuoco riguardo alla questione Obanyaki.\nSe continuate, formeremo un’alleanza.\"",
   "default_footer_left": "Portavoce del Ministero Obanyaki",
