@@ -1,14 +1,15 @@
 {
-  "title": "Generador del Ministerio Obanyaki ver3.0",
-  "author": "Creador: Institute for Failed States (@InsHatanCountry)\nhttps://x.com/InsHatanCountry",
+  "title": "Generador del Ministerio Obanyaki",
+
+  "author": "<a href=\"https://x.com/InsHatanCountry\">Creador: 破綻国家研究所（@InsHatanCountry）</a>",
 
   "notice_title": "⚠️ Avisos y Restricciones",
-  "notice_body": "Esta aplicación es un **generador de imágenes paródicas con fines únicamente recreativos**.\n\n【Prohibido】\n- Contenido que promueva discriminación, insultos o odio étnico\n- Difamación contra individuos o grupos\n- Invasión de la privacidad\n- Contenido obsceno o contrario a las normas sociales\n- Cualquier uso que pueda violar la ley\n\n【Descargo de responsabilidad】\n- El creador **no se hace responsable** de cualquier inconveniente causado por las imágenes generadas.\n- Publicar o reutilizar imágenes en redes sociales es **total responsabilidad del usuario**.\n- Esta aplicación **no está afiliada** a ninguna persona, organización o gobierno real.\n- Aunque se pueden generar imágenes imitando instituciones públicas, **son parodias y no declaraciones oficiales.**",
+  "notice_body": "Esta aplicación es un **generador de imágenes paródicas con fines exclusivamente recreativos**.\n\n【Prohibido】\n- Contenido que promueva discriminación, insultos u odio étnico\n- Difamación hacia individuos o grupos\n- Invasión de la privacidad\n- Contenido obsceno o socialmente inapropiado\n- Cualquier uso que pueda infringir la ley\n\n【Descargo de responsabilidad】\n- El creador **no asume ninguna responsabilidad** por los problemas derivados de las imágenes generadas.\n- Publicar o reutilizar imágenes en redes sociales es **totalmente responsabilidad del usuario**.\n- Esta aplicación **no está afiliada** a ninguna persona, organización o entidad gubernamental real.\n- Aunque pueden generarse imágenes que imiten a instituciones públicas, **son parodias y no declaraciones oficiales reales.**",
 
   "agree_label": "📘 Acepto los términos y usaré la aplicación de manera responsable.",
   "agree_warning": "*Debe aceptar para continuar.*",
 
-  "ascii_links": "### 🔗 Referencias de Arte ASCII\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB es administrado por @aahub_dev. Si usa contenido, considere seguir al creador.*",
+  "ascii_links": "### 🔗 Referencias de Arte ASCII\n\n- [Shin Manga AA Archive](https://seesaawiki.jp/asciiart/)\n- [AAHUB](https://aahub.org/mlt)\n\n*AAHUB es administrado por @aahub_dev. Si utiliza contenido del sitio, considere apoyar al creador.*",
 
   "mode_select": "Selección de modo",
   "normal_mode": "Modo normal",
@@ -16,7 +17,7 @@
 
   "font_select": "Seleccionar fuente (solo modo normal)",
   "yellow_words": "Palabras resaltadas (una por línea)",
-  "main_text": "Texto principal",
+  "main_text": "Texto principal (añada saltos de línea si el texto parece demasiado grande o demasiado pequeño)",
   "footer_left": "Pie de página (izquierda)",
   "footer_right": "Pie de página (derecha)",
   "background_select": "Seleccionar fondo",
@@ -28,9 +29,9 @@
   "save": "Guardar imagen (JPEG)",
   "tweet": "Publicar en X (adjuntar imagen manualmente)",
 
-  "tweet_template": "Esta imagen fue creada con el Generador del Ministerio Obanyaki ver3.0.\nhttps://ikan-no-i-gen.streamlit.app/\nCreador: @InsHatanCountry\n*La imagen no se adjunta automáticamente. Por favor, añádala manualmente.*",
+  "tweet_template": "Esta imagen fue creada con el Generador del Ministerio Obanyaki.\nhttps://ikan-no-i-gen.streamlit.app/\nCreador: @InsHatanCountry\n*La imagen no se adjunta automáticamente. Por favor, añádala manualmente.*",
 
-  "default_main": "\"Advertimos a la facción Imagawayaki:\nNo jueguen con fuego respecto al asunto Obanyaki.\nSi continúan, formaremos una alianza con ellos.\"",
+  "default_main": "\"Advertimos a la facción Imagawayaki:\nNo jueguen con fuego en el asunto Obanyaki.\nSi continúan, formaremos una alianza con sus fuerzas.\"",
   "default_footer_left": "Portavoz del Ministerio Obanyaki",
   "default_footer_right": "15 de noviembre de 2015",
   "default_yellow": "fuego"
