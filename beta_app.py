@@ -577,10 +577,7 @@ document.getElementById("tweetBtn").onclick = function() {
 };
 </script>
 """
-    
-    # ★ Devanagari / Tamil フォント埋め込み
-    html_template = html_template.replace("{{FONTDATA_DEV}}", fontdata_dev)
-    html_template = html_template.replace("{{FONTDATA_TA}}", fontdata_ta)
+
 
     # =========================================================
     # SAVE / TWEET / TWEET_TEXT の置換 ※ここが if agreed の中に必要！
@@ -606,6 +603,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
