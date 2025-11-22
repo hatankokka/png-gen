@@ -1,5 +1,5 @@
 {
-  "title": "Obanyaki 外交部生成器",
+  "title": "大判烧外交部生成器",
 
   "author": "<a href=\"https://x.com/InsHatanCountry\">作者：破綻国家研究所（@InsHatanCountry）</a>",
 
@@ -29,10 +29,10 @@
   "save": "保存图像（JPEG）",
   "tweet": "分享到 X（需手动上传图片）",
 
-  "tweet_template": "本图由 Obanyaki 外交部生成器 创建。\nhttps://ikan-no-i-gen.streamlit.app/\n作者：@InsHatanCountry\n*图片不会自动上传，请手动添加。*",
+  "tweet_template": "本图由大判烧外交部生成器 创建。\nhttps://ikan-no-i-gen.streamlit.app/\n作者：@InsHatanCountry\n*图片不会自动上传，请手动添加。*",
 
   "default_main": "“我们警告今川烧派：\n不要在大判烧问题上玩火。\n如果继续，我们将与今川烧阵营结盟。”",
-  "default_footer_left": "Obanyaki 外交部发言人",
+  "default_footer_left": "大判烧外交部发言人",
   "default_footer_right": "2015年11月15日",
   "default_yellow": "玩火"
 }
