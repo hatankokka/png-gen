@@ -193,30 +193,35 @@ if agreed:
         NG_WORDS = []
 
     # =========================================================
-    # 背景画像（サムネイル + ラジオボタン方式）
+    # 背景画像（ラジオ + サムネイル）
     # =========================================================
     BACKGROUND_CHOICES = {
         Path(p).stem.replace("background", ""): p
         for p in sorted(glob.glob(".streamlit/background*.png"))
     }
 
+    keys = list(BACKGROUND_CHOICES.keys())
 
     st.markdown("### " + T["background_select"])
-    cols = st.columns(3)
 
-    selected_bg = ss.bg_choice if "bg_choice" in ss else "01"
+    # ラジオボタン（背景選択） ← ひとつだけ置く
+    selected_bg = st.radio(
+        "",
+        keys,
+        index=keys.index(ss.bg_choice) if "bg_choice" in ss else 0,
+        key="bg_choice_radio"
+    )
 
-    i = 0
-    for key, path in BACKGROUND_CHOICES.items():
-        col = cols[i % 3]
-        with col:
-            st.image(path, width=100)
-            # ← index を削除
-            if st.radio(" ", [key], key=f"bg_{key}") == key:
-                selected_bg = key
-        i += 1
-
+    # 選ばれた背景を保存
     ss.bg_choice = selected_bg
+
+    # サムネイル表示（3列）
+    cols = st.columns(3)
+    i = 0
+    for key in keys:
+        with cols[i % 3]:
+            st.image(BACKGROUND_CHOICES[key], width=100)
+        i += 1
 
     # 背景画像 Base64 化
     with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
@@ -224,6 +229,7 @@ if agreed:
         bg_b64 = base64.b64encode(bg_b64_raw).decode()
 
     bg_b64_safe = html.escape(bg_b64)
+
 
  
     # =========================================================
@@ -521,6 +527,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
