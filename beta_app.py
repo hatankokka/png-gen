@@ -102,7 +102,7 @@ T = load_lang(st.session_state.lang)
 # タイトル & 作者
 # -----------------------------------------------------------
 st.title(T["title"])
-st.markdown(T["author"])
+st.markdown(T["author"], unsafe_allow_html=True)
 
 # -----------------------------------------------------------
 # 言語選択（作者の直下）
@@ -512,6 +512,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
