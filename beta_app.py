@@ -446,16 +446,18 @@ function drawPoster() {
         const K_len  = 1 / (1 + 0.010 * Math.max(maxLen - 10, 0));
         fontSize = best * K_line * K_len;
     }
-
     if (fontSize < 10) fontSize = 10;
-    ctx.font = fontSize + "px customFont";
+
+    // ★ フォントに Devanagari/Tamil のフォールバックを追加
+    ctx.font = `${fontSize}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
     ctx.textBaseline = "middle";
 
     const totalTextHeight = lines.length * fontSize * LINE_GAP;
     let currentY = marginTop + (areaH - totalTextHeight) / 2 + fontSize * 0.5;
 
     function drawColoredLine(line, centerX, y) {
-        ctx.font = fontSize + "px customFont";
+        // ★ ここも同じフォント設定に修正
+        ctx.font = `${fontSize}px customFont, NotoSansDevanagari, NotoSansTamil, sans-serif`;
 
         if (mode === "AA") {
             ctx.fillStyle = "white";
@@ -572,6 +574,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
