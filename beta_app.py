@@ -192,41 +192,36 @@ if agreed:
     else:
         NG_WORDS = []
 
-# =========================================================
-# 背景画像（サムネイル + ラジオボタン方式）
-# =========================================================
+    # =========================================================
+    # 背景画像（サムネイル + ラジオボタン方式）
+    # =========================================================
+    BACKGROUND_CHOICES = {
+        Path(p).stem.replace("background", ""): p
+        for p in sorted(glob.glob(".streamlit/background*.png"))
+    }
 
+    st.markdown("### " + T["background_select"])
+    cols = st.columns(3)
 
-BACKGROUND_CHOICES = {
-    Path(p).stem.replace("background",""): p
-    for p in sorted(glob.glob(".streamlit/background*.png"))
-}
+    selected_bg = ss.bg_choice if "bg_choice" in ss else "01"
 
+    i = 0
+    for key, path in BACKGROUND_CHOICES.items():
+        col = cols[i % 3]
+        with col:
+            st.image(path, width=100)
+            if st.radio(" ", [key], index=0 if selected_bg == key else -1, key=f"bg_{key}") == key:
+                selected_bg = key
+        i += 1
 
-st.markdown("### " + T["background_select"])
+    ss.bg_choice = selected_bg
 
-cols = st.columns(3)  # グリッド3列
+    # 背景画像 Base64 化
+    with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
+        bg_b64_raw = f.read()
+        bg_b64 = base64.b64encode(bg_b64_raw).decode()
 
-selected_bg = ss.bg_choice if "bg_choice" in ss else "01"
-
-i = 0
-for key, path in BACKGROUND_CHOICES.items():
-    col = cols[i % 3]
-    with col:
-        st.image(path, width=100)
-        # ラジオの label は空文字で消す（見た目をスッキリさせるため）
-        if st.radio(" ", [key], index=0 if selected_bg == key else -1, key=f"bg_{key}") == key:
-            selected_bg = key
-    i += 1
-
-ss.bg_choice = selected_bg
-
-# 背景画像を Base64 化
-with open(BACKGROUND_CHOICES[ss.bg_choice], "rb") as f:
-    bg_b64_raw = f.read()
-    bg_b64 = base64.b64encode(bg_b64_raw).decode()
-
-bg_b64_safe = html.escape(bg_b64)
+    bg_b64_safe = html.escape(bg_b64)
 
 
     # =========================================================
@@ -524,6 +519,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
