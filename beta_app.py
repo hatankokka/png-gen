@@ -396,8 +396,8 @@ function drawPoster() {
     if (mode === "AA") {
         const lineCount = lines.length;
         const maxLen = Math.max(...lines.map(x => x.length), 0);
-        const K_line = 1 / (1 + 0.03 * Math.max(lineCount - 3, 0));
-        const K_len  = 1 / (1 + 0.03 * Math.max(maxLen - 20, 0));
+        const K_line = 1 / (1 + 0.05 * Math.max(lineCount - 3, 0));
+        const K_len  = 1 / (1 + 0.05 * Math.max(maxLen - 20, 0));
         fontSize = best * K_line * K_len * 1.20;
     } else {
         const lineCount = lines.length;
@@ -529,6 +529,7 @@ document.getElementById("tweetBtn").onclick = function() {
     )
 
     st_html(html_final, height=1050, scrolling=True)
+
 
 
 
